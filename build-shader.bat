@@ -1,0 +1,1 @@
+.\tools\fxc.exe /Od /Zi /T vs_5_0 /I .\src /Fo .\build\debug\bin\VSTestShader.cso .\src\Shader\VSTestShader.hlsl
