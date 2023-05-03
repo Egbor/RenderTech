@@ -24,6 +24,7 @@ namespace Engine {
         virtual void WaitEndOfDraw() = 0;
 
         virtual void SetViewport(Int32 width, Int32 height) = 0;
+        virtual void GetViewport(Int32& width, Int32& height) = 0;
 
         virtual SwapChain* CreateSwapChain(UInt32 width, UInt32 height, UInt64 winId) = 0;
         virtual RenderBinderBase* CreateBinder(const String& tag) = 0;

@@ -10,13 +10,13 @@ namespace Engine {
 		GuiImage* m_image;
 
 	public:
-		Viewport(GuiContext* context, const String& name, const String& tag = "Viewport");
+		Viewport(const String& name, const String& tag = "Viewport");
 		virtual ~Viewport();
 
-		Texture2D* GetTarget() const;
+		void SetTexture(GuiContext* context, Texture2D* texture);
 
 	private:
-		void OnViewportResize(GuiLayout* owner, Int32 width, Int32 height);
+		void OnResizeEvent(GuiLayout* owner, Int32 width, Int32 height);
 	};
 }
 

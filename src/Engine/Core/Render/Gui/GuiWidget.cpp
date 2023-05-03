@@ -30,6 +30,7 @@ namespace Engine {
 	}
 
 	void GuiWidget::Render() {	
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin(m_name.c_str());
 		if (ImGuiDockNode* dockNode = ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())) {
 			dockNode->LocalFlags &= ~ImGuiDockNodeFlags_CentralNode;
@@ -47,6 +48,8 @@ namespace Engine {
 		}
 
 		RenderChildLayouts();
+
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 }

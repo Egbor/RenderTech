@@ -18,10 +18,6 @@ using namespace Engine;
 
 class EngineClass {
 private:
-    //std::thread* m_renderThread;
-    //std::thread* m_devguiThread;
-    //bool m_isRun;
-
     SwapChain* m_swapchain;
     SceneRenderSet* m_rsScene;
     GuiRenderSet* m_rsGui;
@@ -34,17 +30,14 @@ public:
     EngineClass(UInt64 winId, UInt32 width, UInt32 height);
     virtual ~EngineClass();
 
-    //void Run(UInt64 winId, UInt32 width, UInt32 height);
-    //void Stop();
-
     void InvokeStartStage();
     void InvokeUpdateStage();
     void InvokeRenderStage();
 
-private:
-    //void StartRenderLoop(UInt64 winId, UInt32 width, UInt32 height);
-    //void StartDevGuiLoop(UInt64 winId, UInt32 width, UInt32 height);
+    Context* GetContext() const;
+    GuiContext* GetGuiContext() const;
 
+private:
     void InitializeWorld();
     void InitializeInput(Input* input);
 };

@@ -8,19 +8,22 @@
 namespace Engine {
 	class GuiImage : public GuiLayout {
 	private:
-		GuiContext* m_context;
-		Texture2D* m_texture;
+		GuiResourceId m_id;
+
+		Int32 m_width;
+		Int32 m_height;
+		Float m_maxWidth;
+		Float m_maxHeight;
 
 	public:
-		GuiImage(const String& tag, GuiContext* context, Int32 width, Int32 height, TextureFormat format);
+		GuiImage(const String& tag);
 		virtual ~GuiImage() = default;
 
 		Int32 GetWidth() const;
 		Int32 GetHeight() const;
 
-		void Resize(Int32 width, Int32 height, TextureFormat format);
-
-		Texture2D* GetTarget() const;
+		void SetTexture(GuiContext* context, Texture2D* texture);
+		void Resize(Int32 width, Int32 height);
 
 	private:
 		void Render() override;

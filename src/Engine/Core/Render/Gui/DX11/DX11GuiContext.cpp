@@ -79,17 +79,19 @@ namespace Engine {
             FreeGuiResource(resourceId);
         }
         
-        HRESULT hr = 0;
-        ComPtr<ID3D11Device> d3dDevice = m_dxContext->GetD3D11Device();
-        IDX11Texture2D* dxTexture2D = dynamic_cast<IDX11Texture2D*>(texture);
-        ID3D11ShaderResourceView** d3dView = reinterpret_cast<ID3D11ShaderResourceView**>(resourceId);
+        if (texture != nullptr) {
+            HRESULT hr = 0;
+            ComPtr<ID3D11Device> d3dDevice = m_dxContext->GetD3D11Device();
+            IDX11Texture2D* dxTexture2D = dynamic_cast<IDX11Texture2D*>(texture);
+            ID3D11ShaderResourceView** d3dView = reinterpret_cast<ID3D11ShaderResourceView**>(resourceId);
 
-        D3D11_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
-        dxTexture2D->GetD3D11ResourceDesc(d3dShaderResourceViewDesc);
+            D3D11_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
+            dxTexture2D->GetD3D11ResourceDesc(d3dShaderResourceViewDesc);
 
-        if (FAILED(hr = d3dDevice->CreateShaderResourceView(dxTexture2D->Data().GetD3D11Texture2D().Get(), 
-            &d3dShaderResourceViewDesc, d3dView))) {
-            throw EngineException("[DX11GuiContext] ID3D11Device::CreateShaderResourceView() failed");
+            if (FAILED(hr = d3dDevice->CreateShaderResourceView(dxTexture2D->Data().GetD3D11Texture2D().Get(),
+                &d3dShaderResourceViewDesc, d3dView))) {
+                throw EngineException("[DX11GuiContext] ID3D11Device::CreateShaderResourceView() failed");
+            }
         }
     }
 

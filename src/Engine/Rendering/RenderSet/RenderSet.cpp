@@ -1,8 +1,8 @@
 #include "Engine/Rendering/RenderSet/RenderSet.h"
 
 namespace Engine {
-	RenderSet::RenderSet() 
-		: m_swapchain(nullptr) {
+	RenderSet::RenderSet(Texture2D* target) 
+		: m_swapchain(nullptr), m_target(target) {
 
 	}
 
@@ -18,6 +18,10 @@ namespace Engine {
 			prev = *it;
 		}
 		PostExecute();
+	}
+
+	Texture2D* RenderSet::GetTarget() const {
+		return m_target;
 	}
 
 	void RenderSet::SetSwapChain(SwapChain* swapchain) {

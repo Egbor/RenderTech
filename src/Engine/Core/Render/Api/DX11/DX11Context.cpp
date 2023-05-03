@@ -81,6 +81,15 @@ namespace Engine {
         m_d3dContext->RSSetViewports(1, &viewport);
     }
 
+    void DX11Context::GetViewport(Int32& width, Int32& height) {
+        D3D11_VIEWPORT viewport;
+        UINT num = 1;
+        m_d3dContext->RSGetViewports(&num, &viewport);
+
+        width = (Int32)viewport.Width;
+        height = (Int32)viewport.Height;
+    }
+
     SwapChain* DX11Context::CreateSwapChain(UInt32 width, UInt32 height, UInt64 winId) {
         return new DX11SwapChain(this, width, height, reinterpret_cast<HWND>(winId));
     }

@@ -8,11 +8,15 @@ namespace Engine {
 	class RenderSet {
 	private:
 		Array<RenderPass*> m_renderPass;
+		
 		SwapChain* m_swapchain;
+		Texture2D* m_target;
 
 	public:
-		RenderSet();
+		RenderSet(Texture2D* target);
 		virtual ~RenderSet();
+
+		Texture2D* GetTarget() const;
 
 		void Execute();
 		void SetSwapChain(SwapChain* swapchain);

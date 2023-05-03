@@ -19,7 +19,11 @@ namespace Engine {
 
     void MeshRenderPass::Render(RenderPass* prev) {
         ECBStorage& storage = ECBStorage::GetInstance();
-        Float aspectRatio = static_cast<Float>(GetViewportTarget()->GetWidth()) / static_cast<Float>(GetViewportTarget()->GetHeight());
+
+        Int32 viewportWidth;
+        Int32 viewportHeight;
+        GetContext()->GetViewport(viewportWidth, viewportHeight);
+        Float aspectRatio = static_cast<Float>(viewportWidth) / static_cast<Float>(viewportHeight);
 
         MeshComponentBehavior* behaviorMesh = storage.FindComponentBehavior<MeshComponentBehavior>(MeshComponent::TypeIdClass());
         CameraComponentBehavior* behaviorCamera = storage.FindComponentBehavior<CameraComponentBehavior>(CameraComponent::TypeIdClass());
