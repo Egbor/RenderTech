@@ -1,11 +1,11 @@
 #ifndef CUBEMAPRENDERPASS_H
 #define CUBEMAPRENDERPASS_H
 
-#include "Engine/Rendering/RenderPass/RenderPass.h"
+#include "Engine/Rendering/RenderPass/ContentRenderPass.h"
 #include "Engine/Object/Class/Mesh.h"
 
 namespace Engine {
-    class EnviromentMapRenderPass : public RenderPass {
+    class EnviromentMapRenderPass : public ContentRenderPass {
     private:
         Array<DynamicBuffer*> m_buffers;
         Array<Shader*> m_shaders;
@@ -17,7 +17,7 @@ namespace Engine {
         CubeTexture2D* m_outputCubeTexture2D;
 
     public:
-        EnviromentMapRenderPass(Context* context, SwapChain* swapchain);
+        EnviromentMapRenderPass(Context* context, Texture2D* target);
         EnviromentMapRenderPass(const EnviromentMapRenderPass&) = default;
         virtual ~EnviromentMapRenderPass();
 

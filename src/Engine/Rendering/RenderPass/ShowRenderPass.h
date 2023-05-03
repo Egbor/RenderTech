@@ -1,12 +1,12 @@
 #ifndef SHOWRENDERPASS_H
 #define SHOWRENDERPASS_H
 
-#include "Engine/Rendering/RenderPass/RenderPass.h"
+#include "Engine/Rendering/RenderPass/ContentRenderPass.h"
 
 namespace Engine {
-    class ShowRenderPass : public RenderPass {
+    class ShowRenderPass : public ContentRenderPass {
     public:
-        ShowRenderPass(Context* context, SwapChain* swapchain);
+        ShowRenderPass(Context* context, Texture2D* target);
         ShowRenderPass(const ShowRenderPass&) = default;
         virtual ~ShowRenderPass() = default;
 

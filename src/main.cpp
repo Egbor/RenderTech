@@ -63,8 +63,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		exit(-1);
 	}
 
+	ShowWindow(hWnd, SW_SHOWDEFAULT);
 	SwitchWindowToFullscreen(hWnd);
-	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
 	RECT rectWindow;
@@ -72,21 +72,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UINT currWindowWidth = rectWindow.right - rectWindow.left;
 	UINT currWindowHeight = rectWindow.bottom - rectWindow.top;
 
-	EngineClass engine((UInt64)hWnd);
-	engine.Run((UInt64)hWnd, currWindowWidth, currWindowHeight);
+	EngineClass engine((UInt64)hWnd, currWindowWidth, currWindowHeight);
 
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
 
+	engine.InvokeStartStage();
 	while (msg.message != WM_QUIT) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else {
+			engine.InvokeUpdateStage();
+			engine.InvokeRenderStage();
 		}
 	}
-
-	engine.Stop();
 
 	return 0;
 }

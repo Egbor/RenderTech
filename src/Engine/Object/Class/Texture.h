@@ -25,6 +25,8 @@ namespace Engine {
         Texture2D(const Texture2D&) = default;
         virtual ~Texture2D() = default;
 
+        virtual void Resize(Int32 height, Int32 width, TextureFormat format);
+
         virtual Int32 GetWidth() const;
         virtual Int32 GetHeight() const;
     };

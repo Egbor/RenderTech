@@ -10,8 +10,8 @@ namespace Engine {
     CubeTexture2D* testCubeTexture;
     Mesh* testSkyboxMesh;
 
-    SkyboxRenderPass::SkyboxRenderPass(Context* context, SwapChain* swapchain)
-        : RenderPass(context, swapchain), m_buffers(1), m_shaders(2) {
+    SkyboxRenderPass::SkyboxRenderPass(Context* context, Texture2D* target)
+        : ContentRenderPass(context, target), m_buffers(1), m_shaders(2) {
 
         CubeTextureImport importTexture("bin/texture/cubemap/Forest");
         MeshImport importMesh("bin/models/cube.obj");
@@ -22,9 +22,6 @@ namespace Engine {
         SetupBuffers();
         SetupShaders();
         SetupTextures();
-
-        AddTarget();
-        AttachRenderResource(ResourceType::RB_TARGET, static_cast<Int32>(RenderOutput::RO_TARGET0), GetTarget(RenderOutput::RO_TARGET0));
     }
 
     SkyboxRenderPass::~SkyboxRenderPass() {
@@ -36,14 +33,16 @@ namespace Engine {
 
     void SkyboxRenderPass::Render(RenderPass* prev) {
         ECBStorage& storage = ECBStorage::GetInstance();
-        Float aspectRatio = static_cast<Float>(GetSwapChain()->GetWidth()) / static_cast<Float>(GetSwapChain()->GetHeight());
+        Float aspectRatio = static_cast<Float>(GetViewportTarget()->GetWidth()) / static_cast<Float>(GetViewportTarget()->GetHeight());
 
         CameraComponentBehavior* behaviorCamera = storage.FindComponentBehavior<CameraComponentBehavior>(CameraComponent::TypeIdClass());
 
         RasterizerState* stateRasterizer = GetRenderState<RasterizerState>();
         stateRasterizer->SetCullMode(CullMode::D3D11_CULL_FRONT);
 
+        AddTarget(RenderOutput::RO_TARGET0, GetViewportTarget());
         AddTarget(RenderOutput::RO_DEPTH, prev->GetTarget(RenderOutput::RO_DEPTH));
+        AttachRenderResource(ResourceType::RB_TARGET, RenderOutput::RO_TARGET0, GetTarget(RenderOutput::RO_TARGET0));
         AttachRenderResource(ResourceType::RB_TARGET, RenderOutput::RO_DEPTH, GetTarget(RenderOutput::RO_DEPTH));
 
         BindRenderResources(ResourceType::RB_SHADER);
@@ -61,7 +60,7 @@ namespace Engine {
         GetContext()->DrawIndexed(testSkyboxMesh->GetSubmesh(0)->GetNumIndexies());
 
         UnBindRenderResources(ResourceType::RB_SHADER);
-        //UnBindRenderResources(ResourceType::RB_TARGET);
+        UnBindRenderResources(ResourceType::RB_TARGET);
         UnBindRenderResources(ResourceType::RB_TEXTURE);
         UnBindRenderResources(ResourceType::RB_BUFFER);
         UnBindRenderResources(ResourceType::RB_DYNAMIC);

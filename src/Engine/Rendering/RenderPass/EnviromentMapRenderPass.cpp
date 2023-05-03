@@ -4,8 +4,8 @@
 #include "Engine/Core/System/Import/ShaderImport.h"
 
 namespace Engine {
-    EnviromentMapRenderPass::EnviromentMapRenderPass(Context* context, SwapChain* swapchain)
-        : RenderPass(context, swapchain), m_buffers(1), m_shaders(2), m_cameraMatrices(6) {
+    EnviromentMapRenderPass::EnviromentMapRenderPass(Context* context, Texture2D* target)
+        : ContentRenderPass(context, target), m_buffers(1), m_shaders(2), m_cameraMatrices(6) {
         SetupBuffers();
         SetupShaders();
         SetupCubeMesh();

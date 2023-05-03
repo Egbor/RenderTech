@@ -6,12 +6,10 @@
 #include "Engine/Core/System/Import/ShaderImport.h"
 
 namespace Engine {
-    LightRenderPass::LightRenderPass(Context* context, SwapChain* swapchain)
-        : RenderPass(context, swapchain), m_buffers(3), m_shaders(2) {
+    LightRenderPass::LightRenderPass(Context* context, Texture2D* target)
+        : ContentRenderPass(context, target), m_buffers(3), m_shaders(2) {
         SetupBuffers();
         SetupShaders();
-
-        AddTarget();
     }
 
     LightRenderPass::~LightRenderPass() {
@@ -21,11 +19,12 @@ namespace Engine {
 
     void LightRenderPass::Render(RenderPass* prev) {
         ECBStorage& storage = ECBStorage::GetInstance();
-        Float aspectRatio = static_cast<Float>(GetSwapChain()->GetWidth()) / static_cast<Float>(GetSwapChain()->GetHeight());
+        Float aspectRatio = static_cast<Float>(GetViewportTarget()->GetWidth()) / static_cast<Float>(GetViewportTarget()->GetHeight());
 
         LightComponentBehavior* behaviorLight = storage.FindComponentBehavior<LightComponentBehavior>(LightComponent::TypeIdClass());
         CameraComponentBehavior* behaviorCamera = storage.FindComponentBehavior<CameraComponentBehavior>(CameraComponent::TypeIdClass());
 
+        AddTarget(RenderOutput::RO_TARGET0, GetViewportTarget());
         AddTarget(RenderOutput::RO_DEPTH, prev->GetTarget(RenderOutput::RO_DEPTH));
         ClearOutputTarget();
 
@@ -192,8 +191,8 @@ namespace Engine {
         accumulationBuffer.Projection = proj.Transpose();
         accumulationBuffer.invProjection = proj.Inverse().Transpose();
         accumulationBuffer.Resolution = Vector2(
-            static_cast<Float>(GetSwapChain()->GetWidth()),
-            static_cast<Float>(GetSwapChain()->GetHeight())
+            static_cast<Float>(GetViewportTarget()->GetWidth()),
+            static_cast<Float>(GetViewportTarget()->GetHeight())
         );
 
         m_buffers[1]->Update({ &accumulationBuffer, 1, sizeof(DynamicBufferAccumulationDesc) });

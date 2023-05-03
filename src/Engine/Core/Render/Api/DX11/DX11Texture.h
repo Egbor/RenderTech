@@ -26,6 +26,7 @@ namespace Engine {
                         D3D11_TEXTURE2D_DESC* d3dTextureDesc,
                         D3D11_SUBRESOURCE_DATA* d3dSubresourceData);
 
+        ComPtr<ID3D11Device> GetD3D11Device() const;
         ComPtr<ID3D11Texture2D> GetD3D11Texture2D() const;
 
     private:
@@ -90,6 +91,8 @@ namespace Engine {
         DX11ResourceTexture2D(const DX11ResourceTexture2D&) = default;
         virtual ~DX11ResourceTexture2D() = default;
 
+        void Resize(Int32 width, Int32 height, TextureFormat format) override;
+
         String GetTag() const override;
         void Create(DX11Context* context, TextureInfo info) override;
     };
@@ -101,6 +104,8 @@ namespace Engine {
         DX11ResourceCubeTexture2D(const ObjectArgument& argument);
         DX11ResourceCubeTexture2D(const DX11ResourceCubeTexture2D&) = default;
         virtual ~DX11ResourceCubeTexture2D() = default;
+
+        void Resize(Int32 width, Int32 height, TextureFormat format) override;
 
         String GetTag() const override;
         void Create(DX11Context* context, TextureInfo info) override;
@@ -114,8 +119,13 @@ namespace Engine {
         DX11OutputTexture2D(const DX11OutputTexture2D&) = default;
         virtual ~DX11OutputTexture2D() = default;
 
+        void Resize(Int32 width, Int32 height, TextureFormat format) override;
+
         String GetTag() const override;
         void Create(DX11Context* context, TextureInfo info) override;
+
+    private:
+        void InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info);
     };
 
     class DX11OutputDepthStencilTexture2D : public DX11Texture2D {
@@ -126,9 +136,14 @@ namespace Engine {
         DX11OutputDepthStencilTexture2D(const DX11OutputDepthStencilTexture2D&) = default;
         virtual ~DX11OutputDepthStencilTexture2D() = default;
 
+        void Resize(Int32 width, Int32 height, TextureFormat format) override;
+
         String GetTag() const override;
         void Create(DX11Context* context, TextureInfo info) override;
         void GetD3D11ResourceDesc(D3D11_SHADER_RESOURCE_VIEW_DESC& desc) override;
+
+    private:
+        void InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info);
     };
 
     class DX11OutputCubeTexture2D : public DX11CubeTexture2D {
@@ -139,10 +154,14 @@ namespace Engine {
         DX11OutputCubeTexture2D(const DX11OutputCubeTexture2D&) = default;
         virtual ~DX11OutputCubeTexture2D() = default;
 
+        void Resize(Int32 width, Int32 height, TextureFormat format) override;
         void ReadBits(DX11Context* context, Int8* bits, Size size);
 
         String GetTag() const override;
         void Create(DX11Context* context, TextureInfo info) override;
+
+    private:
+        void InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info);
     };
 }
 

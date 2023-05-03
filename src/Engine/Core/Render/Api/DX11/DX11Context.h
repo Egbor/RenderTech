@@ -49,6 +49,8 @@ namespace Engine {
         void DrawIndexed(UInt32 count) override;
         void WaitEndOfDraw() override;
 
+        void SetViewport(Int32 width, Int32 height) override;
+
         SwapChain* CreateSwapChain(UInt32 width, UInt32 height, UInt64 winId) override;
         RenderBinderBase* CreateBinder(const String& tag) override;
         RenderState* CreateState(const String& tag) override;

@@ -6,9 +6,8 @@
 #include "Engine/Core/System/Import/ShaderImport.h"
 
 namespace Engine {
-    MeshRenderPass::MeshRenderPass(Context* context, SwapChain* swapchain)
-        : RenderPass(context, swapchain), m_buffers(1), m_shaders(2) {
-        SetupTargets();
+    MeshRenderPass::MeshRenderPass(Context* context, Texture2D* target)
+        : ContentRenderPass(context, target), m_buffers(1), m_shaders(2) {
         SetupShaders();
         SetupUniform();
     }
@@ -20,11 +19,12 @@ namespace Engine {
 
     void MeshRenderPass::Render(RenderPass* prev) {
         ECBStorage& storage = ECBStorage::GetInstance();
-        Float aspectRatio = static_cast<Float>(GetSwapChain()->GetWidth()) / static_cast<Float>(GetSwapChain()->GetHeight());
+        Float aspectRatio = static_cast<Float>(GetViewportTarget()->GetWidth()) / static_cast<Float>(GetViewportTarget()->GetHeight());
 
         MeshComponentBehavior* behaviorMesh = storage.FindComponentBehavior<MeshComponentBehavior>(MeshComponent::TypeIdClass());
         CameraComponentBehavior* behaviorCamera = storage.FindComponentBehavior<CameraComponentBehavior>(CameraComponent::TypeIdClass());
 
+        SetupTargets();
         ClearTargets();
         AttachTargets();
 
@@ -59,10 +59,10 @@ namespace Engine {
     }
 
     void MeshRenderPass::SetupTargets() {
-        AddTarget(RenderOutput::RO_TARGET0, TextureFormat::TF_R8G8B8A8_BMP);
-        AddTarget(RenderOutput::RO_TARGET1, TextureFormat::TF_R32G32B32A32_FLOAT);
-        AddTarget(RenderOutput::RO_TARGET2, TextureFormat::TF_R8G8B8A8_BMP);
-        AddTarget(RenderOutput::RO_DEPTH, TextureFormat::TF_R24G8_BMP);
+        AddTarget(RenderOutput::RO_TARGET0, TextureFormat::TF_R8G8B8A8_BMP, GetViewportTarget()->GetWidth(), GetViewportTarget()->GetHeight());
+        AddTarget(RenderOutput::RO_TARGET1, TextureFormat::TF_R32G32B32A32_FLOAT, GetViewportTarget()->GetWidth(), GetViewportTarget()->GetHeight());
+        AddTarget(RenderOutput::RO_TARGET2, TextureFormat::TF_R8G8B8A8_BMP, GetViewportTarget()->GetWidth(), GetViewportTarget()->GetHeight());
+        AddTarget(RenderOutput::RO_DEPTH, TextureFormat::TF_R24G8_BMP, GetViewportTarget()->GetWidth(), GetViewportTarget()->GetHeight());
     }
 
     void MeshRenderPass::AttachTargets() {

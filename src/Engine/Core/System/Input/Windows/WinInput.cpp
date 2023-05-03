@@ -26,6 +26,10 @@ namespace Engine {
 
     void HandleMouseInput(RAWMOUSE& mouse) {
         if (mouse.usButtonFlags == 0) {
+      //std::stringstream ss;
+      // ss << "X: " << mouse.lLastX << std::endl
+      //    << "Y: " << mouse.lLastY << std::endl;
+      // OutputDebugStringA(ss.str().c_str());
             Float xValue = std::clamp(mouse.lLastX * MOUSE_SACLER, -1.0f, 1.0f);
             Float yValue = std::clamp(mouse.lLastY * MOUSE_SACLER, -1.0f, 1.0f);
             gInputMapInvoker(InputKey::IK_MOSUE_X, xValue);
@@ -91,6 +95,7 @@ namespace Engine {
                     }
                 }
             }
+            break;
         }
         default:
             break;

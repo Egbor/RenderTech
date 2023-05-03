@@ -69,6 +69,18 @@ namespace Engine {
         m_d3dContext->Flush();
     }
 
+    void DX11Context::SetViewport(Int32 width, Int32 height) {
+        D3D11_VIEWPORT viewport;
+        viewport.Width = static_cast<Float>(width);
+        viewport.Height = static_cast<Float>(height);
+        viewport.TopLeftX = 0.0f;
+        viewport.TopLeftY = 0.0f;
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+
+        m_d3dContext->RSSetViewports(1, &viewport);
+    }
+
     SwapChain* DX11Context::CreateSwapChain(UInt32 width, UInt32 height, UInt64 winId) {
         return new DX11SwapChain(this, width, height, reinterpret_cast<HWND>(winId));
     }

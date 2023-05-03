@@ -1,20 +1,20 @@
 #ifndef MESHRENDERPASS_H
 #define MESHRENDERPASS_H
 
-#include "Engine/Rendering/RenderPass/RenderPass.h"
+#include "Engine/Rendering/RenderPass/ContentRenderPass.h"
 
 #include "Engine/Object/Class/Mesh.h"
 #include "Engine/Object/Class/Material.h"
 #include "Engine/Math/Matrix.h"
 
 namespace Engine {
-    class MeshRenderPass : public RenderPass {
+    class MeshRenderPass : public ContentRenderPass {
     private:
         Array<DynamicBuffer*> m_buffers;
         Array<Shader*> m_shaders;
 
     public:
-        MeshRenderPass(Context* context, SwapChain* swapchain);
+        MeshRenderPass(Context* context, Texture2D* target);
         MeshRenderPass(const MeshRenderPass&) = default;
         virtual ~MeshRenderPass();
 

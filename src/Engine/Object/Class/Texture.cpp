@@ -25,6 +25,10 @@ namespace Engine {
 
     }
 
+    void Texture2D::Resize(Int32 height, Int32 width, TextureFormat format) {
+        throw EngineException("[Texture2D] Texture2D::Resize() is abstract method without any features");
+    }
+
     Int32 Texture2D::GetWidth() const {
         throw EngineException("[Texture2D] Texture2D::GetWidth() is abstract method without any features");
     }

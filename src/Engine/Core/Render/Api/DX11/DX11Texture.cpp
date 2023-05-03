@@ -128,6 +128,12 @@ namespace Engine {
         memcpy(bits, d3dMappedResource.pData, size);
     }
 
+    ComPtr<ID3D11Device> DX11Texture2DData::GetD3D11Device() const {
+        ComPtr<ID3D11Device> d3dDevice;
+        m_d3dTexture2D->GetDevice(&d3dDevice);
+        return d3dDevice;
+    }
+
     ComPtr<ID3D11Texture2D> DX11Texture2DData::GetD3D11Texture2D() const {
         return m_d3dTexture2D;
     }
@@ -229,6 +235,10 @@ namespace Engine {
 
     }
 
+    void DX11ResourceTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
+        // Not implemented
+    }
+
     String DX11ResourceTexture2D::GetTag() const {
         return tagTexture;
     }
@@ -256,6 +266,10 @@ namespace Engine {
     DX11ResourceCubeTexture2D::DX11ResourceCubeTexture2D(const ObjectArgument& argument)
         : Super(argument) {
 
+    }
+
+    void DX11ResourceCubeTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
+        // Not implemented
     }
 
     String DX11ResourceCubeTexture2D::GetTag() const {
@@ -295,14 +309,21 @@ namespace Engine {
         return tagTargetTexture;
     }
 
+    void DX11OutputTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
+        InitializeDX11Texture2DData(Data().GetD3D11Device(), { (UInt32)width, (UInt32)height, format });
+    }
+
     void DX11OutputTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        ComPtr<ID3D11Device> d3dDevice = context->GetD3D11Device();
+        InitializeDX11Texture2DData(context->GetD3D11Device(), desc);
+    }
+
+    void DX11OutputTexture2D::InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info) {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
 
         InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(desc.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(desc.height);
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(desc.format)];
+        d3dTexture2DDesc.Width = static_cast<UINT>(info.width);
+        d3dTexture2DDesc.Height = static_cast<UINT>(info.height);
+        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(info.format)];
         d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 
         Data().Initialize(d3dDevice, &d3dTexture2DDesc, NULL);
@@ -319,14 +340,21 @@ namespace Engine {
         return tagDepthStencilTargetTexture;
     }
 
+    void DX11OutputDepthStencilTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
+        InitializeDX11Texture2DData(Data().GetD3D11Device(), { (UInt32)width, (UInt32)height, format });
+    }
+
     void DX11OutputDepthStencilTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        ComPtr<ID3D11Device> d3dDevice = context->GetD3D11Device();
+        InitializeDX11Texture2DData(context->GetD3D11Device(), desc);
+    }
+
+    void DX11OutputDepthStencilTexture2D::InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info) {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
 
         InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(desc.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(desc.height);
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(desc.format)];
+        d3dTexture2DDesc.Width = static_cast<UINT>(info.width);
+        d3dTexture2DDesc.Height = static_cast<UINT>(info.height);
+        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(info.format)];
         d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
 
         Data().Initialize(d3dDevice, &d3dTexture2DDesc, NULL);
@@ -353,15 +381,22 @@ namespace Engine {
         return tagCubeMapTargetTexture;
     }
 
+    void DX11OutputCubeTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
+        InitializeDX11Texture2DData(Data().GetD3D11Device(), { (UInt32)width, (UInt32)height, format });
+    }
+
     void DX11OutputCubeTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        ComPtr<ID3D11Device> d3dDevice = context->GetD3D11Device();
+        InitializeDX11Texture2DData(context->GetD3D11Device(), desc);
+    }
+
+    void DX11OutputCubeTexture2D::InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info) {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
 
         InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(desc.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(desc.height);
+        d3dTexture2DDesc.Width = static_cast<UINT>(info.width);
+        d3dTexture2DDesc.Height = static_cast<UINT>(info.height);
         d3dTexture2DDesc.ArraySize = 6;
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(desc.format)];
+        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(info.format)];
         d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
         d3dTexture2DDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 

@@ -1,16 +1,16 @@
 #ifndef SKYBOXRENDERPASS_H
 #define SKYBOXRENDERPASS_H
 
-#include "Engine/Rendering/RenderPass/RenderPass.h"
+#include "Engine/Rendering/RenderPass/ContentRenderPass.h"
 
 namespace Engine {
-    class SkyboxRenderPass : public RenderPass {
+    class SkyboxRenderPass : public ContentRenderPass {
     private:
         Array<DynamicBuffer*> m_buffers;
         Array<Shader*> m_shaders;
 
     public:
-        SkyboxRenderPass(Context* context, SwapChain* swapchain);
+        SkyboxRenderPass(Context* context, Texture2D* target);
         SkyboxRenderPass(const SkyboxRenderPass&) = default;
         virtual ~SkyboxRenderPass();
 

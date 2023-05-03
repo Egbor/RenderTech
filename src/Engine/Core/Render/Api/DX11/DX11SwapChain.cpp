@@ -29,11 +29,12 @@ namespace Engine {
         dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
         dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 0;
         dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
         dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         dxgiSwapChainDesc.OutputWindow = hWnd;
         dxgiSwapChainDesc.SampleDesc.Count = 1;
         dxgiSwapChainDesc.SampleDesc.Quality = 0;
-        dxgiSwapChainDesc.Windowed = TRUE;
+        dxgiSwapChainDesc.Windowed = FALSE;
 
         if (FAILED(hr = dxgiFactory->CreateSwapChain(d3dDevice.Get(), &dxgiSwapChainDesc, &m_dxgiSwapChain))) {
             throw new EngineException("[DX11SwapChain] IDXGIFactory::CreateSwapChain() failed.");
@@ -67,6 +68,6 @@ namespace Engine {
     }
 
     void DX11SwapChain::SwapBuffers() {
-        m_dxgiSwapChain->Present(0, 0);
+        m_dxgiSwapChain->Present(1, 0);
     }
 }

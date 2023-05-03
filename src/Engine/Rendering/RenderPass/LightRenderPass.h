@@ -1,17 +1,17 @@
 #ifndef LIGHTRENDERPASS_H
 #define LIGHTRENDERPASS_H
 
-#include "Engine/Rendering/RenderPass/RenderPass.h"
+#include "Engine/Rendering/RenderPass/ContentRenderPass.h"
 #include "Engine/Object/Class/Mesh.h"
 
 namespace Engine {
-    class LightRenderPass : public RenderPass {
+    class LightRenderPass : public ContentRenderPass {
     private:
         Array<DynamicBuffer*> m_buffers;
         Array<Shader*> m_shaders;
 
     public:
-        LightRenderPass(Context* context, SwapChain* swapchain);
+        LightRenderPass(Context* context, Texture2D* target);
         LightRenderPass(const LightRenderPass&) = default;
         virtual ~LightRenderPass();
 
