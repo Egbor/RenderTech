@@ -9,11 +9,16 @@ namespace Engine {
     class Object : public BaseObject {
         GENERATE_BODY(Object, BaseObject)
 
+    private:
+        String m_name;
+
     public:
         Object() = default;
         Object(const ObjectArgument& argument);
         Object(const Object&) = default;
         virtual ~Object() = default;
+
+        const String& GetName() const;
 
         template<class TReturnClass>
         TReturnClass* CreateDefaultSubobject(const ObjectArgument& argument) {
@@ -21,8 +26,10 @@ namespace Engine {
         }
 
         template<class TReturnClass>
-        TReturnClass* CreateDefaultSubobject() {
-            return CreateDefaultSubobject<TReturnClass>(ObjectArgument::Dummy());
+        TReturnClass* CreateDefaultSubobject(const String& name = "None") {
+            ObjectArgument argument;
+            argument.Put(argTagName, name);
+            return CreateDefaultSubobject<TReturnClass>(argument);
         }
     };
 }

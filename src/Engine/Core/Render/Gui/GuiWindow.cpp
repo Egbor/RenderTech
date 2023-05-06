@@ -19,7 +19,7 @@ namespace Engine {
         RemoveChildLayout(widget->GetTag());
     }
 
-	void GuiWindow::Render() {
+	void GuiWindow::Render(void* layoutData) {
         static bool isOpen = true;
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
@@ -66,7 +66,7 @@ namespace Engine {
         }
         //}
 
-        RenderChildLayouts();
+        RenderChildLayouts((void*)&dockspace_id);
 
         ImGui::End();
     }

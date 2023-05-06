@@ -18,6 +18,9 @@ namespace Engine {
 
 		void AddViewportResizeEvent(EventBase<Int32, Int32>& callback);
 		void RemoveViewportResizeEvent(EventBase<Int32, Int32>& callback);
+
+		void AddEntityToExplorer(Entity* entity);
+		void RemoveEntityFromExplorer(Entity* entity);
 	};
 }
 

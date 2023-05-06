@@ -112,8 +112,13 @@ namespace Engine {
 			return (_other != nullptr) && (_other->m_method.owner == this->m_method.owner) && (_other->m_method.ptr == this->m_method.ptr);
 		}
 
-        static Delegate<TOwner, TArgs...>& Create(TOwner* owner, typename TMethod::TMethodPtr method) {
+        static Delegate<TOwner, TArgs...>& Allocate(TOwner* owner, typename TMethod::TMethodPtr method) {
             return *new Delegate(owner, method);
         }
+
+		static void Free(Delegate<TOwner, TArgs...>& del) {
+			EventBase<TArgs...>* temp = &del;
+			delete temp;
+		}
 	};
 }

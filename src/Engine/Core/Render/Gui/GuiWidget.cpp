@@ -29,7 +29,7 @@ namespace Engine {
 		m_eventOnResize -= callback;
 	}
 
-	void GuiWidget::Render() {	
+	void GuiWidget::Render(void* layoutData) {	
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin(m_name.c_str());
 		if (ImGuiDockNode* dockNode = ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())) {
@@ -47,7 +47,7 @@ namespace Engine {
 			m_eventOnClick(this);
 		}
 
-		RenderChildLayouts();
+		RenderChildLayouts(layoutData);
 
 		ImGui::End();
 		ImGui::PopStyleVar();

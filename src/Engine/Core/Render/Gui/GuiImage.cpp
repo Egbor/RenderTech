@@ -29,7 +29,7 @@ namespace Engine {
 		m_height = height;
 	}
 
-	void GuiImage::Render() {
+	void GuiImage::Render(void* layoutData) {
 		if (m_id != nullptr) {
 			Float x = m_width / (Float)m_maxWidth;
 			Float y = m_height / (Float)m_maxHeight;

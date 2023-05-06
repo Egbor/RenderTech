@@ -13,7 +13,8 @@ namespace Engine {
 	private:
 		String m_layoutTag;
 
-		Map<String, GuiLayout*> m_childLayouts;
+		GuiLayout* m_parentLayout;
+		Array<GuiLayout*> m_childLayouts;
 
 	protected:
 		Event<GuiLayout*> m_eventOnClick;
@@ -22,19 +23,22 @@ namespace Engine {
 		GuiLayout(const String& tag);
 		virtual ~GuiLayout() = default;
 
-		virtual void Render();
+		virtual void Render(void* layoutData = nullptr);
+
 		String GetTag() const;
+
+		bool AddChildLayout(GuiLayout* layout);
+		bool RemoveChildLayout(const String& tag, GuiLayout** outLayout = nullptr);
 
 		void AddOnClickEvent(EventBase<GuiLayout*>& callback);
 		void RemoveOnClickEvent(EventBase<GuiLayout*>& callback);
 
 	protected:
-		void RenderChildLayouts();
-		void AddChildLayout(GuiLayout* layout);
-		GuiLayout* GetChildLayout(const String& tag);
-		void RemoveChildLayout(const String& tag);
+		void RenderChildLayouts(void* layoutData);
 
-		void InvokeOnClickEvent();
+	private:
+		void Register(GuiLayout* parent);
+		void UnRegister();
 	};
 }
 

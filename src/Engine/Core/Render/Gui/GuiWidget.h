@@ -26,7 +26,7 @@ namespace Engine {
 		void RemoveResizeEvent(EventBase<GuiLayout*, Int32, Int32>& callback);
 
 	private:
-		void Render() override;
+		void Render(void* layoutData) override;
 	};
 }
 

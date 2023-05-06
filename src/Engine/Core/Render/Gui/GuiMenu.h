@@ -21,7 +21,7 @@ namespace Engine {
 		void RemoveMenuItem(const String& tag);
 
 	private:
-		void Render() override;
+		void Render(void* layoutData) override;
 	};
 }
 

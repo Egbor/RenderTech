@@ -9,11 +9,12 @@ namespace Engine {
     class SceneComponent : public EntityComponent {
         GENERATE_BODY(SceneComponent, EntityComponent)
 
-    private:
-        Vector3 m_position;
-        Vector3 m_scale;
-        Rotator m_rotation;
+    public:
+        Vector3 position;
+        Vector3 scale;
+        Rotator rotation;
 
+    private:
         SceneComponent* m_parent;
         List<SceneComponent*> m_children;
         ListIterator<SceneComponent*> m_childIterator;

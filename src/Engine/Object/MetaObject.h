@@ -11,6 +11,7 @@ namespace Engine {
         MetaClass(const MetaClass&) = default;
         virtual ~MetaClass() = default;
 
+        virtual String GetClassName() const = 0;
         virtual BaseObject* CreateDefaultObject(const ObjectArgument& argument) = 0;
 
         template<class TReturnClass>
@@ -25,6 +26,10 @@ namespace Engine {
         MetaObject() = default;
         MetaObject(const MetaObject&) = default;
         virtual ~MetaObject() = default;
+
+        String GetClassName() const override {
+            return TObjectClass::TypeName();
+        }
 
         BaseObject* CreateDefaultObject(const ObjectArgument& argument) override {
             return new TObjectClass(argument);

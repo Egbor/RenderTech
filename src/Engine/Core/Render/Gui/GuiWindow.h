@@ -30,7 +30,7 @@ namespace Engine {
 		void RemoveWidget(GuiWidget* widget);
 
 	private:
-		void Render() override;
+		void Render(void* layoutData) override;
 	};
 }
 

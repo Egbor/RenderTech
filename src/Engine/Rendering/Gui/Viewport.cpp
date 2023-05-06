@@ -7,7 +7,7 @@ namespace Engine {
 	Viewport::Viewport(const String& name, const String& tag)
 		: GuiWidget(tag, name), m_image(new GuiImage(tag + "1")) {
 		AddChildLayout(m_image);
-		AddOnResizeEvent(Delegate<Viewport, GuiLayout*, Int32, Int32>::Create(this, &Viewport::OnResizeEvent));
+		AddOnResizeEvent(Delegate<Viewport, GuiLayout*, Int32, Int32>::Allocate(this, &Viewport::OnResizeEvent));
 	}
 
 	Viewport::~Viewport() {

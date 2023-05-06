@@ -12,7 +12,7 @@ namespace Engine {
 		GuiMenuItem(const String& tag, const String& label);
 		virtual ~GuiMenuItem() = default;
 
-		void Render() override;
+		void Render(void* layoutData) override;
 
 		String GetLabel() const;
 	};

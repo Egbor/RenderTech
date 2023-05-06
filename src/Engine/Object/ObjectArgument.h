@@ -4,8 +4,9 @@
 #include "Engine/EngineDef.h"
 
 namespace Engine {
-    constexpr static const char* argLocation = "location";
-    constexpr static const char* argRotation = "rotation";
+    constexpr static const char* argTagLocation = "location";
+    constexpr static const char* argTagRotation = "rotation";
+    constexpr static const char* argTagName = "name";
 
     struct ObjectArgumentPack {
         void* argument;

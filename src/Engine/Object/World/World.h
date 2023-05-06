@@ -15,6 +15,9 @@ namespace Engine {
         List<EntityController*> m_controllers;
         List<Entity*> m_entities;
 
+        Event<Entity*> m_eventOnEntitySpawn;
+        Event<Entity*> m_eventOnEntityDestroy;
+
     public:
         World(const ObjectArgument& argument);
         World(const World&) = default;
@@ -28,6 +31,12 @@ namespace Engine {
 
         EntityController* AddController(MetaClass* controllerClass);
         void RemoveController(EntityController* controller);
+
+        void AddOnEntitySpawnEvent(EventBase<Entity*>& callback);
+        void AddOnEntityDestroyEvent(EventBase<Entity*>& callback);
+
+        void RemoveOnEntitySpawnEvent(EventBase<Entity*>& callback);
+        void RemoveOnEntityDestroyEvent(EventBase<Entity*>& callback);
 
     private:
         void SetupWorld(WorldMode* mode);

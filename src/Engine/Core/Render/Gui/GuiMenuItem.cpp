@@ -10,9 +10,9 @@ namespace Engine {
 
 	}
 
-	void GuiMenuItem::Render() {
+	void GuiMenuItem::Render(void* layoutData) {
 		if (ImGui::MenuItem(m_label.c_str(), "")) {
-			InvokeOnClickEvent();
+			m_eventOnClick(this);
 		}
 	}
 

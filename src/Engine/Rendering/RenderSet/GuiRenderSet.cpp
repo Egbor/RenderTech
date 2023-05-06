@@ -20,6 +20,14 @@ namespace Engine {
 		return m_viewportTarget;
 	}
 
+	void GuiRenderSet::AddEntityToExplorer(Entity* entity) {
+		m_rootLayout->AddEntityToExplorer(entity);
+	}
+
+	void GuiRenderSet::RemoveEntityFromExplorer(Entity* entity) {
+		m_rootLayout->RemoveEntityFromExplorer(entity);
+	}
+
 	void GuiRenderSet::AddViewportResizeEvent(EventBase<Int32, Int32>& callback) {
 		m_rootLayout->AddViewportResizeEvent(callback);
 	}

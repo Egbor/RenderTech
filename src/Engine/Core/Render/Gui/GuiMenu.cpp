@@ -32,9 +32,9 @@ namespace Engine {
 		}
 	}
 
-	void GuiMenu::Render() {
+	void GuiMenu::Render(void* layoutData) {
 		if (ImGui::BeginMenu(m_label.c_str())) {
-			RenderChildLayouts();
+			RenderChildLayouts(layoutData);
 			ImGui::EndMenu();
 		}
 	}

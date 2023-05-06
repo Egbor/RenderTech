@@ -23,7 +23,7 @@ namespace Engine {
             if (it == m_actions.end()) {
                 m_actions.insert({ tag, std::make_unique<Event<>>() });
             }
-            (*m_actions[tag]) += Delegate<TOwner>::Create(owner, callback);
+            (*m_actions[tag]) += Delegate<TOwner>::Allocate(owner, callback);
         }
 
         template<class TOwner>
@@ -32,7 +32,7 @@ namespace Engine {
             if (it == m_axis.end()) {
                 m_axis.insert({ tag, std::make_unique<Event<Float>>() });
             }
-            (*m_axis[tag]) += Delegate<TOwner, Float>::Create(owner, callback);
+            (*m_axis[tag]) += Delegate<TOwner, Float>::Allocate(owner, callback);
         }
 
         template<class Predicate>

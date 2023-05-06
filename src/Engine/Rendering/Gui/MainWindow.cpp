@@ -4,19 +4,30 @@
 
 namespace Engine {
 	MainWindow::MainWindow(const String& tag) 
-		: GuiWindow(tag), m_mainMenu(new MainMenu()),
-		m_viewport(new Viewport("Viewport")), m_worldExplorer(new WorldExplorer("World")) {
+		: GuiWindow(tag), m_mainMenu(new MainMenu())
+		, m_viewport(new Viewport("Viewport")), m_worldExplorer(new WorldExplorer("World"))
+		, m_properties(new Properties("Properties")) {
 		AddChildLayout(m_mainMenu);
+		AddWidget(m_properties, GuiSplitDirection::GSD_NONE, 0.0f);
+		AddWidget(m_worldExplorer, GuiSplitDirection::GSD_UP, 0.5f);
 		AddWidget(m_viewport, GuiSplitDirection::GSD_LEFT, 0.8f);
-		AddWidget(m_worldExplorer, GuiSplitDirection::GSD_NONE, 0.0f);
 
-		m_viewport->AddOnResizeEvent(Delegate<MainWindow, GuiLayout*, Int32, Int32>::Create(this, &MainWindow::OnViewportResize));
+		m_viewport->AddOnResizeEvent(Delegate<MainWindow, GuiLayout*, Int32, Int32>::Allocate(this, &MainWindow::OnViewportResize));
 	}
 
 	MainWindow::~MainWindow() {
 		DELETE_LAYOUT(m_mainMenu);
 		DELETE_LAYOUT(m_viewport);
 		DELETE_LAYOUT(m_worldExplorer);
+		DELETE_LAYOUT(m_properties);
+	}
+
+	void MainWindow::AddEntityToExplorer(Entity* entity) {
+		m_worldExplorer->AddEntityToExplorer(entity);
+	}
+
+	void MainWindow::RemoveEntityFromExplorer(Entity* entity) {
+		m_worldExplorer->RemoveEntityFromExplorer(entity);
 	}
 
 	void MainWindow::SetViewportTexture(GuiContext* context, Texture2D* texture) {

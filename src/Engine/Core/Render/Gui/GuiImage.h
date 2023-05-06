@@ -26,7 +26,7 @@ namespace Engine {
 		void Resize(Int32 width, Int32 height);
 
 	private:
-		void Render() override;
+		void Render(void* layoutData) override;
 	};
 }
 

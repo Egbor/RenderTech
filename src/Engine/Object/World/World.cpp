@@ -24,11 +24,14 @@ namespace Engine {
 
     Entity* World::SpawnEntity(MetaClass* entityClass, const Vector3& location, const Rotator& rotation) {
         ObjectArgument argument;
-        argument.Put(argLocation, location);
-        argument.Put(argRotation, rotation);
+        argument.Put(argTagName, entityClass->GetClassName());
+        argument.Put(argTagLocation, location);
+        argument.Put(argTagRotation, rotation);
 
         Entity* entity = entityClass->CreateDefaultObject<Entity>(argument);
         m_entities.push_back(entity);
+        m_eventOnEntitySpawn(entity);
+
         return entity;
     }
 
@@ -36,6 +39,7 @@ namespace Engine {
         ListIterator<Entity*> it = std::find_if(m_entities.begin(), m_entities.end(), [&](Entity* obj){ return entity == obj; });
         if (it != m_entities.end()) {
             m_entities.erase(it);
+            m_eventOnEntityDestroy(*it);
         }
     }
 
@@ -52,6 +56,22 @@ namespace Engine {
         if (it != m_controllers.end()) {
             m_controllers.erase(it);
         }
+    }
+
+    void World::AddOnEntitySpawnEvent(EventBase<Entity*>& callback) {
+        m_eventOnEntitySpawn += callback;
+    }
+
+    void World::AddOnEntityDestroyEvent(EventBase<Entity*>& callback) {
+        m_eventOnEntityDestroy += callback;
+    }
+
+    void World::RemoveOnEntitySpawnEvent(EventBase<Entity*>& callback) {
+        m_eventOnEntitySpawn -= callback;
+    }
+
+    void World::RemoveOnEntityDestroyEvent(EventBase<Entity*>& callback) {
+        m_eventOnEntityDestroy -= callback;
     }
 
     void World::SetupWorld(WorldMode* mode) {
