@@ -23,6 +23,8 @@ namespace Engine {
 
         void SetEnable(RenderOutput target, bool enable) override;
 
+        void Reset() override;
+
         void Bind() override;
         void UnBind() override;
     };

@@ -31,6 +31,7 @@ namespace Engine {
 		void RemoveViewportResizeEvent(EventBase<Int32, Int32>& callback);
 
 	private:
+		void OnEntitySelected(GuiLayout* owner, GuiTreeNode* node);
 		void OnViewportResize(GuiLayout* owner, Int32 width, Int32 height);
 	};
 }

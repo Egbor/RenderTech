@@ -13,6 +13,7 @@ namespace Engine {
 		AddWidget(m_viewport, GuiSplitDirection::GSD_LEFT, 0.8f);
 
 		m_viewport->AddOnResizeEvent(Delegate<MainWindow, GuiLayout*, Int32, Int32>::Allocate(this, &MainWindow::OnViewportResize));
+		m_worldExplorer->AddOnEntitySelectedEvent(Delegate<MainWindow, GuiLayout*, GuiTreeNode*>::Allocate(this, &MainWindow::OnEntitySelected));
 	}
 
 	MainWindow::~MainWindow() {
@@ -40,6 +41,10 @@ namespace Engine {
 
 	void MainWindow::RemoveViewportResizeEvent(EventBase<Int32, Int32>& callback) {
 		m_eventOnViewportResize -= callback;
+	}
+
+	void MainWindow::OnEntitySelected(GuiLayout* owner, GuiTreeNode* node) {
+		m_properties->SetEntity(reinterpret_cast<Entity*>(node->GetId()));
 	}
 
 	void MainWindow::OnViewportResize(GuiLayout* owner, Int32 width, Int32 height) {

@@ -30,6 +30,8 @@ namespace Engine {
         void SetDepthWriteEnable(bool enable) override;
         void SetStencilRef(UInt32 ref) override;
 
+        void Reset() override;
+
         void Bind() override;
         void UnBind() override;
     };

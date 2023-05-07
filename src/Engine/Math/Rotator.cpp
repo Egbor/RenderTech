@@ -4,7 +4,7 @@ using namespace DirectX;
 
 namespace Engine {
     XMVECTOR NormalizeEulerAngles(XMVECTOR xmEuler) {
-        return xmEuler - 360.0f * XMVectorRound(xmEuler / 360.0f);
+        return xmEuler - 360.0f * XMVectorTruncate(xmEuler / 360.0f);
     }
 
     Rotator::Rotator() : XMFLOAT3(0.0f, 0.0f, 0.0f) {
@@ -49,10 +49,8 @@ namespace Engine {
         XMVECTOR xmVector2 = XMLoadFloat3(&rotator);
         XMVECTOR xmVector = xmVector1 - xmVector2;
 
-        xmVector = xmVector - 360.0f * XMVectorRound(xmVector / 360.0f);
-
         Rotator result;
-        XMStoreFloat3(&result, xmVector);
+        XMStoreFloat3(&result, NormalizeEulerAngles(xmVector));
 
         return result;
     }

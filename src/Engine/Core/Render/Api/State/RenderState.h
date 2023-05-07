@@ -17,6 +17,8 @@ namespace Engine {
         RenderState(const RenderState&) = default;
         virtual ~RenderState() = default;
 
+        virtual void Reset() = 0;
+
         virtual void Bind() = 0;
         virtual void UnBind() = 0;
     };

@@ -32,16 +32,7 @@ namespace Engine {
 
     DX11BlendState::DX11BlendState(DX11Context* dxContext)
         : m_dxContext(dxContext), m_blendFactor({1.0f, 1.0f, 1.0f, 1.0f}) {
-        m_d3dBlendDesc.AlphaToCoverageEnable = FALSE;
-        m_d3dBlendDesc.IndependentBlendEnable = FALSE;
-        m_d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
-        m_d3dBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-        m_d3dBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-        m_d3dBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-        m_d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-        m_d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-        m_d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-        m_d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        Reset();
     }
 
     void DX11BlendState::SetSourceFactor(RenderOutput target, Blend factor) {
@@ -66,6 +57,19 @@ namespace Engine {
         UInt32 targetId = static_cast<UInt32>(target);
         m_d3dBlendDesc.RenderTarget[targetId].BlendEnable = enable;
 
+    }
+
+    void DX11BlendState::Reset() {
+        m_d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+        m_d3dBlendDesc.IndependentBlendEnable = FALSE;
+        m_d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+        m_d3dBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+        m_d3dBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+        m_d3dBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        m_d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+        m_d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+        m_d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        m_d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     }
 
     void DX11BlendState::Bind() {

@@ -11,6 +11,19 @@ namespace Engine {
 
     DX11RasterizerState::DX11RasterizerState(DX11Context* dxContext)
         : m_dxContext(dxContext) {
+        Reset();
+    }
+
+    void  DX11RasterizerState::SetCullMode(CullMode mode) {
+        UInt32 modeId = static_cast<UInt32>(mode);
+        m_d3dRasterizerDesc.CullMode = gCullModeTable[modeId];
+    }
+
+    void DX11RasterizerState::SetDepthClipEnable(bool enable) {
+        m_d3dRasterizerDesc.DepthClipEnable = enable;
+    }
+
+    void DX11RasterizerState::Reset() {
         m_d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
         m_d3dRasterizerDesc.CullMode = D3D11_CULL_BACK;
         m_d3dRasterizerDesc.FrontCounterClockwise = FALSE;
@@ -21,15 +34,6 @@ namespace Engine {
         m_d3dRasterizerDesc.ScissorEnable = FALSE;
         m_d3dRasterizerDesc.MultisampleEnable = FALSE;
         m_d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
-    }
-
-    void  DX11RasterizerState::SetCullMode(CullMode mode) {
-        UInt32 modeId = static_cast<UInt32>(mode);
-        m_d3dRasterizerDesc.CullMode = gCullModeTable[modeId];
-    }
-
-    void DX11RasterizerState::SetDepthClipEnable(bool enable) {
-        m_d3dRasterizerDesc.DepthClipEnable = enable;
     }
 
     void DX11RasterizerState::Bind() {

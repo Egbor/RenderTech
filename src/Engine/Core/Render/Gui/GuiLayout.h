@@ -12,6 +12,7 @@ namespace Engine {
 	class GuiLayout {
 	private:
 		String m_layoutTag;
+		bool m_isVisible;
 
 		GuiLayout* m_parentLayout;
 		Array<GuiLayout*> m_childLayouts;
@@ -26,6 +27,9 @@ namespace Engine {
 		virtual void Render(void* layoutData = nullptr);
 
 		String GetTag() const;
+
+		void SetVisible(bool value);
+		bool GetVisible() const;
 
 		bool AddChildLayout(GuiLayout* layout);
 		bool RemoveChildLayout(const String& tag, GuiLayout** outLayout = nullptr);

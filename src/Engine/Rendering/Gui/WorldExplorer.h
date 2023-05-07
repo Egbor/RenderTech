@@ -8,7 +8,7 @@
 namespace Engine {
 	class WorldExplorer : public GuiWidget {
 	private:
-		GuiTreeNode* m_root;
+		GuiTree* m_root;
 
 	public:
 		WorldExplorer(const String& name, const String& tag = "WorldExplorer");
@@ -16,6 +16,9 @@ namespace Engine {
 
 		void AddEntityToExplorer(Entity* entity);
 		void RemoveEntityFromExplorer(Entity* entity);
+
+		void AddOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback);
+		void RemoveOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback);
 	};
 }
 

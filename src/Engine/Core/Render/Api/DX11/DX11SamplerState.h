@@ -18,6 +18,8 @@ namespace Engine {
 
         void SetAddress(SamplerAddress address) override;
 
+        void Reset() override;
+
         void Bind() override;
         void UnBind() override;
     };

@@ -80,23 +80,32 @@ namespace Engine {
     }
 
     void LightRenderPass::StartRenderLightVolume(RenderPass* prev, Mesh* volume) {
+        BlendState* stateBlend = GetRenderState<BlendState>();
         DepthStencilState* stateDepthStencil = GetRenderState<DepthStencilState>();
         RasterizerState* stateRasterizer = GetRenderState<RasterizerState>();
 
+        stateBlend->SetEnable(RenderOutput::RO_TARGET0, false);
         stateRasterizer->SetCullMode(CullMode::D3D11_CULL_BACK);
+        stateRasterizer->SetDepthClipEnable(true);
         stateDepthStencil->SetDepthWriteEnable(false);
         stateDepthStencil->SetDepthTestEnable(true);
         stateDepthStencil->SetStencilTestEnable(true);
         stateDepthStencil->SetDepthTestComparisonFunction(ComparisonFunction::CF_GREATER);
-        stateDepthStencil->SetStencilTestComparisonBackFunction(ComparisonFunction::CF_ALWAYS);
-        stateDepthStencil->SetStencilTestBackOperation({
+        stateDepthStencil->SetStencilTestComparisonFrontFunction(ComparisonFunction::CF_ALWAYS);
+        stateDepthStencil->SetStencilTestFrontOperation({
             StencilOperation::SO_KEEP,
             StencilOperation::SO_KEEP,
             StencilOperation::SO_DECR_SAT
         });
+        stateDepthStencil->SetStencilTestComparisonBackFunction(ComparisonFunction::CF_ALWAYS);
+        stateDepthStencil->SetStencilTestBackOperation({
+            StencilOperation::SO_KEEP,
+            StencilOperation::SO_KEEP,
+            StencilOperation::SO_KEEP
+        });
 
         DetachRenderResource(ResourceType::RB_TARGET, RenderOutput::RO_TARGET0);
-        AttachRenderResource(ResourceType::RB_TARGET, RenderOutput::RO_DEPTH, prev->GetTarget(RenderOutput::RO_DEPTH));
+        AttachRenderResource(ResourceType::RB_TARGET, RenderOutput::RO_DEPTH, GetTarget(RenderOutput::RO_DEPTH));
         AttachRenderResource(ResourceType::RB_BUFFER, RenderBuffer::RB_VERTEX, volume->GetSubmesh(0)->GetVertexBuffer());
         AttachRenderResource(ResourceType::RB_BUFFER, RenderBuffer::RB_INDEX, volume->GetSubmesh(0)->GetIndexBuffer());
         AttachRenderResource(ResourceType::RB_SHADER, RenderStage::RS_VERTEX, m_shaders[0]);
@@ -129,8 +138,14 @@ namespace Engine {
         stateDepthStencil->SetStencilTestEnable(true);
         stateDepthStencil->SetStencilRef(1);
         stateDepthStencil->SetDepthTestComparisonFunction(ComparisonFunction::CF_GREATER_EQUAL);
-        stateDepthStencil->SetStencilTestComparisonFrontFunction(ComparisonFunction::CF_EQUAL);
+        stateDepthStencil->SetStencilTestComparisonBackFunction(ComparisonFunction::CF_EQUAL);
         stateDepthStencil->SetStencilTestBackOperation({
+            StencilOperation::SO_KEEP,
+            StencilOperation::SO_KEEP,
+            StencilOperation::SO_KEEP
+        });
+        stateDepthStencil->SetStencilTestComparisonFrontFunction(ComparisonFunction::CF_ALWAYS);
+        stateDepthStencil->SetStencilTestFrontOperation({
             StencilOperation::SO_KEEP,
             StencilOperation::SO_KEEP,
             StencilOperation::SO_KEEP
@@ -170,7 +185,7 @@ namespace Engine {
     }
 
     void LightRenderPass::ClearStencilTarget() {
-        TargetClear stencilClear;
+        TargetClear stencilClear{};
         stencilClear.forDepthStencil.depth = 0.0f;
         stencilClear.forDepthStencil.stencil = 1;
         stencilClear.forDepthStencil.clearDepth = false;

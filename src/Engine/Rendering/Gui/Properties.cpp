@@ -19,6 +19,10 @@ namespace Engine {
 	}
 
 	void Properties::SetEntity(Entity* entity) {
+		if (entity == nullptr) {
+			return;
+		}
+
 		m_position->SetData(reinterpret_cast<Float*>(&entity->GetRootComponent()->position));
 		m_rotation->SetData(reinterpret_cast<Float*>(&entity->GetRootComponent()->rotation));
 		m_scale->SetData(reinterpret_cast<Float*>(&entity->GetRootComponent()->scale));

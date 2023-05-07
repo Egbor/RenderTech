@@ -13,9 +13,9 @@ namespace Engine {
 		return it != layouts.end();
 	}
 
-	GuiLayout::GuiLayout(const String& tag) 
-		: m_layoutTag(tag), m_parentLayout(nullptr)
-		, m_childLayouts()  {
+	GuiLayout::GuiLayout(const String& tag)
+		: m_layoutTag(tag), m_isVisible(true)
+		, m_parentLayout(nullptr), m_childLayouts()  {
 
 	}
 
@@ -51,9 +51,19 @@ namespace Engine {
 		return m_layoutTag;
 	}
 
+	void GuiLayout::SetVisible(bool value) {
+		m_isVisible = value;
+	}
+
+	bool GuiLayout::GetVisible() const {
+		return m_isVisible;
+	}
+
 	void GuiLayout::RenderChildLayouts(void* layoutData) {
 		for (auto it = m_childLayouts.begin(); it != m_childLayouts.end(); it++) {
-			(*it)->Render(layoutData);
+			if ((*it)->GetVisible()) {
+				(*it)->Render(layoutData);
+			}
 		}
 	}
 

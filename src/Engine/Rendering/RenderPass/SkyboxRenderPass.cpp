@@ -43,6 +43,7 @@ namespace Engine {
 
         RasterizerState* stateRasterizer = GetRenderState<RasterizerState>();
         stateRasterizer->SetCullMode(CullMode::D3D11_CULL_FRONT);
+        stateRasterizer->SetDepthClipEnable(false);
 
         AddTarget(RenderOutput::RO_TARGET0, GetViewportTarget());
         AddTarget(RenderOutput::RO_DEPTH, prev->GetTarget(RenderOutput::RO_DEPTH));

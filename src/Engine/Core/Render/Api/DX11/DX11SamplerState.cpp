@@ -12,6 +12,17 @@ namespace Engine {
 
     DX11SamplerState::DX11SamplerState(DX11Context* dxContext)
         : m_dxContext(dxContext) {
+        Reset();
+    }
+
+    void DX11SamplerState::SetAddress(SamplerAddress address) {
+        UInt32 addressId = static_cast<UInt32>(address);
+        m_d3dSamplerDesc.AddressU = gAddressModeTable[addressId];
+        m_d3dSamplerDesc.AddressV = gAddressModeTable[addressId];
+        m_d3dSamplerDesc.AddressW = gAddressModeTable[addressId];
+    }
+
+    void DX11SamplerState::Reset() {
         m_d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
         m_d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
         m_d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -25,13 +36,6 @@ namespace Engine {
         m_d3dSamplerDesc.BorderColor[1] = 1.0f;
         m_d3dSamplerDesc.BorderColor[2] = 1.0f;
         m_d3dSamplerDesc.BorderColor[3] = 1.0f;
-    }
-
-    void DX11SamplerState::SetAddress(SamplerAddress address) {
-        UInt32 addressId = static_cast<UInt32>(address);
-        m_d3dSamplerDesc.AddressU = gAddressModeTable[addressId];
-        m_d3dSamplerDesc.AddressV = gAddressModeTable[addressId];
-        m_d3dSamplerDesc.AddressW = gAddressModeTable[addressId];
     }
 
     void DX11SamplerState::Bind() {

@@ -18,6 +18,8 @@ namespace Engine {
         void SetCullMode(CullMode mode) override;
         void SetDepthClipEnable(bool enable) override;
 
+        void Reset() override;
+
         void Bind() override;
         void UnBind() override;
     };
