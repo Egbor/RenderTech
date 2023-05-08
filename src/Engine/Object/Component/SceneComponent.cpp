@@ -8,6 +8,7 @@ namespace Engine {
         , rotation(0.0f, 0.0f, 0.0f), m_parent(nullptr), m_children(), m_childIterator() {
         argument.Pull(argTagLocation, position);
         argument.Pull(argTagRotation, rotation);
+
     }
 
     SceneComponent::~SceneComponent() {
@@ -96,5 +97,9 @@ namespace Engine {
 
     UInt64 SceneComponent::GetBehaviorID() const {
         return SceneComponent::TypeIdClass();
+    }
+
+    const List<SceneComponent*>& SceneComponent::GetChildComponents() const {
+        return m_children;
     }
 }

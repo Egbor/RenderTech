@@ -19,6 +19,13 @@ namespace Engine {
 
 	}
 
+	GuiLayout::~GuiLayout() {
+		while (m_childLayouts.begin() != m_childLayouts.end()) {
+			GuiLayout* layout = *m_childLayouts.begin();
+			DELETE_LAYOUT(layout);
+		}
+	}
+
 	void GuiLayout::Render(void* layoutData) {
 		RenderChildLayouts(layoutData);
 	}
@@ -36,12 +43,12 @@ namespace Engine {
 		ArrayIterator<GuiLayout*> it;
 		if (IsGuiLayoutExist(m_childLayouts, tag, &it)) {
 			(*it)->UnRegister();
-			m_childLayouts.erase(it);
 
 			if (outLayout != nullptr) {
 				*outLayout = *it;
 			}
 
+			m_childLayouts.erase(it);
 			return true;
 		}
 		return false;
@@ -49,6 +56,10 @@ namespace Engine {
 
 	String GuiLayout::GetTag() const {
 		return m_layoutTag;
+	}
+
+	GuiLayout* GuiLayout::GetParent() const {
+		return m_parentLayout;
 	}
 
 	void GuiLayout::SetVisible(bool value) {

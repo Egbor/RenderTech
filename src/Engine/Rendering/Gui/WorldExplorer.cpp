@@ -17,23 +17,23 @@ namespace Engine {
 		std::stringstream ss;
 		ss << (UInt64)entity;
 
-		m_root->AddTreeNode(new GuiTreeNode(ss.str(), entity->GetName(), entity));
+		m_root->AddTreeNode(new GuiTree(ss.str(), entity->GetName(), entity));
 	}
 
 	void WorldExplorer::RemoveEntityFromExplorer(Entity* entity) {
 		std::stringstream ss;
 		ss << (UInt64)entity;
 
-		GuiTreeNode* layout = nullptr;
+		GuiTree* layout = nullptr;
 		m_root->RemoveTreeNode(ss.str(), &layout);
 		DELETE_LAYOUT(layout);
 	}
 
-	void WorldExplorer::AddOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback) {
+	void WorldExplorer::AddOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback) {
 		m_root->AddOnSelectedEvent(callback);
 	}
 
-	void WorldExplorer::RemoveOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback) {
+	void WorldExplorer::RemoveOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback) {
 		m_root->RemoveOnSelectedEvent(callback);
 	}
 }

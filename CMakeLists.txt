@@ -24,7 +24,7 @@ file(GLOB PROJECT_LIBRARIES
 
 add_executable(RenderTech WIN32
     ${PROJECT_SOURCES}
-)
+ "src/Engine/Core/Render/Gui/GuiColorPicker.cpp")
 
 target_link_directories(RenderTech PUBLIC
     ${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_LIBRARY_DIRECTORY}

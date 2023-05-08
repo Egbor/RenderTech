@@ -17,8 +17,8 @@ namespace Engine {
 		void AddEntityToExplorer(Entity* entity);
 		void RemoveEntityFromExplorer(Entity* entity);
 
-		void AddOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback);
-		void RemoveOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback);
+		void AddOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback);
+		void RemoveOnEntitySelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback);
 	};
 }
 

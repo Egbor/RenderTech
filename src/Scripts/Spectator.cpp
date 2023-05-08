@@ -8,7 +8,7 @@ namespace Engine {
 
     Spectator::Spectator(const ObjectArgument& argument)
         : Super(argument) {
-        m_cameraComponent = CreateDefaultSubobject<CameraComponent>();
+        m_cameraComponent = CreateDefaultSubobject<CameraComponent>("CameraComponent");
         m_cameraComponent->AttachToComponent(GetRootComponent());
 
         AllowControlCameraRotation(m_cameraComponent);

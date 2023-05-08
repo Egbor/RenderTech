@@ -5,7 +5,6 @@ namespace Engine {
 
     Entity::Entity(const ObjectArgument& argument)
         : Super(argument), m_rootComponent(new SceneComponent(argument)) {
-
     }
 
     Entity::~Entity() {

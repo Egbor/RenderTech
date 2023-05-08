@@ -6,6 +6,7 @@
 #include "Engine/Rendering/Gui/MainMenu.h"
 #include "Engine/Rendering/Gui/Viewport.h"
 #include "Engine/Rendering/Gui/WorldExplorer.h"
+#include "Engine/Rendering/Gui/ComponentExplorer.h"
 #include "Engine/Rendering/Gui/Properties.h"
 
 namespace Engine {
@@ -14,6 +15,7 @@ namespace Engine {
 		MainMenu* m_mainMenu;
 		Viewport* m_viewport;
 		WorldExplorer* m_worldExplorer;
+		ComponentExplorer* m_componentExplorer;
 		Properties* m_properties;
 
 		Event<Int32, Int32> m_eventOnViewportResize;
@@ -31,7 +33,8 @@ namespace Engine {
 		void RemoveViewportResizeEvent(EventBase<Int32, Int32>& callback);
 
 	private:
-		void OnEntitySelected(GuiLayout* owner, GuiTreeNode* node);
+		void OnEntitySelected(GuiLayout* owner, GuiTree* node);
+		void OnComponentSelected(GuiLayout* owner, GuiTree* node);
 		void OnViewportResize(GuiLayout* owner, Int32 width, Int32 height);
 	};
 }

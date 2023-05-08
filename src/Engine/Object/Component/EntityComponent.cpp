@@ -5,7 +5,7 @@ namespace Engine {
     GENERATE_RTTI_DEFINITIONS(EntityComponent)
 
     EntityComponent::EntityComponent(const ObjectArgument& argument)
-        : m_register(nullptr), m_behaviorID(0) {
+        : Super(argument), m_register(nullptr), m_behaviorID(0) {
     }
 
     HandlerPtr& EntityComponent::GetHandler() {

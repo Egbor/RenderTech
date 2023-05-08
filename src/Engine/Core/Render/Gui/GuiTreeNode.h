@@ -25,22 +25,23 @@ namespace Engine {
 
 	class GuiTree : public GuiTreeNode {
 	private:
-		GuiTreeNode* m_selected;
+		GuiTree* m_selected;
 
-		Event<GuiLayout*, GuiTreeNode*> m_eventOnSleceted;
+		Event<GuiLayout*, GuiTree*> m_eventOnSelected;
 
 	public:
 		GuiTree(const String& tag, const String& label, void* id);
 		virtual ~GuiTree() = default;
 
-		bool AddTreeNode(GuiTreeNode* node);
-		bool RemoveTreeNode(const String& tag, GuiTreeNode** outNode = nullptr);
+		bool AddTreeNode(GuiTree* node);
+		bool RemoveTreeNode(const String& tag, GuiTree** outNode = nullptr);
 
-		void AddOnSelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback);
-		void RemoveOnSelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback);
+		void AddOnSelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback);
+		void RemoveOnSelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback);
 
 	private:
 		void OnNodeClicked(GuiLayout* owner);
+		void OnNodeSelected(GuiLayout* owner, GuiTree* node);
 	};
 }
 

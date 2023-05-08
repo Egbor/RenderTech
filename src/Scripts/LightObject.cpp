@@ -5,10 +5,10 @@ namespace Engine {
 
     LightObject::LightObject(const ObjectArgument& argument)
         : Super(argument) {
-        m_lightComponent1 = CreateDefaultSubobject<PointLightComponent>();
-        m_lightComponent2 = CreateDefaultSubobject<PointLightComponent>();
-        m_lightComponent3 = CreateDefaultSubobject<PointLightComponent>();
-        m_lightComponent4 = CreateDefaultSubobject<PointLightComponent>();
+        m_lightComponent1 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent2 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent3 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent4 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
 
         m_lightComponent1->AttachToComponent(GetRootComponent());
         m_lightComponent2->AttachToComponent(GetRootComponent());

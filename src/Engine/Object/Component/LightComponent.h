@@ -8,10 +8,9 @@ namespace Engine {
     class LightComponent : public SceneComponent {
         GENERATE_BODY(LightComponent, SceneComponent)
 
-    private:
-        Vector4 m_color;
-
     public:
+        Vector4 color;
+
         LightComponent(const ObjectArgument& argument);
         LightComponent(const LightComponent&) = default;
         virtual ~LightComponent() = default;

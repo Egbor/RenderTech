@@ -33,22 +33,24 @@ namespace Engine {
 	}
 
 	GuiTree::GuiTree(const String& tag, const String& label, void* id) 
-		: GuiTreeNode(tag, label, id), m_selected(nullptr), m_eventOnSleceted() {
+		: GuiTreeNode(tag, label, id), m_selected(nullptr), m_eventOnSelected() {
 		AddOnClickEvent(Delegate<GuiTree, GuiLayout*>::Allocate(this, &GuiTree::OnNodeClicked));
 	}
 
-	bool GuiTree::AddTreeNode(GuiTreeNode* node) {
+	bool GuiTree::AddTreeNode(GuiTree* node) {
 		if (AddChildLayout(node)) {
 			node->AddOnClickEvent(Delegate<GuiTree, GuiLayout*>::Allocate(this, &GuiTree::OnNodeClicked));
+			node->AddOnSelectedEvent(Delegate<GuiTree, GuiLayout*, GuiTree*>::Allocate(this, &GuiTree::OnNodeSelected));
 			return true;
 		}
 		return false;
 	}
 
-	bool GuiTree::RemoveTreeNode(const String& tag, GuiTreeNode** outNode) {
-		GuiTreeNode* layout = nullptr;
+	bool GuiTree::RemoveTreeNode(const String& tag, GuiTree** outNode) {
+		GuiTree* layout = nullptr;
 		if (RemoveChildLayout(tag, reinterpret_cast<GuiLayout**>(&layout))) {
 			layout->RemoveOnClickEvent(Delegate<GuiTree, GuiLayout*>::Allocate(this, &GuiTree::OnNodeClicked));
+			layout->RemoveOnSelectedEvent(Delegate<GuiTree, GuiLayout*, GuiTree*>::Allocate(this, &GuiTree::OnNodeSelected));
 
 			if (outNode != nullptr) {
 				*outNode = layout;
@@ -59,16 +61,16 @@ namespace Engine {
 		return false;
 	}
 
-	void GuiTree::AddOnSelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback) {
-		m_eventOnSleceted += callback;
+	void GuiTree::AddOnSelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback) {
+		m_eventOnSelected += callback;
 	}
 
-	void GuiTree::RemoveOnSelectedEvent(EventBase<GuiLayout*, GuiTreeNode*>& callback) {
-		m_eventOnSleceted -= callback;
+	void GuiTree::RemoveOnSelectedEvent(EventBase<GuiLayout*, GuiTree*>& callback) {
+		m_eventOnSelected -= callback;
 	}
 
 	void GuiTree::OnNodeClicked(GuiLayout* owner) {
-		GuiTreeNode* node = dynamic_cast<GuiTreeNode*>(owner);
+		GuiTree* node = dynamic_cast<GuiTree*>(owner);
 		
 		if (m_selected != nullptr) {
 			m_selected->SetActive(false);
@@ -76,6 +78,10 @@ namespace Engine {
 		m_selected = node;
 		m_selected->SetActive(true);
 
-		m_eventOnSleceted(this, m_selected);
+		OnNodeSelected(this, m_selected);
+	}
+
+	void GuiTree::OnNodeSelected(GuiLayout* owner, GuiTree* node) {
+		m_eventOnSelected(owner, node);
 	}
 }

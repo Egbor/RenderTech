@@ -4,9 +4,11 @@
 #include "Engine/EngineDef.h"
 #include "Engine/Tools/Event.h"
 
-#define DELETE_LAYOUT(layout)				\
-	RemoveChildLayout((layout)->GetTag());	\
-	DELETE_OBJECT((layout));
+#define DELETE_LAYOUT(layout)					\
+	if (layout != nullptr) {					\
+		RemoveChildLayout((layout)->GetTag());	\
+		DELETE_OBJECT((layout));				\
+	}
 
 namespace Engine {
 	class GuiLayout {
@@ -22,11 +24,12 @@ namespace Engine {
 
 	public:
 		GuiLayout(const String& tag);
-		virtual ~GuiLayout() = default;
+		virtual ~GuiLayout();
 
 		virtual void Render(void* layoutData = nullptr);
 
 		String GetTag() const;
+		GuiLayout* GetParent() const;
 
 		void SetVisible(bool value);
 		bool GetVisible() const;

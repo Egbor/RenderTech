@@ -5,16 +5,16 @@ namespace Engine {
     GENERATE_RTTI_DEFINITIONS(LightComponent)
 
     LightComponent::LightComponent(const ObjectArgument& argument)
-        : Super(argument), m_color(1.0f, 1.0f, 1.0f, 1.0f) {
+        : Super(argument), color(1.0f, 1.0f, 1.0f, 1.0f) {
 
     }
 
     void LightComponent::SetColor(const Vector4& rgb) {
-        m_color = rgb;
+        color = rgb;
     }
 
     Vector4 LightComponent::GetColor() const {
-        return m_color;
+        return color;
     }
 
     Vector4 LightComponent::GetValue() const {

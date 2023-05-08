@@ -43,6 +43,8 @@ namespace Engine {
         Vector3 GetRight() const;
         Vector3 GetUp() const;
 
+        const List<SceneComponent*>& GetChildComponents() const;
+
     protected:
         virtual UInt64 GetBehaviorID() const override;
     };

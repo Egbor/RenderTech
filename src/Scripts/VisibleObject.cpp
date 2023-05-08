@@ -18,7 +18,7 @@ namespace Engine {
 
     VisibleObject::VisibleObject(const ObjectArgument& argument)
         : Super(argument) {
-        m_meshComponent = CreateDefaultSubobject<MeshComponent>();
+        m_meshComponent = CreateDefaultSubobject<MeshComponent>("MeshComponent");
         m_meshComponent->AttachToComponent(GetRootComponent());
 
         MeshImport meshImport("./bin/models/SM_Gameboy.fbx");
