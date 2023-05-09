@@ -134,6 +134,7 @@ namespace Engine {
         Matrix4x4 wvp = wv * proj;
 
         DynamicBufferCameraDesc cameraBuffer;
+        cameraBuffer.invWorldView = wv.Inverse().Transpose();
         cameraBuffer.WorldView = wv.Transpose();
         cameraBuffer.WorldViewProjection = wvp.Transpose();
 

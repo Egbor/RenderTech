@@ -134,6 +134,7 @@ namespace Engine {
     struct DYNAMIC_BUFFER DynamicBufferCameraDesc {
         Matrix4x4 WorldViewProjection;
         Matrix4x4 WorldView;
+        Matrix4x4 invWorldView;
     };
 
     struct DYNAMIC_BUFFER DynamicBufferAccumulationDesc {

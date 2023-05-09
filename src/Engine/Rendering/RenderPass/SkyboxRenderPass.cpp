@@ -42,8 +42,13 @@ namespace Engine {
         CameraComponentBehavior* behaviorCamera = storage.FindComponentBehavior<CameraComponentBehavior>(CameraComponent::TypeIdClass());
 
         RasterizerState* stateRasterizer = GetRenderState<RasterizerState>();
+        DepthStencilState* stateDepthStencil = GetRenderState<DepthStencilState>();
+
         stateRasterizer->SetCullMode(CullMode::D3D11_CULL_FRONT);
         stateRasterizer->SetDepthClipEnable(false);
+        stateDepthStencil->SetDepthTestEnable(true);
+        stateDepthStencil->SetDepthWriteEnable(false);
+        stateDepthStencil->SetDepthTestComparisonFunction(ComparisonFunction::CF_LESS_EQUAL);
 
         AddTarget(RenderOutput::RO_TARGET0, GetViewportTarget());
         AddTarget(RenderOutput::RO_DEPTH, prev->GetTarget(RenderOutput::RO_DEPTH));

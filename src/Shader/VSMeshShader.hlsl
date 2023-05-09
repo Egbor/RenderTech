@@ -9,7 +9,7 @@ VertexShaderOutput main(float3 position : POSITION, float3 tangent : TANGENT,
     output.TexCoord = GetCorrectedTextureCoordinate(uv);
     output.vsTangent = mul(tangent, (float3x3)WorldView);
     output.vsBinormal = mul(binormal, (float3x3)WorldView);
-    output.vsNormal = mul(normal, (float3x3)WorldView);
+    output.vsNormal = mul(normal, transpose((float3x3)invWorldView));
 
     return output;
 }

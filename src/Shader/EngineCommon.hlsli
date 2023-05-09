@@ -6,6 +6,7 @@
 cbuffer VS_ENGINE_CAMERA_BUFFER : register(b0) {
 	float4x4 WorldViewProjection;
 	float4x4 WorldView;
+	float4x4 invWorldView;
 }
 
 Texture2D AlbedoTexture : register(t0);
