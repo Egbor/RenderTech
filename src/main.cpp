@@ -1,6 +1,9 @@
 #include <Windows.h>
 
 #include "Engine.h"
+#include "imgui/imgui.h"
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 constexpr static const char* gWindowClass = "RenderTechClass";
 constexpr static const char* gWindowName = "RenderTech";
@@ -34,6 +37,10 @@ void SwitchWindowToFullscreen(HWND hWnd) {
 }
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
+		return true;
+	}
+
 	switch (msg) {
 	case WM_DESTROY:
 		PostQuitMessage(0);

@@ -217,7 +217,7 @@ namespace Engine {
         m_buffers[1]->Update({ &accumulationBuffer, 1, sizeof(DynamicBufferAccumulationDesc) });
     }
 
-    void LightRenderPass::LightRenderPass::UpdateLightBuffer(Vector4& value, Vector4& color) {
+    void LightRenderPass::UpdateLightBuffer(Vector4& value, Vector4& color) {
         DynamicBufferLightDesc lightBuffer;
         lightBuffer.LightColor = color;
         lightBuffer.LightValue = value;

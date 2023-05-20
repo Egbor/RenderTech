@@ -18,10 +18,10 @@ namespace Engine {
         switch (nCode) {
         case HC_ACTION:
         {
-            LPMSG wndProcArgs = (LPMSG)lParam;
-            if (ImGui_ImplWin32_WndProcHandler(wndProcArgs->hwnd, wndProcArgs->message, wndProcArgs->wParam, wndProcArgs->lParam)) {
-                return CallNextHookEx(NULL, nCode, wParam, lParam);
-            }
+            //LPMSG wndProcArgs = (LPMSG)lParam;
+            //if (ImGui_ImplWin32_WndProcHandler(wndProcArgs->hwnd, wndProcArgs->message, wndProcArgs->wParam, wndProcArgs->lParam)) {
+            //    return CallNextHookEx(NULL, nCode, wParam, lParam);
+            //}
             break;
         }
         default:
@@ -43,10 +43,17 @@ namespace Engine {
 
         ImGui::StyleColorsDark();
 
+        ImGuiStyle& style = ImGui::GetStyle();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
+
         ImGui_ImplWin32_Init(hWnd);
         ImGui_ImplDX11_Init(dxContext->GetD3D11Device().Get(), dxContext->GetD3D11Context().Get());
 
-        SetWindowsHookExA(WH_GETMESSAGE, HookWndProcForDevGui, NULL, GetCurrentThreadId());
+        //SetWindowsHookExA(WH_GETMESSAGE, HookWndProcForDevGui, NULL, GetCurrentThreadId());
     }
 
     DX11GuiContext::~DX11GuiContext() {

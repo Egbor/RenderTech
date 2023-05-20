@@ -15,18 +15,7 @@ using namespace Engine;
 
 MeshComponentBehavior* behaviorMesh = new MeshComponentBehavior(ObjectArgument::Dummy());
 CameraComponentBehavior* behaviorCamera = new CameraComponentBehavior(ObjectArgument::Dummy());
-LightComponentBehavior* behaviorLight = new LightComponentBehavior(ObjectArgument::Dummy());
-
-#define START_ENGINE_THREAD(pThread, callback)                                    \
-    pThread = new std::thread([&](UInt64 winId_, UInt32 width_, UInt32 height_) { \
-        callback(winId_, width_, height_);                                        \
-    }, winId, width, height)
-
-#define STOP_ENGINE_THREAD(pThread)  \
-    if ((pThread) != nullptr) {      \
-        (pThread)->join();           \
-        DELETE_OBJECT((pThread));    \
-    }                               
+LightComponentBehavior* behaviorLight = new LightComponentBehavior(ObjectArgument::Dummy());                            
 
 EngineClass::EngineClass(UInt64 winId, UInt32 width, UInt32 height)
     : m_rsScene(nullptr), m_rsGui(nullptr) {
