@@ -6,6 +6,7 @@
 #include "Engine/Object/Component/EntityComponent.h"
 
 namespace Engine {
+    CLASSTYPE(InputComponent)
     class InputComponent : public EntityComponent {
         GENERATE_BODY(InputComponent, EntityComponent)
 

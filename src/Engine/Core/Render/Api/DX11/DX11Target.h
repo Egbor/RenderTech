@@ -5,6 +5,7 @@
 #include "Engine/Core/Render/Api/DX11/DX11Texture.h"
 
 namespace Engine {
+    CLASSTYPE(DX11Target)
     class DX11Target : public Target {
         GENERATE_BODY(DX11Target, Target);
 
@@ -27,12 +28,13 @@ namespace Engine {
         template<class Texture2DClass, class Predicate>
         static void CreateD3D11View(DX11Target* owner, DX11Texture2DData* data, Predicate creator) {
             if (creator()) {
-                owner->m_dxTexture = owner->CreateDefaultSubobject<Texture2DClass>();
+                owner->m_dxTexture = ObjectClassType<Texture2DClass>::CreateDefaultObject();
                 owner->m_dxTexture->As<Texture2DClass>()->Data().Initialize(data->GetD3D11Texture2D());
             }
         }
     };
 
+    CLASSTYPE(DX11OutputTarget)
     class DX11OutputTarget : public DX11Target {
         GENERATE_BODY(DX11OutputTarget, DX11Target);
 
@@ -56,6 +58,7 @@ namespace Engine {
                                                 DX11OutputTarget* owner);
     };
 
+    CLASSTYPE(DX11DepthStencilTarget)
     class DX11DepthStencilTarget : public DX11Target {
         GENERATE_BODY(DX11DepthStencilTarget, DX11Target);
 
@@ -79,6 +82,7 @@ namespace Engine {
                                                 DX11DepthStencilTarget* owner);
     };
 
+    CLASSTYPE(DX11OutputCubeTarget)
     class DX11OutputCubeTarget : public DX11OutputTarget {
         GENERATE_BODY(DX11OutputCubeTarget, DX11OutputTarget)
 

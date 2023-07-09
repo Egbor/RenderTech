@@ -1,0 +1,6 @@
+﻿<?xml version="1.0"?>
+<Entity name="SerializedObject">
+    <MeshComponent name="MeshComponent" path="assets/model/model.obj">
+        <Material id="0" path="assets/material/material.xml"/>
+    </MeshComponent>
+</Entity>

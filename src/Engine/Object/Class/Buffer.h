@@ -5,6 +5,7 @@
 #include "Engine/Object/Object.h"
 
 namespace Engine {
+    CLASSTYPE(Buffer)
     class Buffer : public Object {
         GENERATE_BODY(Buffer, Object)
 
@@ -17,6 +18,7 @@ namespace Engine {
         virtual UInt32 GetBufferNumElements() const;
     };
 
+    CLASSTYPE(DynamicBuffer)
     class DynamicBuffer : public Buffer {
         GENERATE_BODY(DynamicBuffer, Buffer)
 

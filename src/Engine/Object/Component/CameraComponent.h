@@ -4,12 +4,16 @@
 #include "Engine/Object/Component/SceneComponent.h"
 
 namespace Engine {
+    CLASSTYPE(CameraComponent)
     class CameraComponent : public SceneComponent {
         GENERATE_BODY(CameraComponent, SceneComponent)
 
     private:
+        PROPERTY(ObjectValueType<Float>, fov)
         Float m_fov;
+        PROPERTY(ObjectValueType<Float>, far)
         Float m_far;
+        PROPERTY(ObjectValueType<Float>, near)
         Float m_near;
 
     public:

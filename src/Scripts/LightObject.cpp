@@ -1,14 +1,15 @@
 #include "Scripts/LightObject.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(LightObject)
+    //GENERATE_RTTI_DEFINITIONS(LightObject)
+    GENERATE_INSTANTIATION(LightObject)
 
     LightObject::LightObject(const ObjectArgument& argument)
         : Super(argument) {
-        m_lightComponent1 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
-        m_lightComponent2 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
-        m_lightComponent3 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
-        m_lightComponent4 = CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent1 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent2 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent3 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent4 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
 
         m_lightComponent1->AttachToComponent(GetRootComponent());
         m_lightComponent2->AttachToComponent(GetRootComponent());

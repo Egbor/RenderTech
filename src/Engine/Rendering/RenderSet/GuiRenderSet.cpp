@@ -35,4 +35,12 @@ namespace Engine {
 	void GuiRenderSet::RemoveViewportResizeEvent(EventBase<Int32, Int32>& callback) {
 		m_rootLayout->RemoveViewportResizeEvent(callback);
 	}
+
+	void GuiRenderSet::AddOnAddObjectEvent(EventBase<const String&>& callback) {
+		m_rootLayout->AddOnAddObjectEvent(callback);
+	}
+
+	void GuiRenderSet::RemoveOnAddObjectEvent(EventBase<const String&>& callback) {
+		m_rootLayout->RemoveOnAddObjectEvent(callback);
+	}
 }

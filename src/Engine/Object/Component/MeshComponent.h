@@ -5,10 +5,12 @@
 #include "Engine/Object/Class/Mesh.h"
 
 namespace Engine {
+    CLASSTYPE(MeshComponent)
     class MeshComponent : public SceneComponent {
         GENERATE_BODY(MeshComponent, SceneComponent)
 
     private:
+        PROPERTY(ObjectClassType<Mesh>, mesh)
         Mesh* m_mesh;
 
     public:
@@ -18,6 +20,9 @@ namespace Engine {
 
         void SetMesh(Mesh* mesh);
         Mesh* GetMesh() const;
+
+        void Serialize(ISerializer* serializer) override;
+        void Deserialize(ISerializer* serializer) override;
 
     protected:
         virtual UInt64 GetBehaviorID() const override;

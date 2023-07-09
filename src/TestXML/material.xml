@@ -1,0 +1,8 @@
+﻿<?xml version="1.0"?>
+<Material>
+    <Texture2D type="Albedo" path="assets/texture/alebdo.png"/>
+    <Texture2D type="Normal" path="assets/texture/normal.png"/>
+    <Texture2D type="Metallic" path="assets/texture/metallic.png"/>
+    <Texture2D type="Roughness" path="assets/texture/roughness.png"/>
+    <Texture2D type="AmbiantOcclusion" path="assets/texture/ao.png"/>
+</Material>

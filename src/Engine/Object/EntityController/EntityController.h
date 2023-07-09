@@ -4,6 +4,7 @@
 #include "Engine/Object/Entity/Actor.h"
 
 namespace Engine {
+    CLASSTYPE(EntityController)
     class EntityController : public Object {
         GENERATE_BODY(EntityController, Object)
 

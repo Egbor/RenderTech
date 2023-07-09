@@ -1,7 +1,8 @@
 #include "Engine/Object/Component/Behavior/LightComponentBehavior.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(LightComponentBehavior)
+    //GENERATE_RTTI_DEFINITIONS(LightComponentBehavior)
+    GENERATE_INSTANTIATION(LightComponentBehavior)
 
     LightComponentBehavior::LightComponentBehavior(const ObjectArgument& argument)
         : Super(argument){

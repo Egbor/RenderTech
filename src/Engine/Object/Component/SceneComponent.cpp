@@ -1,13 +1,14 @@
 #include "Engine/Object/Component/SceneComponent.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(SceneComponent)
+    //GENERATE_RTTI_DEFINITIONS(SceneComponent)
+    GENERATE_INSTANTIATION(SceneComponent)
 
     SceneComponent::SceneComponent(const ObjectArgument& argument)
-        : Super(argument), position(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f)
-        , rotation(0.0f, 0.0f, 0.0f), m_parent(nullptr), m_children(), m_childIterator() {
-        argument.Pull(argTagLocation, position);
-        argument.Pull(argTagRotation, rotation);
+        : Super(argument), m_position(0.0f, 0.0f, 0.0f), m_scale(1.0f, 1.0f, 1.0f)
+        , m_rotation(0.0f, 0.0f, 0.0f), m_parent(nullptr), m_children(), m_childIterator() {
+        argument.Pull(argTagLocation, m_position);
+        argument.Pull(argTagRotation, m_rotation);
 
     }
 
@@ -39,48 +40,48 @@ namespace Engine {
     }
 
     void SceneComponent::SetLocalPosition(const Vector3& position) {
-        this->position = position;
+        this->m_position = position;
     }
 
     void SceneComponent::SetLocalRotation(const Rotator& rotator) {
-        this->rotation = rotator;
+        this->m_rotation = rotator;
     }
 
     void SceneComponent::SetLocalScale(const Vector3& scale) {
-        this->scale = scale;
+        this->m_scale = scale;
     }
 
     Vector3 SceneComponent::GetLocalPosition() const {
-        return this->position;
+        return this->m_position;
     }
 
     Rotator SceneComponent::GetLocalRotation() const {
-        return this->rotation;
+        return this->m_rotation;
     }
 
     Vector3 SceneComponent::GetLocalScale() const {
-        return this->scale;
+        return this->m_scale;
     }
 
     Vector3 SceneComponent::GetWorldPosition() const {
         if (m_parent == nullptr) {
-            return this->position;
+            return this->m_position;
         }
-        return m_parent->GetWorldPosition() + GetWorldRotation().RotateVector(this->position);
+        return m_parent->GetWorldPosition() + GetWorldRotation().RotateVector(this->m_position);
     }
 
     Rotator SceneComponent::GetWorldRotation() const {
         if (m_parent == nullptr) {
-            return this->rotation;
+            return this->m_rotation;
         }
-        return m_parent->GetWorldRotation() + this->rotation;
+        return m_parent->GetWorldRotation() + this->m_rotation;
     }
 
     Vector3 SceneComponent::GetWorldScale() const {
         if (m_parent == nullptr) {
-            return this->scale;
+            return this->m_scale;
         }
-        return m_parent->GetWorldScale() * this->scale;
+        return m_parent->GetWorldScale() * this->m_scale;
     }
 
     Vector3 SceneComponent::GetForward() const {

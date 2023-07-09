@@ -5,6 +5,7 @@
 #include "Engine/Object/Object.h"
 
 namespace Engine {
+    CLASSTYPE(Texture)
     class Texture : public Object {
         GENERATE_BODY(Texture, Object)
 
@@ -17,6 +18,7 @@ namespace Engine {
         virtual TextureFormat GetFormat() const;
     };
 
+    CLASSTYPE(Texture2D)
     class Texture2D : public Texture {
         GENERATE_BODY(Texture2D, Texture)
 
@@ -31,6 +33,7 @@ namespace Engine {
         virtual Int32 GetHeight() const;
     };
 
+    CLASSTYPE(CubeTexture2D)
     class CubeTexture2D : public Texture2D {
         GENERATE_BODY(CubeTexture2D, Texture2D)
 

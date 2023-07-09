@@ -1,7 +1,8 @@
 #include "Engine/Object/Component/Behavior/CameraComponentBehavior.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(CameraComponentBehavior)
+    //GENERATE_RTTI_DEFINITIONS(CameraComponentBehavior)
+    GENERATE_INSTANTIATION(CameraComponentBehavior)
 
     CameraComponentBehavior::CameraComponentBehavior(const ObjectArgument& argument)
         : Super(argument) {

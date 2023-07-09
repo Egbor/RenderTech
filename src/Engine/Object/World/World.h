@@ -8,6 +8,7 @@
 #include "Engine/Object/EntityController/EntityController.h"
 
 namespace Engine {
+    CLASSTYPE(World)
     class World : public Object {
         GENERATE_BODY(World, Object)
 
@@ -26,10 +27,10 @@ namespace Engine {
         void Start(WorldMode* mode);
         void Update(Float deltaTime);
 
-        Entity* SpawnEntity(MetaClass* entityClass, const Vector3& location, const Rotator& rotation);
+        Entity* SpawnEntity(ObjectType* entityClass, const Vector3& location, const Rotator& rotation);
         void DestroyEntity(Entity* entity);
 
-        EntityController* AddController(MetaClass* controllerClass);
+        EntityController* AddController(ObjectType* controllerClass);
         void RemoveController(EntityController* controller);
 
         void AddOnEntitySpawnEvent(EventBase<Entity*>& callback);

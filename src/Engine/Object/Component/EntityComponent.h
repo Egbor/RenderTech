@@ -4,6 +4,7 @@
 #include "Engine/Object/Object.h"
 
 namespace Engine {
+    CLASSTYPE(EntityComponent)
     class EntityComponent : public Object {
         GENERATE_BODY(EntityComponent, Object)
 

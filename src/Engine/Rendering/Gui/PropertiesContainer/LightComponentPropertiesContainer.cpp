@@ -15,7 +15,7 @@ namespace Engine {
 		if (component->Is(LightComponent::TypeIdClass())) {
 			LightComponent* temp = component->As<LightComponent>();
 
-			m_color->SetData(reinterpret_cast<Float*>(&temp->color));
+			m_color->SetData(reinterpret_cast<Float*>(&temp->m_color));
 			layout->AddChildLayout(m_color);
 		} else {
 			Detach(layout);

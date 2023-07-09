@@ -7,6 +7,7 @@
 #include "Engine/Math/Matrix.h"
 
 namespace Engine {
+    CLASSTYPE(CameraComponentBehavior)
     class CameraComponentBehavior : public EntityComponentBehavior<CameraComponent> {
         GENERATE_BODY(CameraComponentBehavior, EntityComponentBehavior<CameraComponent>)
 

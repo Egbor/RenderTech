@@ -87,18 +87,7 @@ float4 MapNormal(float3x3 TBN, Texture2D tex, sampler sam, float2 uv) {
 	return normalize(float4(normal, 0.0f));
 }
 
-float3 ACESFilm(float3 color) {
-	float a = 2.51f;
-	float b = 0.03f;
-	float c = 2.43f;
-	float d = 0.59f;
-	float e = 0.14f;
-	return saturate((color * (a * color + b)) / (color * (c * color + d) + e));
-}
-
-float3 TonMappingForHDR(float3 color) {
-	return color / (color + float3(1.0f, 1.0f, 1.0f));
-}
+#include "ACES.hlsli"
 
 float3 LinearTosRGB(float3 color) {
 	float3 x = color * 12.92f;

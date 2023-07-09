@@ -5,6 +5,7 @@
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
 
 namespace Engine {
+    CLASSTYPE(DX11Shader)
     class DX11Shader : public Shader {
         GENERATE_BODY(DX11Shader, Shader)
 
@@ -19,6 +20,7 @@ namespace Engine {
         virtual void Create(const DX11Context* context, const void* code, Size codeLength);
     };
 
+    CLASSTYPE(DX11VertexShader)
     class DX11VertexShader : public DX11Shader {
         GENERATE_BODY(DX11VertexShader, DX11Shader)
 
@@ -38,6 +40,7 @@ namespace Engine {
         void UnBind(const DX11Context* context) override;
     };
 
+    CLASSTYPE(DX11PixelShader)
     class DX11PixelShader : public DX11Shader {
         GENERATE_BODY(DX11PixelShader, DX11Shader)
 

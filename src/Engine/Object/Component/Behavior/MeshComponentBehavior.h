@@ -7,6 +7,7 @@
 #include "Engine/Math/Matrix.h"
 
 namespace Engine {
+    CLASSTYPE(MeshComponentBehavior)
     class MeshComponentBehavior : public EntityComponentBehavior<MeshComponent> {
         GENERATE_BODY(MeshComponentBehavior, EntityComponentBehavior<MeshComponent>)
 

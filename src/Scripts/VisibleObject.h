@@ -5,6 +5,7 @@
 #include "Engine/Object/Component/MeshComponent.h"
 
 namespace Engine {
+    CLASSTYPE(VisibleObject)
     class VisibleObject : public Entity {
         GENERATE_BODY(VisibleObject, Entity)
 

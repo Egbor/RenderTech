@@ -160,7 +160,8 @@ namespace Engine {
         return d3dTexture2D;
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11Texture2D)
+    //GENERATE_RTTI_DEFINITIONS(DX11Texture2D)
+    GENERATE_INSTANTIATION(DX11Texture2D)
 
     DX11Texture2D::DX11Texture2D(const ObjectArgument& argument)
         : Super(argument), m_dxTexture2DWrapper() {
@@ -194,7 +195,8 @@ namespace Engine {
         throw EngineException("[DX11Texture2D] DX11Texture2D::Create() is abstaract method without any features");
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11CubeTexture2D)
+    //GENERATE_RTTI_DEFINITIONS(DX11CubeTexture2D)
+    GENERATE_INSTANTIATION(DX11CubeTexture2D)
 
     DX11CubeTexture2D::DX11CubeTexture2D(const ObjectArgument& argument)
         : Super(argument), m_dxTexture2DWrapper() {
@@ -228,7 +230,8 @@ namespace Engine {
         throw EngineException("[DX11Texture2D] DX11Texture2D::Create() is abstaract method without any features");
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11ResourceTexture2D)
+    //GENERATE_RTTI_DEFINITIONS(DX11ResourceTexture2D)
+    GENERATE_INSTANTIATION(DX11ResourceTexture2D)
 
     DX11ResourceTexture2D::DX11ResourceTexture2D(const ObjectArgument& argument)
         : Super(argument) {
@@ -261,7 +264,8 @@ namespace Engine {
         Data().Initialize(d3dDevice, &d3dTexture2DDesc, &d3dSubresourceData);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11ResourceCubeTexture2D)
+    //GENERATE_RTTI_DEFINITIONS(DX11ResourceCubeTexture2D)
+    GENERATE_INSTANTIATION(DX11ResourceCubeTexture2D)
 
     DX11ResourceCubeTexture2D::DX11ResourceCubeTexture2D(const ObjectArgument& argument)
         : Super(argument) {
@@ -298,7 +302,8 @@ namespace Engine {
         Data().Initialize(d3dDevice, &d3dTexture2DDesc, d3dSubresourceData);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11OutputTexture2D)
+    //GENERATE_RTTI_DEFINITIONS(DX11OutputTexture2D)
+    GENERATE_INSTANTIATION(DX11OutputTexture2D)
 
     DX11OutputTexture2D::DX11OutputTexture2D(const ObjectArgument& argument)
         : Super(argument) {
@@ -329,7 +334,8 @@ namespace Engine {
         Data().Initialize(d3dDevice, &d3dTexture2DDesc, NULL);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11OutputDepthStencilTexture2D)
+    //GENERATE_RTTI_DEFINITIONS(DX11OutputDepthStencilTexture2D)
+    GENERATE_INSTANTIATION(DX11OutputDepthStencilTexture2D)
 
     DX11OutputDepthStencilTexture2D::DX11OutputDepthStencilTexture2D(const ObjectArgument& argument)
         : Super(argument) {
@@ -365,7 +371,8 @@ namespace Engine {
         desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11OutputCubeTexture2D)
+    //GENERATE_RTTI_DEFINITIONS(DX11OutputCubeTexture2D)
+    GENERATE_INSTANTIATION(DX11OutputCubeTexture2D)
 
     DX11OutputCubeTexture2D::DX11OutputCubeTexture2D(const ObjectArgument& argument)
         : Super(argument) {

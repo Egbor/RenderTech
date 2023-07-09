@@ -5,6 +5,7 @@
 #include "Engine/Object/Component/PointLightComponent.h"
 
 namespace Engine {
+    CLASSTYPE(LightObject)
     class LightObject : public Entity {
         GENERATE_BODY(LightObject, Entity)
 

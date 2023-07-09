@@ -7,6 +7,8 @@
 #include "Engine/Object/Component/Behavior/CameraComponentBehavior.h"
 #include "Engine/Object/Component/Behavior/LightComponentBehavior.h"
 
+#include "Engine/Core/System/Serialization/XmlSerializer.h"
+
 #include "Scripts/Spectator.h"
 #include "Scripts/VisibleObject.h"
 #include "Scripts/LightObject.h"
@@ -31,6 +33,7 @@ EngineClass::EngineClass(UInt64 winId, UInt32 width, UInt32 height)
 
     m_world->AddOnEntitySpawnEvent(Delegate<GuiRenderSet, Entity*>::Allocate(m_rsGui, &GuiRenderSet::AddEntityToExplorer));
     m_world->AddOnEntityDestroyEvent(Delegate<GuiRenderSet, Entity*>::Allocate(m_rsGui, &GuiRenderSet::RemoveEntityFromExplorer));
+    m_rsGui->AddOnAddObjectEvent(Delegate<EngineClass, const String&>::Allocate(this, &EngineClass::AddObject));
     m_rsGui->AddViewportResizeEvent(Delegate<SceneRenderSet, Int32, Int32>::Allocate(m_rsScene, &SceneRenderSet::SetViewport));
     m_rsGui->SetSwapChain(m_swapchain);
 
@@ -71,11 +74,11 @@ GuiContext* EngineClass::GetGuiContext() const {
 }
 
 void EngineClass::InitializeWorld() {
-    m_mode->SetActor(Spectator::TypeMetaClass());
-    m_mode->SetController(EntityController::TypeMetaClass());
+    m_mode->SetActor(ObjectClassType<Spectator>::GetInstance());
+    m_mode->SetController(ObjectClassType<EntityController>::GetInstance());
 
-    m_world->SpawnEntity(VisibleObject::TypeMetaClass(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
-    m_world->SpawnEntity(LightObject::TypeMetaClass(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
+    m_world->SpawnEntity(ObjectClassType<VisibleObject>::GetInstance(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
+    m_world->SpawnEntity(ObjectClassType<LightObject>::GetInstance(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
 }
 
 void EngineClass::InitializeInput(Input* input) {
@@ -83,6 +86,20 @@ void EngineClass::InitializeInput(Input* input) {
     input->SetupAxis("Forword", InputKey::IK_S, -1.0f);
     input->SetupAxis("Right", InputKey::IK_D, 1.0f);
     input->SetupAxis("Right", InputKey::IK_A, -1.0f);
-    //input->SetupAxis("LookRight", InputKey::IK_MOSUE_X, 1.0f);
-    //input->SetupAxis("LookUp", InputKey::IK_MOSUE_Y, 1.0f);
+    input->SetupAxis("RMB", InputKey::IK_MOUSE_BUTTON_RIGHT, 1.0f);
+    input->SetupAxis("LookRight", InputKey::IK_MOSUE_X, 1.0f);
+    input->SetupAxis("LookUp", InputKey::IK_MOSUE_Y, 1.0f);
+}
+
+void EngineClass::AddObject(const String& filename) {
+    XmlSerializer serializer(filename, SerializationMode::SM_READ);
+    Object* obj = serializer.Read();
+    DELETE_OBJECT(obj);
+    //ISerializer* root = nullptr;
+    //serializer.CreateSubobjectSerializer(&root);
+
+    //Entity* entity = m_world->SpawnEntity(ObjectClassType<Entity>::GetInstance(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
+    //entity->Deserialize(root);
+
+    //serializer.DispatchSubobjectSerializer(&root);
 }

@@ -26,7 +26,7 @@ namespace Engine {
             throw new EngineException("[MeshImport] Failed to load model: " + GetImportingFilename());
         }
 
-        Mesh* mesh = Mesh::TypeMetaClass()->CreateDefaultObject<Mesh>(ObjectArgument::Dummy());
+        Mesh* mesh = ObjectClassType<Mesh>::CreateDefaultObject();
         ProcessNode(scene->mRootNode, scene, mesh);
         return mesh;
     }

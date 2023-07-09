@@ -2,7 +2,8 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(Target)
+    //GENERATE_RTTI_DEFINITIONS(Target)
+    GENERATE_INSTANTIATION(Target)
 
     Target::Target(const ObjectArgument& argument)
         : Super(argument) {

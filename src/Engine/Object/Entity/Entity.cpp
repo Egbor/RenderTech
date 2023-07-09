@@ -1,7 +1,8 @@
 #include "Engine/Object/Entity/Entity.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(Entity)
+    //GENERATE_RTTI_DEFINITIONS(Entity)
+    GENERATE_INSTANTIATION(Entity)
 
     Entity::Entity(const ObjectArgument& argument)
         : Super(argument), m_rootComponent(new SceneComponent(argument)) {
@@ -60,5 +61,27 @@ namespace Engine {
 
     Vector3 Entity::GetEntityUp() const {
         return m_rootComponent->GetUp();
+    }
+
+    void Entity::Serialize(ISerializer* serializer) {
+        Super::Serialize(serializer);
+    }
+
+    void Entity::Deserialize(ISerializer* serializer) {
+        Super::Deserialize(serializer);
+
+        ISerializer* subobjectSerializer = nullptr;
+        while (serializer->CreateSubobjectSerializer(&subobjectSerializer)) {
+            Object* object = ObjectType::CreateDefaultObjectByName<Object>(subobjectSerializer->GetObjectName());
+
+            if (object->Is(SceneComponent::TypeIdClass())) {
+                SceneComponent* component = object->As<SceneComponent>();
+                component->Deserialize(subobjectSerializer);
+                component->AttachToComponent(m_rootComponent);
+            } else {
+                DELETE_OBJECT(object);
+            }
+        }
+        serializer->DispatchSubobjectSerializer(&subobjectSerializer);
     }
 }

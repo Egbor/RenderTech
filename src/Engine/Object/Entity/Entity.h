@@ -7,10 +7,12 @@
 #include "Engine/Core/System/Time/Time.h"
 
 namespace Engine {
+    CLASSTYPE(Entity)
     class Entity : public Object {
         GENERATE_BODY(Entity, Object)
 
     private:
+        PROPERTY(ObjectClassType<SceneComponent>, rootComponent)
         SceneComponent* m_rootComponent;
 
     public:
@@ -34,6 +36,9 @@ namespace Engine {
         Vector3 GetEntityForword() const;
         Vector3 GetEntityRight() const;
         Vector3 GetEntityUp() const;
+
+        void Serialize(ISerializer* serializer) override;
+        void Deserialize(ISerializer* serializer) override;
     };
 }
 

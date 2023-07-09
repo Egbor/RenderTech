@@ -5,11 +5,14 @@
 #include "Engine/Object/Component/CameraComponent.h"
 
 namespace Engine {
+    CLASSTYPE(Spectator)
     class Spectator : public Actor {
         GENERATE_BODY(Spectator, Actor)
 
     private:
         CameraComponent* m_cameraComponent;
+
+        bool m_isMouseActive;
 
     public:
         Spectator(const ObjectArgument& argument);
@@ -21,6 +24,7 @@ namespace Engine {
 
         void OnForwardMovement(Float value);
         void OnRightMovement(Float value);
+        void OnMouseActive(Float value);
     };
 }
 

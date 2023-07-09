@@ -4,6 +4,7 @@
 #include "Engine/Object/Object.h"
 
 namespace Engine {
+    CLASSTYPE(Shader)
     class Shader : public Object {
         GENERATE_BODY(Shader, Object)
 

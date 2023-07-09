@@ -4,22 +4,23 @@
 #include "Engine/Object/Object.h"
 
 namespace Engine {
+    CLASSTYPE(WorldMode)
     class WorldMode : public Object {
         GENERATE_BODY(WorldMode, Object)
 
     private:
-        MetaClass* m_actorClass;
-        MetaClass* m_controllerClass;
+        ObjectType* m_actorClass;
+        ObjectType* m_controllerClass;
 
     public:
         WorldMode(const ObjectArgument& argument);
         virtual ~WorldMode() = default;
 
-        void SetActor(MetaClass* actorClass);
-        void SetController(MetaClass* controllerClass);
+        void SetActor(ObjectType* actorClass);
+        void SetController(ObjectType* controllerClass);
 
-        MetaClass* GetActorClass() const;
-        MetaClass* GetControllerClass() const;
+        ObjectType* GetActorClass() const;
+        ObjectType* GetControllerClass() const;
     };
 }
 

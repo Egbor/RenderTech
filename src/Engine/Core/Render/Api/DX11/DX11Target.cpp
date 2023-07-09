@@ -4,7 +4,8 @@
 #include "Engine/Object/Global/EngineConfig.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(DX11Target)
+    //GENERATE_RTTI_DEFINITIONS(DX11Target)
+    GENERATE_INSTANTIATION(DX11Target)
 
     DX11Target::DX11Target(const ObjectArgument& argument)
         : Super(argument), m_dxTexture(nullptr) {
@@ -30,7 +31,8 @@ namespace Engine {
         return m_dxTexture;
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11OutputTarget)
+    //GENERATE_RTTI_DEFINITIONS(DX11OutputTarget)
+    GENERATE_INSTANTIATION(DX11OutputTarget)
 
     DX11OutputTarget::DX11OutputTarget(const ObjectArgument& argument)
         : Super(argument) {
@@ -75,7 +77,8 @@ namespace Engine {
         return true;
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11DepthStencilTarget)
+    //GENERATE_RTTI_DEFINITIONS(DX11DepthStencilTarget)
+    GENERATE_INSTANTIATION(DX11DepthStencilTarget)
 
     DX11DepthStencilTarget::DX11DepthStencilTarget(const ObjectArgument& argument)
         : Super(argument) {
@@ -129,7 +132,8 @@ namespace Engine {
         });
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11OutputCubeTarget)
+    //GENERATE_RTTI_DEFINITIONS(DX11OutputCubeTarget)
+    GENERATE_INSTANTIATION(DX11OutputCubeTarget)
 
     DX11OutputCubeTarget::DX11OutputCubeTarget(const ObjectArgument& argument)
         : Super(argument) {

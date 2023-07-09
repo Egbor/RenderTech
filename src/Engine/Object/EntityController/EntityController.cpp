@@ -2,11 +2,12 @@
 #include "Engine/Object/Global/EngineConfig.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(EntityController)
+    //GENERATE_RTTI_DEFINITIONS(EntityController)
+    GENERATE_INSTANTIATION(EntityController)
 
     EntityController::EntityController(const ObjectArgument& argument)
         : Super(argument), m_actor(nullptr) {
-        m_component = CreateDefaultSubobject<InputComponent>();
+        m_component = ObjectClassType<InputComponent>::CreateDefaultObject();//CreateDefaultSubobject<InputComponent>();
     }
 
     void EntityController::AttachActor(Actor* actor) {

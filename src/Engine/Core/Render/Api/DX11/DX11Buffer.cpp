@@ -4,7 +4,8 @@
 #include "Engine/Object/Global/EngineConfig.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(DX11Buffer)
+    //GENERATE_RTTI_DEFINITIONS(DX11Buffer)
+    GENERATE_INSTANTIATION(DX11Buffer)
 
     DX11Buffer::DX11Buffer(const ObjectArgument& argument)
         : Super(argument) {
@@ -27,7 +28,8 @@ namespace Engine {
         throw new EngineException("[DX11Buffer] DX11Buffer::Create() is abstract method without any features");
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11DynamicBuffer)
+    //GENERATE_RTTI_DEFINITIONS(DX11DynamicBuffer)
+    GENERATE_INSTANTIATION(DX11DynamicBuffer)
 
     DX11DynamicBuffer::DX11DynamicBuffer(const ObjectArgument& argument)
         : Super(argument) {
@@ -50,7 +52,8 @@ namespace Engine {
         throw new EngineException("[DX11DynamicBuffer] DX11DynamicBuffer::Create() is abstract method without any features");
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11VertexBuffer)
+    //GENERATE_RTTI_DEFINITIONS(DX11VertexBuffer)
+    GENERATE_INSTANTIATION(DX11VertexBuffer)
 
     DX11VertexBuffer::DX11VertexBuffer(const ObjectArgument& argument)
         : Super(argument) {
@@ -102,7 +105,8 @@ namespace Engine {
         d3dContext->IASetVertexBuffers(0, 0, NULL, &m_strides, &m_offsets);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11IndexBuffer)
+    //GENERATE_RTTI_DEFINITIONS(DX11IndexBuffer)
+    GENERATE_INSTANTIATION(DX11IndexBuffer)
 
     DX11IndexBuffer::DX11IndexBuffer(const ObjectArgument& argument)
         : Super(argument) {
@@ -154,7 +158,8 @@ namespace Engine {
         d3dContext->IASetIndexBuffer(NULL, DXGI_FORMAT_R32_UINT, 0);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11AbstractConstBuffer)
+    //GENERATE_RTTI_DEFINITIONS(DX11AbstractConstBuffer)
+    GENERATE_INSTANTIATION(DX11AbstractConstBuffer)
 
     DX11AbstractConstBuffer::DX11AbstractConstBuffer(const ObjectArgument& argument)
         : Super(argument) {
@@ -206,7 +211,8 @@ namespace Engine {
         d3dContext->Unmap(m_d3dBuffer.Get(), 0);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11VSConstBuffer)
+    //GENERATE_RTTI_DEFINITIONS(DX11VSConstBuffer)
+    GENERATE_INSTANTIATION(DX11VSConstBuffer)
 
     DX11VSConstBuffer::DX11VSConstBuffer(const ObjectArgument& argument)
         : Super(argument) {
@@ -224,7 +230,8 @@ namespace Engine {
         d3dContext->VSSetConstantBuffers(slot, 0, NULL);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11PSConstBuffer)
+    //GENERATE_RTTI_DEFINITIONS(DX11PSConstBuffer)
+    GENERATE_INSTANTIATION(DX11PSConstBuffer)
 
     DX11PSConstBuffer::DX11PSConstBuffer(const ObjectArgument& argument)
         : Super(argument) {

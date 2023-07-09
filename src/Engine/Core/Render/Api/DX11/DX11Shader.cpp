@@ -2,7 +2,8 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(DX11Shader)
+    //GENERATE_RTTI_DEFINITIONS(DX11Shader)
+    GENERATE_INSTANTIATION(DX11Shader)
 
     DX11Shader::DX11Shader(const ObjectArgument& argument)
         : Super(argument) {
@@ -21,7 +22,8 @@ namespace Engine {
         throw new EngineException("[DX11Shader] DX11Shader::Create() is abstract method without any features");
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11VertexShader)
+    //GENERATE_RTTI_DEFINITIONS(DX11VertexShader)
+    GENERATE_INSTANTIATION(DX11VertexShader)
 
     DX11VertexShader::DX11VertexShader(const ObjectArgument& argument)
         : Super(argument) {
@@ -52,7 +54,8 @@ namespace Engine {
         d3dContext->VSSetShader(NULL, NULL, 0);
     }
 
-    GENERATE_RTTI_DEFINITIONS(DX11PixelShader)
+    //GENERATE_RTTI_DEFINITIONS(DX11PixelShader)
+    GENERATE_INSTANTIATION(DX11PixelShader)
 
     DX11PixelShader::DX11PixelShader(const ObjectArgument& argument)
         : Super(argument) {

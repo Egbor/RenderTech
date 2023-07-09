@@ -5,11 +5,13 @@
 #include "Engine/Object/Class/Mesh.h"
 
 namespace Engine {
+    CLASSTYPE(LightComponent)
     class LightComponent : public SceneComponent {
         GENERATE_BODY(LightComponent, SceneComponent)
 
     public:
-        Vector4 color;
+        PROPERTY(ObjectValueType<Vector4>, color)
+        Vector4 m_color;
 
         LightComponent(const ObjectArgument& argument);
         LightComponent(const LightComponent&) = default;

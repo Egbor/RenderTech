@@ -7,6 +7,7 @@
 #include "Engine/Math/Matrix.h"
 
 namespace Engine {
+    CLASSTYPE(LightComponentBehavior)
     class LightComponentBehavior : public EntityComponentBehavior<LightComponent> {
         GENERATE_BODY(LightComponentBehavior, EntityComponentBehavior<LightComponent>)
 

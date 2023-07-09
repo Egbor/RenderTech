@@ -6,6 +6,7 @@
 #include <list>
 #include <unordered_map>
 #include <memory>
+#include <functional>
 
 #include "Engine/Core/System/Input/InputDef.h"
 

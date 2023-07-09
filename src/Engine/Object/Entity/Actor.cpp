@@ -3,10 +3,11 @@
 #include <algorithm>
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(Actor)
+    //GENERATE_RTTI_DEFINITIONS(Actor)
+    GENERATE_INSTANTIATION(Actor)
 
     Actor::Actor(const ObjectArgument& argument)
-        : Super(argument), m_componentForRollRotation(GetRootComponent()) {
+        : Super(argument), m_componentForRollRotation(nullptr) {
     }
 
     void Actor::SetupInputComponent(InputComponent* component) {
@@ -22,11 +23,13 @@ namespace Engine {
         Super::OnUpdate(deltaTime);
 
         AddEntityLocation(m_movement.Normalize() * deltaTime);
-        AddEntityRotation(Rotator(0.0f, m_rotation.y * deltaTime, 0.0f));
 
-        Float oldRoll = m_componentForRollRotation->GetLocalRotation().x;
-        Float newRoll = std::clamp(oldRoll + m_rotation.x * deltaTime, -90.0f, 90.0f);
-        m_componentForRollRotation->SetLocalRotation(Rotator(newRoll, 0.0f, 0.0f));
+        if (m_componentForRollRotation != nullptr) {
+            AddEntityRotation(Rotator(0.0f, m_rotation.y * deltaTime, 0.0f));
+            Float oldRoll = m_componentForRollRotation->GetLocalRotation().x;
+            Float newRoll = std::clamp(oldRoll + m_rotation.x * deltaTime, -90.0f, 90.0f);
+            m_componentForRollRotation->SetLocalRotation(Rotator(newRoll, 0.0f, 0.0f));
+        }
 
         ResetMovement();
     }
@@ -44,9 +47,7 @@ namespace Engine {
     }
 
     void Actor::AllowControlCameraRotation(CameraComponent* component) {
-        if (component != nullptr) {
-            m_componentForRollRotation = component;
-        }
+        m_componentForRollRotation = component;
     }
 
     void Actor::ResetMovement() {

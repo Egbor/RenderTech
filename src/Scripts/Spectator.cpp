@@ -4,14 +4,15 @@
 #include <algorithm>
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(Spectator)
+    //GENERATE_RTTI_DEFINITIONS(Spectator)
+    GENERATE_INSTANTIATION(Spectator)
 
     Spectator::Spectator(const ObjectArgument& argument)
         : Super(argument) {
-        m_cameraComponent = CreateDefaultSubobject<CameraComponent>("CameraComponent");
+        m_cameraComponent = ObjectClassType<CameraComponent>::CreateDefaultObject(); //CreateDefaultSubobject<CameraComponent>("CameraComponent");
         m_cameraComponent->AttachToComponent(GetRootComponent());
 
-        AllowControlCameraRotation(m_cameraComponent);
+        //AllowControlCameraRotation(m_cameraComponent);
     }
 
     Spectator::~Spectator() {
@@ -24,10 +25,13 @@ namespace Engine {
         component->BindAxis("Right", this, &Spectator::OnRightMovement);
         component->BindAxis("LookRight", this, &Spectator::AddPitchRotation);
         component->BindAxis("LookUp", this, &Spectator::AddRollRotation);
+        component->BindAxis("RMB", this, &Spectator::OnMouseActive);
     }
 
     void Spectator::OnUpdate(Float deltaTime) {
         Super::OnUpdate(deltaTime);
+
+        AllowControlCameraRotation(nullptr);
     }
 
     void Spectator::OnForwardMovement(Float value) {
@@ -36,5 +40,10 @@ namespace Engine {
 
     void Spectator::OnRightMovement(Float value) {
        AddMovement(GetEntityRight() * value);
+    }
+
+    void Spectator::OnMouseActive(Float value) {
+        AllowControlCameraRotation(m_cameraComponent);
+        //m_isMouseActive = (value > 0.0f);
     }
 }

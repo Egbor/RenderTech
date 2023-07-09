@@ -6,13 +6,17 @@
 #include "Engine/Math/Rotator.h"
 
 namespace Engine {
+    CLASSTYPE(SceneComponent)
     class SceneComponent : public EntityComponent {
         GENERATE_BODY(SceneComponent, EntityComponent)
 
     public:
-        Vector3 position;
-        Vector3 scale;
-        Rotator rotation;
+        PROPERTY(ObjectValueType<Vector3>, position)
+        Vector3 m_position;
+        PROPERTY(ObjectValueType<Vector3>, scale)
+        Vector3 m_scale;
+        PROPERTY(ObjectValueType<Rotator>, rotation)
+        Rotator m_rotation;
 
     private:
         SceneComponent* m_parent;

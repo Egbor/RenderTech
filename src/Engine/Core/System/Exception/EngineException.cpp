@@ -17,4 +17,14 @@ namespace Engine {
         whatw.assign(whats.begin(), whats.end());
         return whatw;
     }
+
+   EngineBadAllocationException::EngineBadAllocationException() 
+       : EngineException("Bad allocation") {
+
+   }
+
+   EngineBadPointerException::EngineBadPointerException() 
+       : EngineException("Bad pointer") {
+
+   }
 }

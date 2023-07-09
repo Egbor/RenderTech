@@ -16,9 +16,9 @@ float4 main(float4 position : SV_POSITION) : SV_TARGET0 {
 
 	float4 texViewPosition = FindViewFromDepth(depth.r, texUV, invProjection);
 
-	float4 color = LightColor;
 	float4 L = mul(LightValue, WorldView) - texViewPosition;
 	float4 V = eyePosition - texViewPosition;
+	float4 color = LightColor / length(L);
 
 	L = normalize(L);
 	V = normalize(V);
@@ -26,8 +26,8 @@ float4 main(float4 position : SV_POSITION) : SV_TARGET0 {
 	float4 H = normalize(V + L);
 	float4 N = normalize(normal);
 
-	float3 outgoingLight = FindOutgoingPBRLight(N.xyz, V.xyz, L.xyz, H.xyz, color.rgb, sRGBToLinear(albedo.rgb), orm.rgb);
-	outgoingLight = ACESFilm(TonMappingForHDR(outgoingLight));
+	float3 outgoingLight = FindOutgoingPBRLight(N.xyz, V.xyz, L.xyz, H.xyz, color.rgb, sRGBToLinear(albedo.rgb), orm.rgb);	
+	outgoingLight = ACESFitted(outgoingLight);
 	outgoingLight = LinearTosRGB(outgoingLight);
 
 	return float4(outgoingLight, 1.0f);

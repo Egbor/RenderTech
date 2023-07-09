@@ -30,9 +30,9 @@ namespace Engine {
 	}
 
 	void Properties::SetComponent(SceneComponent* component) {
-		m_position->SetData(reinterpret_cast<Float*>(&component->position));
-		m_rotation->SetData(reinterpret_cast<Float*>(&component->rotation));
-		m_scale->SetData(reinterpret_cast<Float*>(&component->scale));
+		m_position->SetData(reinterpret_cast<Float*>(&component->m_position));
+		m_rotation->SetData(reinterpret_cast<Float*>(&component->m_rotation));
+		m_scale->SetData(reinterpret_cast<Float*>(&component->m_scale));
 
 		for (auto it = m_containers.begin(); it != m_containers.end(); it++) {
 			(*it)->Attach(this, component);

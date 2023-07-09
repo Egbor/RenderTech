@@ -2,7 +2,8 @@
 #include "Engine/Object/Global/ECBStorage.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(EntityComponent)
+    //GENERATE_RTTI_DEFINITIONS(EntityComponent)
+    GENERATE_INSTANTIATION(EntityComponent)
 
     EntityComponent::EntityComponent(const ObjectArgument& argument)
         : Super(argument), m_register(nullptr), m_behaviorID(0) {

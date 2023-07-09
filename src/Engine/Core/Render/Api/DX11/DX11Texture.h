@@ -41,6 +41,7 @@ namespace Engine {
         virtual void GetD3D11ResourceDesc(D3D11_SHADER_RESOURCE_VIEW_DESC& desc) = 0;
     };
 
+    CLASSTYPE(DX11Texture2D)
     class DX11Texture2D : public IDX11Texture2D, public Texture2D {
         GENERATE_BODY(DX11Texture2D, Texture2D)
 
@@ -62,6 +63,7 @@ namespace Engine {
         virtual void Create(DX11Context* context, TextureInfo info);
     };
 
+    CLASSTYPE(DX11CubeTexture2D)
     class DX11CubeTexture2D : public IDX11Texture2D, public CubeTexture2D {
         GENERATE_BODY(DX11CubeTexture2D, CubeTexture2D)
 
@@ -83,6 +85,7 @@ namespace Engine {
         virtual void Create(DX11Context* context, TextureInfo info);
     };
 
+    CLASSTYPE(DX11ResourceTexture2D)
     class DX11ResourceTexture2D : public DX11Texture2D {
         GENERATE_BODY(DX11ResourceTexture2D, DX11Texture2D)
 
@@ -97,6 +100,7 @@ namespace Engine {
         void Create(DX11Context* context, TextureInfo info) override;
     };
 
+    CLASSTYPE(DX11ResourceCubeTexture2D)
     class DX11ResourceCubeTexture2D : public DX11CubeTexture2D {
         GENERATE_BODY(DX11ResourceTexture2D, DX11CubeTexture2D)
 
@@ -111,6 +115,7 @@ namespace Engine {
         void Create(DX11Context* context, TextureInfo info) override;
     };
 
+    CLASSTYPE(DX11OutputTexture2D)
     class DX11OutputTexture2D : public DX11Texture2D {
         GENERATE_BODY(DX11OutputTexture2D, DX11Texture2D)
 
@@ -128,6 +133,7 @@ namespace Engine {
         void InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info);
     };
 
+    CLASSTYPE(DX11OutputDepthStencilTexture2D)
     class DX11OutputDepthStencilTexture2D : public DX11Texture2D {
         GENERATE_BODY(DX11OutputDepthStencilTexture2D, DX11Texture2D)
 
@@ -146,6 +152,7 @@ namespace Engine {
         void InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info);
     };
 
+    CLASSTYPE(DX11OutputCubeTexture2D)
     class DX11OutputCubeTexture2D : public DX11CubeTexture2D {
         GENERATE_BODY(DX11OutputCubeTexture2D, DX11CubeTexture2D)
 

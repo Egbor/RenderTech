@@ -6,6 +6,7 @@
 #include "Engine/Object/Component/CameraComponent.h"
 
 namespace Engine {
+    CLASSTYPE(Actor)
     class Actor : public Entity {
         GENERATE_BODY(Actor, Entity)
 

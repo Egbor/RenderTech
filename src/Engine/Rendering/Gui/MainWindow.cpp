@@ -45,6 +45,14 @@ namespace Engine {
 		m_eventOnViewportResize -= callback;
 	}
 
+	void MainWindow::AddOnAddObjectEvent(EventBase<const String&>& callback) {
+		m_mainMenu->AddOnAddObjectEvent(callback);
+	}
+
+	void MainWindow::RemoveOnAddObjectEvent(EventBase<const String&>& callback) {
+		m_mainMenu->RemoveOnAddObjectEvent(callback);
+	}
+
 	void MainWindow::OnEntitySelected(GuiLayout* owner, GuiTree* node) {
 		Entity* entity = reinterpret_cast<Entity*>(node->GetId());
 		if (entity != nullptr) {

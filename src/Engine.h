@@ -40,6 +40,8 @@ public:
 private:
     void InitializeWorld();
     void InitializeInput(Input* input);
+
+    void AddObject(const String& filename);
 };
 
 #endif // RENDERENGINE_H

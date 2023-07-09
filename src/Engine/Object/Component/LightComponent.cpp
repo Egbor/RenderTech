@@ -2,19 +2,20 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(LightComponent)
+    //GENERATE_RTTI_DEFINITIONS(LightComponent)
+    GENERATE_INSTANTIATION(LightComponent)
 
     LightComponent::LightComponent(const ObjectArgument& argument)
-        : Super(argument), color(1.0f, 1.0f, 1.0f, 1.0f) {
+        : Super(argument), m_color(1.0f, 1.0f, 1.0f, 1.0f) {
 
     }
 
     void LightComponent::SetColor(const Vector4& rgb) {
-        color = rgb;
+        m_color = rgb;
     }
 
     Vector4 LightComponent::GetColor() const {
-        return color;
+        return m_color;
     }
 
     Vector4 LightComponent::GetValue() const {

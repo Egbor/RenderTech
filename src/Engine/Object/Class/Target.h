@@ -18,6 +18,7 @@ namespace Engine {
         };
     };
 
+    CLASSTYPE(Target)
     class Target : public Object {
         GENERATE_BODY(Target, Object)
 

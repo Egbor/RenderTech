@@ -5,7 +5,8 @@
 
 /*Trowbridge-Reitz GGX*/
 float D(float alpha, float cosH) {
-	float numerator = alpha * alpha;
+	float r = alpha * alpha;
+	float numerator = r * r;
 	float denominator = cosH * cosH * (numerator - 1.0f) + 1.0f;
 
 	denominator = (PI * denominator * denominator);
@@ -16,7 +17,8 @@ float D(float alpha, float cosH) {
 
 /*Smith-Schlick model*/
 float G1(float alpha, float cosX) {
-	float k = alpha / 2.0f;
+	float r = alpha + 1.0f;
+	float k = (r * r) / 2.0f;
 	float denominator = cosX * (1.0f - k) + k;
 
 	denominator = max(denominator, 0.000001f);
@@ -30,7 +32,7 @@ float G(float alpha, float cosL, float cosV) {
 
 /*Schlick's implementation*/
 float3 F(float3 F0, float cosVH) {
-	return F0 + (float3(1.0f, 1.0f, 1.0f) - F0) * pow(1.0f - cosVH, 5.0);
+	return F0 + (float3(1.0f, 1.0f, 1.0f) - F0) * pow(clamp(1.0f - cosVH, 0.0f, 1.0f), 5.0);
 }
 
 /*Render equation function*/
@@ -41,9 +43,9 @@ float3 FindOutgoingPBRLight(float3 normal, float3 view, float3 light, float3 hal
 	float cosVH = saturate(dot(halfv, view));
 	float cosLV = saturate(dot(light, view));
 
-	float alpha = ormColor.g * ormColor.g;
+	float alpha = ormColor.g;
 
-	float3 F0 = lerp(0.04f, albedoColor, ormColor.b);//float3(IOR, IOR, IOR);
+	float3 F0 = lerp(0.04f, albedoColor, ormColor.b);
 	float3 Ks = F(F0, cosVH);
 	float3 Kd = (float3(1.0f, 1.0f, 1.0f) - Ks) * (1.0f - ormColor.b);
 
@@ -58,9 +60,9 @@ float3 FindOutgoingPBRLight(float3 normal, float3 view, float3 light, float3 hal
 	float3 BRDF = Kd * lambert + cookTorrance;
 	float3 outgoingLight = BRDF * lightColor * cosL;
 
-	float3 ambiant = float3(0.03f, 0.03f, 0.03f) * albedoColor * ormColor.r;
+	//float3 ambiant = float3(0.03f, 0.03f, 0.03f) * albedoColor * ormColor.r;
 
-	return outgoingLight + ambiant;
+	return outgoingLight;
 }
 
 #endif

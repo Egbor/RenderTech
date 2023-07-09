@@ -10,6 +10,7 @@ namespace Engine {
     constexpr static const char* argVertexBufferInfo = "vertexBufferInfo";
     constexpr static const char* argIndexBufferInfo = "indexBufferInfo";
 
+    CLASSTYPE(Submesh)
     class Submesh : public Object {
         GENERATE_BODY(Submesh, Object)
 
@@ -32,6 +33,7 @@ namespace Engine {
         void SetMaterial(Material* material);
     };
 
+    CLASSTYPE(Mesh)
     class Mesh : public Object {
         GENERATE_BODY(Mesh, Object)
 

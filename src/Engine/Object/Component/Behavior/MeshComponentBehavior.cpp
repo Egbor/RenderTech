@@ -1,7 +1,8 @@
 #include "Engine/Object/Component/Behavior/MeshComponentBehavior.h"
 
 namespace Engine {
-    GENERATE_RTTI_DEFINITIONS(MeshComponentBehavior)
+    //GENERATE_RTTI_DEFINITIONS(MeshComponentBehavior)
+    GENERATE_INSTANTIATION(MeshComponentBehavior)
 
     MeshComponentBehavior::MeshComponentBehavior(const ObjectArgument& argument)
         : Super(argument), m_componentsInterators() {

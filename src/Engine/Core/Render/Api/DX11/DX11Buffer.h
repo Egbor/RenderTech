@@ -5,6 +5,7 @@
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
 
 namespace Engine {
+    CLASSTYPE(DX11Buffer)
     class DX11Buffer : public Buffer {
         GENERATE_BODY(DX11Buffer, Buffer);
 
@@ -21,6 +22,7 @@ namespace Engine {
         virtual void Create(const DX11Context* context, const void* buffer, UInt32 bufferSize, UInt32 typeSize);
     };
 
+    CLASSTYPE(DX11DynamicBuffer)
     class DX11DynamicBuffer : public DynamicBuffer {
         GENERATE_BODY(DX11DynamicBuffer, DynamicBuffer);
 
@@ -37,6 +39,7 @@ namespace Engine {
         virtual void Create(const DX11Context* context, const void* buffer, UInt32 bufferSize, UInt32 typeSize);
     };
 
+    CLASSTYPE(DX11VertexBuffer)
     class DX11VertexBuffer : public DX11Buffer {
         GENERATE_BODY(DX11VertexBuffer, DX11Buffer)
 
@@ -63,6 +66,7 @@ namespace Engine {
         void UnBind(DX11Context* context) override;
     };
 
+    CLASSTYPE(DX11IndexBuffer)
     class DX11IndexBuffer : public DX11Buffer {
         GENERATE_BODY(DX11IndexBuffer, DX11Buffer)
 
@@ -88,6 +92,7 @@ namespace Engine {
         void UnBind(DX11Context* context) override;
     };
 
+    CLASSTYPE(DX11AbstractConstBuffer)
     class DX11AbstractConstBuffer : public DX11DynamicBuffer {
         GENERATE_BODY(DX11AbstractConstBuffer, DX11DynamicBuffer)
 
@@ -108,6 +113,7 @@ namespace Engine {
         void Update(const BufferInfo& info) override;
     };
 
+    CLASSTYPE(DX11VSConstBuffer)
     class DX11VSConstBuffer : public DX11AbstractConstBuffer {
         GENERATE_BODY(DX11VSConstBuffer, DX11AbstractConstBuffer)
 
@@ -121,6 +127,7 @@ namespace Engine {
         void UnBind(DX11Context* context, UInt32 slot) override;
     };
 
+    CLASSTYPE(DX11PSConstBuffer)
     class DX11PSConstBuffer : public DX11AbstractConstBuffer {
         GENERATE_BODY(DX11PSConstBuffer, DX11AbstractConstBuffer)
 
