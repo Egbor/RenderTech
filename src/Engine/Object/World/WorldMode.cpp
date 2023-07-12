@@ -9,19 +9,19 @@ namespace Engine {
 
     }
 
-    void WorldMode::SetActor(ObjectType* actorClass) {
+    void WorldMode::SetActor(IClass* actorClass) {
         m_actorClass = actorClass;
     }
 
-    void WorldMode::SetController(ObjectType* controllerClass) {
+    void WorldMode::SetController(IClass* controllerClass) {
         m_controllerClass = controllerClass;
     }
 
-    ObjectType* WorldMode::GetActorClass() const {
+    IClass* WorldMode::GetActorClass() const {
         return m_actorClass;
     }
 
-    ObjectType* WorldMode::GetControllerClass() const {
+    IClass* WorldMode::GetControllerClass() const {
         return m_controllerClass;
     }
 }

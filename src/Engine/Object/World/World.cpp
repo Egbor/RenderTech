@@ -1,7 +1,6 @@
 #include "Engine/Object/World/World.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(World)
     GENERATE_INSTANTIATION(World)
 
     World::World(const ObjectArgument& argument)
@@ -23,9 +22,9 @@ namespace Engine {
         NotifyEntitiesAboutUpdate(deltaTime);
     }
 
-    Entity* World::SpawnEntity(ObjectType* entityClass, const Vector3& location, const Rotator& rotation) {
-        Entity* entity = reinterpret_cast<Entity*>(entityClass->CreateInstance());
-        entity->SetName(entityClass->GetName());
+    Entity* World::SpawnEntity(IClass* entityClass, const Vector3& location, const Rotator& rotation) {
+        Entity* entity = entityClass->CreateDefaultObject(ObjectArgument::Dummy())->As<Entity>();
+        entity->SetName(entityClass->IClass_GetName());
         entity->SetEntityLocation(location);
         entity->SetEntityRotation(rotation);
 
@@ -43,8 +42,8 @@ namespace Engine {
         }
     }
 
-    EntityController* World::AddController(ObjectType* controllerClass) {
-        EntityController* controller = reinterpret_cast<EntityController*>(controllerClass->CreateInstance());
+    EntityController* World::AddController(IClass* controllerClass) {
+        EntityController* controller = controllerClass->CreateDefaultObject(ObjectArgument::Dummy())->As<EntityController>();
         m_controllers.push_back(controller);
         return controller;
     }

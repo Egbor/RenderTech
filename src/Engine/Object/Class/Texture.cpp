@@ -4,7 +4,6 @@
 #include <algorithm>
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(Texture)
     GENERATE_INSTANTIATION(Texture)
 
     Texture::Texture(const ObjectArgument& argument)
@@ -19,7 +18,6 @@ namespace Engine {
         throw EngineException("[Texture] Texture::GetFormat() is abstract method without any features");
     }
 
-    //GENERATE_RTTI_DEFINITIONS(Texture2D)
     GENERATE_INSTANTIATION(Texture2D)
 
     Texture2D::Texture2D(const ObjectArgument& argument)
@@ -39,7 +37,6 @@ namespace Engine {
         throw EngineException("[Texture2D] Texture2D::GetHeight() is abstract method without any features");
     }
 
-    //GENERATE_RTTI_DEFINITIONS(CubeTexture2D)
     GENERATE_INSTANTIATION(CubeTexture2D)
 
     CubeTexture2D::CubeTexture2D(const ObjectArgument& argument)

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0"?>
+<ChangeableSolidObject name="SerializedObject">
+    <MeshComponent name="MeshComponent" _field="meshComponent">
+	<Mesh _field="mesh" _import="assets/model/model.obj">
+	    <Array _type="Material" _field="materials">
+                <Element _id="0" _import="assets/material/material.xml"/>
+	    </Array>
+	</Mesh>
+    </MeshComponent>
+</ChangeableSolidObject>

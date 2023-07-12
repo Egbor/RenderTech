@@ -6,10 +6,10 @@ namespace Engine {
 
     LightObject::LightObject(const ObjectArgument& argument)
         : Super(argument) {
-        m_lightComponent1 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
-        m_lightComponent2 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
-        m_lightComponent3 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
-        m_lightComponent4 = ObjectClassType<PointLightComponent>::CreateDefaultObject(); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent1 = ClassType<PointLightComponent>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent2 = ClassType<PointLightComponent>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent3 = ClassType<PointLightComponent>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
+        m_lightComponent4 = ClassType<PointLightComponent>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<PointLightComponent>("PointLightComponent");
 
         m_lightComponent1->AttachToComponent(GetRootComponent());
         m_lightComponent2->AttachToComponent(GetRootComponent());

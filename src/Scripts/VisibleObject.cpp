@@ -19,7 +19,7 @@ namespace Engine {
 
     VisibleObject::VisibleObject(const ObjectArgument& argument)
         : Super(argument) {
-        m_meshComponent = ObjectClassType<MeshComponent>::CreateDefaultObject(); //CreateDefaultSubobject<MeshComponent>("MeshComponent");
+        m_meshComponent = ClassType<MeshComponent>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<MeshComponent>("MeshComponent");
         m_meshComponent->AttachToComponent(GetRootComponent());
 
         MeshImport meshImport("./bin/models/SM_Gameboy.fbx");
@@ -36,7 +36,7 @@ namespace Engine {
         roughness = roughnessImport.LoadResource();
         ao = occlusionImport.LoadResource();
 
-        Material* material = ObjectClassType<Material>::CreateDefaultObject(); //CreateDefaultSubobject<Material>();
+        Material* material = ClassType<Material>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<Material>();
         material->SetTexture(TextureSlot::TS_ALBEDO, albedo);
         material->SetTexture(TextureSlot::TS_NORMAL, normal);
         material->SetTexture(TextureSlot::TS_METALLIC, metallic);

@@ -2,7 +2,6 @@
 #include "Engine/Core/System/Import/MeshImport.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(PointLightComponent)
     GENERATE_INSTANTIATION(PointLightComponent)
 
     Mesh* PointLightComponent::volume = nullptr;

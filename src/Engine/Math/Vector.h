@@ -26,6 +26,7 @@ namespace Engine {
         bool operator==(const Vector2& vector);
     };
 
+    STRUCTTYPE(Vector3)
     struct Vector3 : public DirectX::XMFLOAT3 {
         Vector3();
         Vector3(float x, float y, float z);
@@ -62,6 +63,7 @@ namespace Engine {
         static Vector3 zero;
     };
 
+    STRUCTTYPE(Vector4)
     struct Vector4 : public DirectX::XMFLOAT4 {
         Vector4();
         Vector4(float x, float y, float z, float w);

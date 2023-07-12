@@ -40,7 +40,7 @@ namespace Engine {
             throw new EngineException("[DX11SwapChain] IDXGIFactory::CreateSwapChain() failed.");
         }
 
-        m_dxBackBuffer = ObjectClassType<DX11OutputTexture2D>::CreateDefaultObject();
+        m_dxBackBuffer = ClassType<DX11OutputTexture2D>::CreateObject(ObjectArgument::Dummy());
     }
 
     UInt32 DX11SwapChain::GetWidth() const {

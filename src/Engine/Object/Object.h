@@ -13,7 +13,7 @@ namespace Engine {
         GENERATE_BODY(Object, BaseObject)
 
     private:
-        PROPERTY(ObjectValueType<String>, name)
+        PROPERTY(ValueType<String>, name)
         String m_name;
 
     public:

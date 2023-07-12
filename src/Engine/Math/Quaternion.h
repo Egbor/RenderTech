@@ -4,6 +4,7 @@
 #include "Engine/Math/Vector.h"
 
 namespace Engine {
+    STRUCTTYPE(Quaternion)
     struct Quaternion : public DirectX::XMFLOAT4 {
         Quaternion();
         Quaternion(float w, float x, float y, float z);

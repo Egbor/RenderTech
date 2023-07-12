@@ -1,7 +1,6 @@
 #include "Engine/Object/Entity/Entity.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(Entity)
     GENERATE_INSTANTIATION(Entity)
 
     Entity::Entity(const ObjectArgument& argument)
@@ -70,18 +69,18 @@ namespace Engine {
     void Entity::Deserialize(ISerializer* serializer) {
         Super::Deserialize(serializer);
 
-        ISerializer* subobjectSerializer = nullptr;
-        while (serializer->CreateSubobjectSerializer(&subobjectSerializer)) {
-            Object* object = ObjectType::CreateDefaultObjectByName<Object>(subobjectSerializer->GetObjectName());
+        //ISerializer* subobjectSerializer = nullptr;
+        //while (serializer->CreateSubobjectSerializer(&subobjectSerializer)) {
+        //    Object* object = ObjectType::CreateDefaultObjectByName<Object>(subobjectSerializer->GetObjectName());
 
-            if (object->Is(SceneComponent::TypeIdClass())) {
-                SceneComponent* component = object->As<SceneComponent>();
-                component->Deserialize(subobjectSerializer);
-                component->AttachToComponent(m_rootComponent);
-            } else {
-                DELETE_OBJECT(object);
-            }
-        }
-        serializer->DispatchSubobjectSerializer(&subobjectSerializer);
+        //    if (object->Is(SceneComponent::TypeIdClass())) {
+        //        SceneComponent* component = object->As<SceneComponent>();
+        //        component->Deserialize(subobjectSerializer);
+        //        component->AttachToComponent(m_rootComponent);
+        //    } else {
+        //        DELETE_OBJECT(object);
+        //    }
+        //}
+        //serializer->DispatchSubobjectSerializer(&subobjectSerializer);
     }
 }

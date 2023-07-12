@@ -10,7 +10,7 @@ namespace Engine {
         GENERATE_BODY(MeshComponent, SceneComponent)
 
     private:
-        PROPERTY(ObjectClassType<Mesh>, mesh)
+        PROPERTY(ClassType<Mesh>, mesh)
         Mesh* m_mesh;
 
     public:

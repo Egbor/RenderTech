@@ -2,7 +2,6 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(LightComponent)
     GENERATE_INSTANTIATION(LightComponent)
 
     LightComponent::LightComponent(const ObjectArgument& argument)

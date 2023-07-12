@@ -2,7 +2,6 @@
 #include "Engine/Object/Global/ECBStorage.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(EntityComponent)
     GENERATE_INSTANTIATION(EntityComponent)
 
     EntityComponent::EntityComponent(const ObjectArgument& argument)

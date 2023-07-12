@@ -4,15 +4,12 @@
 #include <algorithm>
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(Spectator)
     GENERATE_INSTANTIATION(Spectator)
 
     Spectator::Spectator(const ObjectArgument& argument)
         : Super(argument) {
-        m_cameraComponent = ObjectClassType<CameraComponent>::CreateDefaultObject(); //CreateDefaultSubobject<CameraComponent>("CameraComponent");
+        m_cameraComponent = ClassType<CameraComponent>::CreateObject(ObjectArgument::Dummy());
         m_cameraComponent->AttachToComponent(GetRootComponent());
-
-        //AllowControlCameraRotation(m_cameraComponent);
     }
 
     Spectator::~Spectator() {

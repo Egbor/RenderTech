@@ -27,10 +27,10 @@ namespace Engine {
         void Start(WorldMode* mode);
         void Update(Float deltaTime);
 
-        Entity* SpawnEntity(ObjectType* entityClass, const Vector3& location, const Rotator& rotation);
+        Entity* SpawnEntity(IClass* entityClass, const Vector3& location, const Rotator& rotation);
         void DestroyEntity(Entity* entity);
 
-        EntityController* AddController(ObjectType* controllerClass);
+        EntityController* AddController(IClass* controllerClass);
         void RemoveController(EntityController* controller);
 
         void AddOnEntitySpawnEvent(EventBase<Entity*>& callback);

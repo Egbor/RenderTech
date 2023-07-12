@@ -1,7 +1,6 @@
 #include "Engine/Object/Component/CameraComponent.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(CameraComponent)
     GENERATE_INSTANTIATION(CameraComponent)
 
     CameraComponent::CameraComponent(const ObjectArgument& argument)

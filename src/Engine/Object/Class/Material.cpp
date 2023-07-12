@@ -3,7 +3,6 @@
 #include "Engine/Core/System/Import/TextureImport.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(Material)
     GENERATE_INSTANTIATION(Material)
 
     Material::Material(const ObjectArgument& argument)
@@ -32,29 +31,29 @@ namespace Engine {
     void Material::Deserialize(ISerializer* serializer) {
         Super::Deserialize(serializer);
 
-        ISerializer* subobjectSerializer = nullptr;
-        while (serializer->CreateSubobjectSerializer(&subobjectSerializer)) {
-            if (subobjectSerializer->GetObjectName() == "Texture2D") {
-                String path = "";
-                String map = "";
+        //ISerializer* subobjectSerializer = nullptr;
+        //while (serializer->CreateSubobjectSerializer(&subobjectSerializer)) {
+        //    if (subobjectSerializer->GetObjectName() == "Texture2D") {
+        //        String path = "";
+        //        String map = "";
 
-                subobjectSerializer->GetString(argTagPath, path);
-                subobjectSerializer->GetString(argTagMap, map);
+        //        subobjectSerializer->GetString(argTagPath, path);
+        //        subobjectSerializer->GetString(argTagMap, map);
 
-                TextureImport importer(path);
-                if (map == "Albedo") {
-                    SetTexture(TextureSlot::TS_ALBEDO, importer.LoadResource());
-                } else if (map == "Normal") {
-                    SetTexture(TextureSlot::TS_NORMAL, importer.LoadResource());
-                } else if (map == "Metallic") {
-                    SetTexture(TextureSlot::TS_METALLIC, importer.LoadResource());
-                } else if (map == "Roughness") {
-                    SetTexture(TextureSlot::TS_ROUGHNESS, importer.LoadResource());
-                } else if (map == "AmbinatOcclusion") {
-                    SetTexture(TextureSlot::TS_AO, importer.LoadResource());
-                }
-            }
-        }
-        serializer->DispatchSubobjectSerializer(&subobjectSerializer);
+        //        TextureImport importer(path);
+        //        if (map == "Albedo") {
+        //            SetTexture(TextureSlot::TS_ALBEDO, importer.LoadResource());
+        //        } else if (map == "Normal") {
+        //            SetTexture(TextureSlot::TS_NORMAL, importer.LoadResource());
+        //        } else if (map == "Metallic") {
+        //            SetTexture(TextureSlot::TS_METALLIC, importer.LoadResource());
+        //        } else if (map == "Roughness") {
+        //            SetTexture(TextureSlot::TS_ROUGHNESS, importer.LoadResource());
+        //        } else if (map == "AmbinatOcclusion") {
+        //            SetTexture(TextureSlot::TS_AO, importer.LoadResource());
+        //        }
+        //    }
+        //}
+        //serializer->DispatchSubobjectSerializer(&subobjectSerializer);
     }
 }

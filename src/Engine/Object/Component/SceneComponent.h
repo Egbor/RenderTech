@@ -11,11 +11,11 @@ namespace Engine {
         GENERATE_BODY(SceneComponent, EntityComponent)
 
     public:
-        PROPERTY(ObjectValueType<Vector3>, position)
+        PROPERTY(ValueType<Vector3>, position)
         Vector3 m_position;
-        PROPERTY(ObjectValueType<Vector3>, scale)
+        PROPERTY(ValueType<Vector3>, scale)
         Vector3 m_scale;
-        PROPERTY(ObjectValueType<Rotator>, rotation)
+        PROPERTY(ValueType<Rotator>, rotation)
         Rotator m_rotation;
 
     private:

@@ -3,7 +3,6 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(Submesh)
     GENERATE_INSTANTIATION(Submesh)
 
     Submesh::Submesh(const ObjectArgument& argument)
@@ -44,7 +43,6 @@ namespace Engine {
         m_material = material;
     }
 
-    //GENERATE_RTTI_DEFINITIONS(Mesh)
     GENERATE_INSTANTIATION(Mesh)
 
     Mesh::Mesh(const ObjectArgument& argument)
@@ -60,7 +58,7 @@ namespace Engine {
         ObjectArgument argument;
         argument.Put(argVertexBufferInfo, meshDesc->GetMeshInfo());
         argument.Put(argIndexBufferInfo, meshDesc->GetFaceInfo());
-        m_submeshes.push_back(ObjectClassType<Submesh>::CreateDefaultObject(argument));
+        m_submeshes.push_back(ClassType<Submesh>::CreateObject(argument));
     }
 
     void Mesh::SetMaterial(Int32 slot, Material* material) {

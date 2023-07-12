@@ -1,7 +1,6 @@
 #include "Engine/Object/Component/SceneComponent.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(SceneComponent)
     GENERATE_INSTANTIATION(SceneComponent)
 
     SceneComponent::SceneComponent(const ObjectArgument& argument)

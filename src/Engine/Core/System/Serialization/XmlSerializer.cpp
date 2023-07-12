@@ -91,34 +91,34 @@ namespace Engine {
 		DELETE_OBJECT(*serializer);
 	}
 
-#define XML_SETTER_PAIR(Type, CastFunc)								\
-	{ #Type, [](Object* owner, ObjectField* field, const String& value) {	\
+#define XML_SETTERMAP_PAIR(Type, CastFunc)								\
+	{ #Type, [](Object* owner, FieldInfo* field, const String& value) {	\
 		Type val = static_cast<Type>(CastFunc(value));						\
 		field->Set<Type>(owner, val);										\
 	} }
 
-	Map<String, std::function<void(Object*, ObjectField*, const String&)>> xmlSetter = {
-		XML_SETTER_PAIR(Int8, std::stoi),
-		XML_SETTER_PAIR(Int16, std::stoi),
-		XML_SETTER_PAIR(Int32, std::stoi),
-		XML_SETTER_PAIR(Int64, std::stoll),
-		XML_SETTER_PAIR(Float, std::stof),
-		XML_SETTER_PAIR(Double, std::stod),
-		XML_SETTER_PAIR(String)
+	Map<String, std::function<void(Object*, FieldInfo*, const String&)>> xmlSetterMap = {
+		XML_SETTERMAP_PAIR(Int8, std::stoi),
+		XML_SETTERMAP_PAIR(Int16, std::stoi),
+		XML_SETTERMAP_PAIR(Int32, std::stoi),
+		XML_SETTERMAP_PAIR(Int64, std::stoll),
+		XML_SETTERMAP_PAIR(Float, std::stof),
+		XML_SETTERMAP_PAIR(Double, std::stod),
+		XML_SETTERMAP_PAIR(String)
 	};
 
 	Object* XmlSerializer::Read() {
 		rapidxml::xml_node<>* node = m_node->first_node();
 		rapidxml::xml_attribute<>* attr = node->first_attribute();
 
-		Object* obj = ObjectType::CreateDefaultObjectByName<Object>(node->name());
-		ObjectType* objType = obj->TypeClass();
+		IClass * objClass = TypeMap::GetInstance()->GetAsClass(node->name());
+		Object* obj = objClass->CreateDefaultObject(ObjectArgument::Dummy())->As<Object>();
 
 		while (attr != nullptr) {
-			ObjectField* field = objType->GetField(attr->name());
-			ObjectType* fieldType = field->GetType();
+			FieldInfo* field = objClass->GetField(attr->name());
+			IType* fieldType = field->GetType();
 			
-			xmlSetter[fieldType->GetName()](obj, field, attr->value());
+			xmlSetterMap[fieldType->IType_GetName()](obj, field, attr->value());
 			attr = attr->next_attribute();
 		}
 

@@ -4,7 +4,6 @@
 #include "Engine/Object/Global/EngineConfig.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(DX11Buffer)
     GENERATE_INSTANTIATION(DX11Buffer)
 
     DX11Buffer::DX11Buffer(const ObjectArgument& argument)

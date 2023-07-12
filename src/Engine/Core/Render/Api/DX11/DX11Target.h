@@ -28,7 +28,7 @@ namespace Engine {
         template<class Texture2DClass, class Predicate>
         static void CreateD3D11View(DX11Target* owner, DX11Texture2DData* data, Predicate creator) {
             if (creator()) {
-                owner->m_dxTexture = ObjectClassType<Texture2DClass>::CreateDefaultObject();
+                owner->m_dxTexture = ClassType<Texture2DClass>::CreateObject(ObjectArgument::Dummy());
                 owner->m_dxTexture->As<Texture2DClass>()->Data().Initialize(data->GetD3D11Texture2D());
             }
         }

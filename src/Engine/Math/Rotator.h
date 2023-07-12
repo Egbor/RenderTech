@@ -4,6 +4,7 @@
 #include "Engine/Math/Quaternion.h"
 
 namespace Engine {
+    STRUCTTYPE(Rotator)
     struct Rotator : DirectX::XMFLOAT3 {
         Rotator();
         Rotator(float roll, float pitch, float yaw);

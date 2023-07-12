@@ -11,29 +11,46 @@
 #include "Engine/Core/System/Input/InputDef.h"
 
 namespace Engine {
-    typedef float Float;
-    typedef double Double;
+    template<typename TType>
+    struct TypeName { static const std::string name; };
 
-    typedef signed char Int8;
-    typedef signed short Int16;
-    typedef signed int Int32;
-    typedef signed long long Int64;
+#define NONEGENERICTYPE(Type)                                                           \
+    template<>                                                                          \
+    const String TypeName<Type>::name = #Type;                                          \
 
-    typedef unsigned char UInt8;
-    typedef unsigned short UInt16;
-    typedef unsigned int UInt32;
-    typedef unsigned long long UInt64;
+#define GENERICTYPE(Type)                                                               \
+    template<typename TType>                                                            \
+    struct TypeName<Type<TType>> {                                                      \
+        inline static const String name = #Type + "<" + TypeName<TType>::name + ">";    \
+    };
+
+#define VALUETYPE(BaseType, Type, Generic) using Type = BaseType; Generic##GENERICTYPE(Type)
+#define CLASSTYPE(Type) class Type; NONEGENERICTYPE(Type)
+#define STRUCTTYPE(Type) struct Type; NONEGENERICTYPE(Type)
+
+    VALUETYPE(std::string, String, NONE)//using String = std::string;
+    VALUETYPE(std::wstring, WString, NONE)//using WString = std::wstring;
+
+    VALUETYPE(float, Float, NONE)//typedef float Float;
+    VALUETYPE(double, Double, NONE)//typedef double Double;
+
+    VALUETYPE(signed char, Int8, NONE)//typedef signed char Int8;
+    VALUETYPE(signed short, Int16, NONE)//typedef signed short Int16;
+    VALUETYPE(signed int, Int32, NONE)//typedef signed int Int32;
+    VALUETYPE(signed long long, Int64, NONE)//typedef signed long long Int64;
+
+    VALUETYPE(unsigned char, UInt8, NONE)//typedef unsigned char UInt8;
+    VALUETYPE(unsigned short, UInt16, NONE)//typedef unsigned short UInt16;
+    VALUETYPE(unsigned int, UInt32, NONE)//typedef unsigned int UInt32;
+    VALUETYPE(unsigned long long, UInt64, NONE)//typedef unsigned long long UInt64;
 
     typedef size_t Size;
     typedef void* HandlerPtr;
 
-    using String = std::string;
-    using WString = std::wstring;
-
     template<typename TKey, typename T>
     using Map = typename std::unordered_map<TKey, T>;
     template<typename T>
-    using Array = typename std::vector<T>;
+    VALUETYPE(typename std::vector<T>, Array)//using Array = typename std::vector<T>;
     template<typename T>
     using List = typename std::list<T>;
 

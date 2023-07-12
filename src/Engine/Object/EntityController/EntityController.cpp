@@ -7,7 +7,7 @@ namespace Engine {
 
     EntityController::EntityController(const ObjectArgument& argument)
         : Super(argument), m_actor(nullptr) {
-        m_component = ObjectClassType<InputComponent>::CreateDefaultObject();//CreateDefaultSubobject<InputComponent>();
+        m_component = ClassType<InputComponent>::CreateObject(ObjectArgument::Dummy());//CreateDefaultSubobject<InputComponent>();
     }
 
     void EntityController::AttachActor(Actor* actor) {

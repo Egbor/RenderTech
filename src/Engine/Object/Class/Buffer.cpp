@@ -2,7 +2,6 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(Buffer)
     GENERATE_INSTANTIATION(Buffer)
 
     Buffer::Buffer(const ObjectArgument& argument)
@@ -18,7 +17,6 @@ namespace Engine {
         throw new EngineException("[Buffer] Buffer::GetBufferNumElements() is abstract method without any features");
     }
 
-    //GENERATE_RTTI_DEFINITIONS(DynamicBuffer)
     GENERATE_INSTANTIATION(DynamicBuffer)
 
     DynamicBuffer::DynamicBuffer(const ObjectArgument& argument)

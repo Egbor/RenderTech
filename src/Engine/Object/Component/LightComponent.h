@@ -10,7 +10,7 @@ namespace Engine {
         GENERATE_BODY(LightComponent, SceneComponent)
 
     public:
-        PROPERTY(ObjectValueType<Vector4>, color)
+        PROPERTY(ValueType<Vector4>, color)
         Vector4 m_color;
 
         LightComponent(const ObjectArgument& argument);

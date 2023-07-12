@@ -9,11 +9,11 @@ namespace Engine {
         GENERATE_BODY(CameraComponent, SceneComponent)
 
     private:
-        PROPERTY(ObjectValueType<Float>, fov)
+        PROPERTY(ValueType<Float>, fov)
         Float m_fov;
-        PROPERTY(ObjectValueType<Float>, far)
+        PROPERTY(ValueType<Float>, far)
         Float m_far;
-        PROPERTY(ObjectValueType<Float>, near)
+        PROPERTY(ValueType<Float>, near)
         Float m_near;
 
     public:

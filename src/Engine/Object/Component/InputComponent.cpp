@@ -1,7 +1,6 @@
 #include "Engine/Object/Component/InputComponent.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(InputComponent)
     GENERATE_INSTANTIATION(InputComponent)
 
     InputComponent::InputComponent(const ObjectArgument& argument)

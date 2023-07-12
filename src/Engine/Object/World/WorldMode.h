@@ -9,18 +9,18 @@ namespace Engine {
         GENERATE_BODY(WorldMode, Object)
 
     private:
-        ObjectType* m_actorClass;
-        ObjectType* m_controllerClass;
+        IClass* m_actorClass;
+        IClass* m_controllerClass;
 
     public:
         WorldMode(const ObjectArgument& argument);
         virtual ~WorldMode() = default;
 
-        void SetActor(ObjectType* actorClass);
-        void SetController(ObjectType* controllerClass);
+        void SetActor(IClass* actorClass);
+        void SetController(IClass* controllerClass);
 
-        ObjectType* GetActorClass() const;
-        ObjectType* GetControllerClass() const;
+        IClass* GetActorClass() const;
+        IClass* GetControllerClass() const;
     };
 }
 

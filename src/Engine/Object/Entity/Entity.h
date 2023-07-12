@@ -12,7 +12,7 @@ namespace Engine {
         GENERATE_BODY(Entity, Object)
 
     private:
-        PROPERTY(ObjectClassType<SceneComponent>, rootComponent)
+        PROPERTY(ClassType<SceneComponent>, rootComponent)
         SceneComponent* m_rootComponent;
 
     public:
