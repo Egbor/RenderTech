@@ -1,10 +1,23 @@
-﻿<?xml version="1.0"?>
-<ChangeableSolidObject name="SerializedObject">
-    <MeshComponent name="MeshComponent" _field="meshComponent">
-	<Mesh _field="mesh" _import="assets/model/model.obj">
-	    <Array _type="Material" _field="materials">
-                <Element _id="0" _import="assets/material/material.xml"/>
-	    </Array>
-	</Mesh>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ChangeableSolidObject 
+  xmlns:rto="https://github.com/Egbor/RenderTech/tree/main/src/Engine/Object" 
+  xmlns:imp="https://github.com/Egbor/RenderTech/tree/main/src/Engine/Core/System/Import" 
+  rto:name="SerializedObject">
+
+    <MeshComponent 
+      rto:field="meshComponent"
+      rto:name="MeshComponent">
+      
+			<Mesh 
+        rto:field="mesh" 
+        imp:mesh="assets/model/model.obj">
+        
+        <!--<Material rto:id="0" rto:field="materials" imp:material="assets/material/material.xml"/>-->
+        
+			</Mesh>
+      
     </MeshComponent>
+  
+    <TestComponent/>
+  
 </ChangeableSolidObject>

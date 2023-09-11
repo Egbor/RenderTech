@@ -19,9 +19,6 @@ namespace Engine {
 
         void SetTexture(TextureSlot slot, Texture2D* texture);
         Texture2D* GetTexture(TextureSlot slot) const;
-
-        void Serialize(ISerializer* serializer) override;
-        void Deserialize(ISerializer* serializer) override;
     };
 }
 

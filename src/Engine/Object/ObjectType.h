@@ -16,7 +16,17 @@ namespace Engine {
     class IType {
     public:
         virtual String IType_GetName() const = 0;
+        virtual TypeEnum GetType() const = 0;
+        virtual Size GetSize() const = 0;
         virtual bool Is(TypeEnum type) const = 0;
+    };
+
+    class IArray {
+    public:
+        virtual String IArray_GetName() const = 0;
+        virtual void Resize(void* arr, Size size) = 0;
+        virtual void SetValue(void* arr, Size id, void* value) = 0;
+        virtual void* GetValue(void* arr, Size id) = 0;
     };
 
     class IClass {
@@ -56,7 +66,7 @@ namespace Engine {
         const TypeEnum m_type;
 
     protected:
-        CommonType(TypeEnum type) 
+        constexpr CommonType(TypeEnum type) noexcept
             : m_type(type) {
             TypeMap::GetInstance()->Set(TypeName<TType>::name, this);
         }
@@ -68,15 +78,28 @@ namespace Engine {
             return TypeName<TType>::name;
         }
 
+        Size GetSize() const override {
+            return _GetSize();
+        }
+
+        TypeEnum GetType() const override {
+            return m_type;
+        }
+
         bool Is(TypeEnum type) const override {
             return m_type == type;
+        }
+
+    private:
+        constexpr Size _GetSize() const noexcept {
+            return (m_type == TypeEnum::TE_CLASS) ? sizeof(TType*) : sizeof(TType);
         }
     };
 
     template<typename TType>
     class ValueType : public CommonType<TType> {
     private:
-        ValueType() 
+        constexpr ValueType() noexcept 
             : CommonType<TType>(TypeEnum::TE_VALUE) {
 
         }
@@ -91,11 +114,16 @@ namespace Engine {
     };
 
     template<typename TType>
+    struct ClassOf {
+        static IClass* value;
+    };
+
+    template<typename TType>
     class ClassType : public CommonType<TType>, public IClass {
     private:
-        ClassType() 
+        constexpr ClassType() noexcept
             : CommonType<TType>(TypeEnum::TE_CLASS)
-            , m_fields(), m_methods(), m_base(TType::Super::TypeClass()) {
+            , m_fields(), m_methods(), m_base(ClassOf<TType::Super>::value) {
 
         }
 
@@ -140,16 +168,22 @@ namespace Engine {
         }
 
     private:
-        IClass* m_base;
+        const IClass* m_base;
 
         Array<FieldInfo*> m_fields;
         Array<MethodInfo*> m_methods;
     };
 
     template<typename TType>
-    class ArrayType : public CommonType<Array<TType>> {
+    IClass* ClassOf<TType>::value = ClassType<TType>::GetInstance();
+    
+    template<>
+    IClass* ClassOf<BaseObject>::value = nullptr;
+
+    template<typename TType>
+    class ArrayType : public CommonType<Array<TType>>, public IArray {
     private:
-        ArrayType() 
+        constexpr ArrayType() noexcept
             : CommonType<TType>(TypeEnum::TE_ARRAY) {
 
         }
@@ -157,9 +191,40 @@ namespace Engine {
         virtual ~ArrayType() = default;
 
     public:
+        String IArray_GetName() const override {
+            return IType_GetName();
+        }
+
         static ArrayType<TType>* GetInstance() {
             static ArrayType<TType>* type = new ArrayType<TType>();
             return type;
+        }
+
+        void Resize(Array<TType>* arr, Size size) {
+            if (arr->size() < size) {
+                arr->resize(size);
+            }
+        }
+
+        void SetValue(Array<TType>* arr, Size id, TType* value) {
+            (*arr)[id] = *value;
+        }
+
+        TType* GetValue(Array<TType>* arr, Size id) {
+            return (*arr)[id];
+        }
+
+    private:
+        void Resize(void* arr, Size size) override {
+            Resize(reinterpret_cast<Array<TType>*>(arr), size);
+        }
+
+        void SetValue(void* arr, Size id, void* value) override {
+            SetValue(reinterpret_cast<Array<TType>*>(arr), id, reinterpret_cast<TType*>(value));
+        }
+
+        void* GetValue(void* arr, Size id) override {
+            return GetValue(reinterpret_cast<Array<TType>*>(arr), id);
         }
     };
 
@@ -173,23 +238,8 @@ namespace Engine {
         FieldInfo(IClass* owner, IType* type, const String& name);
         virtual ~FieldInfo() = default;
 
-        template<typename TType>
-        void Set(BaseObject* obj, TType value) {
-            if (!obj->Is(m_owner->IClass_GetName())) {
-                return;
-            }
-            TType* val = reinterpret_cast<TType*>(obj->m_propertyMap[m_name]);
-            (*val) = value;
-        }
-
-        template<typename TType>
-        TType Get(BaseObject* obj) {
-            if (!obj->Is(m_owner->IClass_GetName())) {
-                return nullptr;
-            }
-            TType* val = reinterpret_cast<TType*>(obj->m_propertyMap[m_name]);
-            return (*val);
-        }
+        void Set(BaseObject* obj, void* value);
+        void* Get(BaseObject* obj);
 
         IClass* GetOwner() const;
         IType* GetType() const;

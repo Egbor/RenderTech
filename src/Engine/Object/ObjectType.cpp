@@ -1,5 +1,8 @@
 #include "Engine/Object/ObjectType.h"
 
+#include "Engine/Object/BaseObject.h"
+#include "Engine/Core/System/Exception/EngineException.h"
+
 namespace Engine {
 	void TypeMap::Set(const String& name, IType* type) {
 		m_types[name] = type;
@@ -26,6 +29,20 @@ namespace Engine {
 	FieldInfo::FieldInfo(IClass* owner, IType* type, const String& name) 
 		: m_owner(owner), m_type(type), m_name(name) {
 		owner->RegisterField(this);
+	}
+
+	void FieldInfo::Set(BaseObject* obj, void* value) {
+		if (!obj->Is(m_owner->IClass_GetName())) {
+			throw EngineException("[FieldInfo] BasedObject::Is() failed");
+		}
+		std::memcpy(obj->m_propertyMap[m_name], value, m_type->GetSize());
+	}
+
+	void* FieldInfo::Get(BaseObject* obj) {
+		if (!obj->Is(m_owner->IClass_GetName())) {
+			throw EngineException("[FieldInfo] BasedObject::Is() failed");
+		}
+		return obj->m_propertyMap[m_name];
 	}
 
 	IClass* FieldInfo::GetOwner() const {

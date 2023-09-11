@@ -61,26 +61,4 @@ namespace Engine {
     Vector3 Entity::GetEntityUp() const {
         return m_rootComponent->GetUp();
     }
-
-    void Entity::Serialize(ISerializer* serializer) {
-        Super::Serialize(serializer);
-    }
-
-    void Entity::Deserialize(ISerializer* serializer) {
-        Super::Deserialize(serializer);
-
-        //ISerializer* subobjectSerializer = nullptr;
-        //while (serializer->CreateSubobjectSerializer(&subobjectSerializer)) {
-        //    Object* object = ObjectType::CreateDefaultObjectByName<Object>(subobjectSerializer->GetObjectName());
-
-        //    if (object->Is(SceneComponent::TypeIdClass())) {
-        //        SceneComponent* component = object->As<SceneComponent>();
-        //        component->Deserialize(subobjectSerializer);
-        //        component->AttachToComponent(m_rootComponent);
-        //    } else {
-        //        DELETE_OBJECT(object);
-        //    }
-        //}
-        //serializer->DispatchSubobjectSerializer(&subobjectSerializer);
-    }
 }

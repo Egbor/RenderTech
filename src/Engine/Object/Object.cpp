@@ -2,7 +2,6 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    //GENERATE_RTTI_DEFINITIONS(Object)
     GENERATE_INSTANTIATION(Object)
 
     Object::Object(const ObjectArgument& argument) 
@@ -16,16 +15,5 @@ namespace Engine {
 
     const String& Object::GetName() const {
         return m_name;
-    }
-
-    void Object::Serialize(ISerializer* serializer) {
-
-    }
-
-    void Object::Deserialize(ISerializer* serializer) {
-        if (!Is(serializer->GetObjectName())) {
-            throw EngineException("[Object] Object::Deserialize() failed.");
-        }
-        serializer->GetString(argTagName, m_name);
     }
 }

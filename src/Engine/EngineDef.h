@@ -14,43 +14,43 @@ namespace Engine {
     template<typename TType>
     struct TypeName { static const std::string name; };
 
-#define NONEGENERICTYPE(Type)                                                           \
+#define TYPENAME(Type)                                                           \
     template<>                                                                          \
     const String TypeName<Type>::name = #Type;                                          \
 
-#define GENERICTYPE(Type)                                                               \
+#define GENERICTYPENAME(Type)                                                               \
     template<typename TType>                                                            \
     struct TypeName<Type<TType>> {                                                      \
-        inline static const String name = #Type + "<" + TypeName<TType>::name + ">";    \
+        inline static const String name = #Type + ("<" + TypeName<TType>::name + ">");    \
     };
 
-#define VALUETYPE(BaseType, Type, Generic) using Type = BaseType; Generic##GENERICTYPE(Type)
-#define CLASSTYPE(Type) class Type; NONEGENERICTYPE(Type)
-#define STRUCTTYPE(Type) struct Type; NONEGENERICTYPE(Type)
+#define VALUETYPE(BaseType, Type, Generic) using Type = BaseType; Generic##TYPENAME(Type)
+#define CLASSTYPE(Type, Generic) class Type; Generic##TYPENAME(Type)
+#define STRUCTTYPE(Type, Generic) struct Type; Generic##TYPENAME(Type)
 
-    VALUETYPE(std::string, String, NONE)//using String = std::string;
-    VALUETYPE(std::wstring, WString, NONE)//using WString = std::wstring;
+    VALUETYPE(std::string, String)
+    VALUETYPE(std::wstring, WString)
 
-    VALUETYPE(float, Float, NONE)//typedef float Float;
-    VALUETYPE(double, Double, NONE)//typedef double Double;
+    VALUETYPE(float, Float)
+    VALUETYPE(double, Double)
 
-    VALUETYPE(signed char, Int8, NONE)//typedef signed char Int8;
-    VALUETYPE(signed short, Int16, NONE)//typedef signed short Int16;
-    VALUETYPE(signed int, Int32, NONE)//typedef signed int Int32;
-    VALUETYPE(signed long long, Int64, NONE)//typedef signed long long Int64;
+    VALUETYPE(signed char, Int8)
+    VALUETYPE(signed short, Int16)
+    VALUETYPE(signed int, Int32)
+    VALUETYPE(signed long long, Int64)
 
-    VALUETYPE(unsigned char, UInt8, NONE)//typedef unsigned char UInt8;
-    VALUETYPE(unsigned short, UInt16, NONE)//typedef unsigned short UInt16;
-    VALUETYPE(unsigned int, UInt32, NONE)//typedef unsigned int UInt32;
-    VALUETYPE(unsigned long long, UInt64, NONE)//typedef unsigned long long UInt64;
-
+    VALUETYPE(unsigned char, UInt8)
+    VALUETYPE(unsigned short, UInt16)
+    VALUETYPE(unsigned int, UInt32)
+    VALUETYPE(unsigned long long, UInt64)
+        
     typedef size_t Size;
     typedef void* HandlerPtr;
 
     template<typename TKey, typename T>
     using Map = typename std::unordered_map<TKey, T>;
     template<typename T>
-    VALUETYPE(typename std::vector<T>, Array)//using Array = typename std::vector<T>;
+    VALUETYPE(typename std::vector<T>, Array, GENERIC)
     template<typename T>
     using List = typename std::list<T>;
 

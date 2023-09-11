@@ -21,9 +21,6 @@ namespace Engine {
         void SetMesh(Mesh* mesh);
         Mesh* GetMesh() const;
 
-        void Serialize(ISerializer* serializer) override;
-        void Deserialize(ISerializer* serializer) override;
-
     protected:
         virtual UInt64 GetBehaviorID() const override;
     };

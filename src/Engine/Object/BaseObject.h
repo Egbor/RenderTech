@@ -17,6 +17,10 @@ namespace Engine {
             return nullptr;
         }
 
+        virtual IClass* GetType() const {
+            return nullptr;
+        }
+
         virtual bool Is(const unsigned long long id) const {
             return false;
         }
@@ -33,10 +37,6 @@ namespace Engine {
             return nullptr;
         }
 
-        static IClass* TypeClass() { 
-            return nullptr;
-        }
-
     protected:
         void IncludeObjectFieldInRTTI(const String& name, void* address) {
             m_propertyMap[name] = address;
@@ -47,7 +47,6 @@ namespace Engine {
 #define MAX_RTTI_OBJECT_NAME_LENGTH 64
 #define GENERATE_RTTI_DECLARATIONS(Type, ParentType)										\
     public:                                                                                 \
-        static IClass* TypeClass() { return ClassType<Type>::GetInstance(); }               \
         static String TypeName() { return String(rtti_objectName); }                        \
         static const unsigned long long& TypeIdClass() { return rtti_objectId; }			\
         virtual const unsigned long long& TypeIdInstance() override { return Type::TypeIdClass(); }	\
@@ -58,6 +57,10 @@ namespace Engine {
             } else {                                                                        \
                 return ParentType::QueryInterface(id);                                      \
             }                                                                               \
+        }                                                                                   \
+                                                                                            \
+        virtual IClass* GetType() const override {                                                   \
+            return ClassType<Type>::GetInstance();                                          \
         }                                                                                   \
                                                                                             \
         virtual bool Is(const unsigned long long id) const override {                                \
@@ -98,7 +101,7 @@ namespace Engine {
 #define GENERATE_INSTANTIATION(Type) GENERATE_RTTI_DEFINITIONS(Type)
 
 #define PROPERTY(ObjType, Name)                                                                                  \
-    inline static const FieldInfo field_##Name = FieldInfo(This::TypeClass(), ObjType::GetInstance(), #Name);    \
+    inline static const FieldInfo field_##Name = FieldInfo(ClassType<This>::GetInstance(), ObjType::GetInstance(), #Name);    \
     struct _Property_##Name {                                                                                    \
         _Property_##Name(This* obj) {                                                                            \
             obj->IncludeObjectFieldInRTTI(#Name, &(obj->m_##Name));                                              \

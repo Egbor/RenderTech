@@ -23,9 +23,6 @@ namespace Engine {
 
         void SetName(const String& name);
         const String& GetName() const;
-
-        virtual void Serialize(ISerializer* serializer);
-        virtual void Deserialize(ISerializer* serializer);
     };
 }
 

@@ -73,16 +73,6 @@ namespace Engine {
         }
     }
 
-//    String GetImageExtention(FREE_IMAGE_FORMAT format) {
-//        switch(format) {
-//        case FIF_EXR: return ".exr";
-//        case FIF_PNG: return ".png";
-//        default:
-//            break;
-//        }
-//        return "";
-//    }
-
     Size GetFreeImageByteWidth(FIBITMAP* dib) {
         UInt32 bytes = FreeImage_GetBPP(dib) / 8;
         Int32 width = FreeImage_GetWidth(dib);

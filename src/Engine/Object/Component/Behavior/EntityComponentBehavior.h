@@ -6,6 +6,9 @@
 
 namespace Engine {
     template<class EntityComponentType>
+    CLASSTYPE(EntityComponentBehavior, GENERIC)
+
+    template<class EntityComponentType>
     class EntityComponentBehavior : public Object, public IEntityComponentBehavior {
         GENERATE_BODY(EntityComponentBehavior<EntityComponentType>, Object)
 

@@ -74,11 +74,11 @@ GuiContext* EngineClass::GetGuiContext() const {
 }
 
 void EngineClass::InitializeWorld() {
-    m_mode->SetActor(Spectator::TypeClass());
-    m_mode->SetController(EntityController::TypeClass());
+    m_mode->SetActor(ClassOf<Spectator>::value);
+    m_mode->SetController(ClassOf<EntityController>::value);
 
-    m_world->SpawnEntity(VisibleObject::TypeClass(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
-    m_world->SpawnEntity(LightObject::TypeClass(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
+    m_world->SpawnEntity(ClassOf<VisibleObject>::value, Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
+    m_world->SpawnEntity(ClassOf<LightObject>::value, Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
 }
 
 void EngineClass::InitializeInput(Input* input) {

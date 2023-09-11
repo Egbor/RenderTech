@@ -36,9 +36,6 @@ namespace Engine {
         Vector3 GetEntityForword() const;
         Vector3 GetEntityRight() const;
         Vector3 GetEntityUp() const;
-
-        void Serialize(ISerializer* serializer) override;
-        void Deserialize(ISerializer* serializer) override;
     };
 }
 

@@ -1,8 +1,11 @@
 #include "Engine/Core/System/Serialization/XmlSerializer.h"
 #include "Engine/Object/Object.h"
 
+#include "Engine/Core/System/Import/MeshImport.h"
+#include "Engine/Core/System/Import/TextureImport.h"
+
 #include <functional>
-#include <string.h>
+#include <sstream>
 
 namespace Engine {
 	XmlSerializer::XmlSerializer(const String& filename, SerializationMode mode) 
@@ -13,115 +16,88 @@ namespace Engine {
 		}
 	}
 
-	XmlSerializer::XmlSerializer(rapidxml::xml_node<>* node)
-		: m_file(nullptr), m_node(node) {
-	}
-
 	XmlSerializer::~XmlSerializer() {
 		DELETE_OBJECT(m_file);
 	}
 
-	String XmlSerializer::GetObjectName() const {
-		return m_node->name();
-	}
-
-	template<class T, class Predicate>
-	bool CastXmlAttributeValue(rapidxml::xml_attribute<>* attribute, Predicate cast, T& out) {
-		if (attribute != nullptr) {
-			out = static_cast<T>(cast(attribute->value()));
-			return true;
-		}
-		return false;
-	}
-
-	bool XmlSerializer::GetInt8(const String& name, Int8& outValue) const {
-		return CastXmlAttributeValue<Int8>(m_node->first_attribute(name.c_str()), [&](const String& str) { return std::stoi(str); }, outValue);
-	}
-
-	bool XmlSerializer::GetInt16(const String& name, Int16& outValue) const {
-		return CastXmlAttributeValue<Int16>(m_node->first_attribute(name.c_str()), [&](const String& str) { return std::stoi(str); }, outValue);
-	}
-
-	bool XmlSerializer::GetInt32(const String& name, Int32& outValue) const {
-		return CastXmlAttributeValue<Int32>(m_node->first_attribute(name.c_str()), [&](const String& str) { return std::stoi(str); }, outValue);
-	}
-
-	bool XmlSerializer::GetInt64(const String& name, Int64& outValue) const {
-		return CastXmlAttributeValue<Int64>(m_node->first_attribute(name.c_str()), [&](const String& str) { return std::stoll(str); }, outValue);
-	}
-
-	bool XmlSerializer::GetFloat(const String& name, Float& outValue) const {
-		return CastXmlAttributeValue<Float>(m_node->first_attribute(name.c_str()), [&](const String& str) { return std::stof(str); }, outValue);
-	}
-
-	bool XmlSerializer::GetDouble(const String& name, Double& outValue) const {
-		return CastXmlAttributeValue<Double>(m_node->first_attribute(name.c_str()), [&](const String& str) { return std::stod(str); }, outValue);
-	}
-
-	bool XmlSerializer::GetString(const String& name, String& outValue) const {
-		return CastXmlAttributeValue<String>(m_node->first_attribute(name.c_str()), [&](const String& str) { return str; }, outValue);
-	}
-
-	bool XmlSerializer::CreateSubobjectSerializer(ISerializer** serializer) const {
-		rapidxml::xml_node<>* node = nullptr;
-		
-		if (*serializer == nullptr) {
-			node = m_node->first_node();
-		} else {
-			XmlSerializer* xmlSerializer = dynamic_cast<XmlSerializer*>((*serializer));
-			node = xmlSerializer->m_node->next_sibling();
-		}
-
-		DispatchSubobjectSerializer(serializer);
-
-		if (node != nullptr) {
-			*serializer = new XmlSerializer(node);
-			return true;
-		}
-		return false;
-	}
-
-	bool XmlSerializer::CreateSubobjectSerializer(const String& filename, ISerializer** serializer) const {
-		DispatchSubobjectSerializer(serializer);
-		*serializer = new XmlSerializer(filename, SerializationMode::SM_READ);
-		return true;
-	}
-
-	void XmlSerializer::DispatchSubobjectSerializer(ISerializer** serializer) const {
-		DELETE_OBJECT(*serializer);
-	}
-
-#define XML_SETTERMAP_PAIR(Type, CastFunc)								\
-	{ #Type, [](Object* owner, FieldInfo* field, const String& value) {	\
-		Type val = static_cast<Type>(CastFunc(value));						\
-		field->Set<Type>(owner, val);										\
+#define XML_CASTINGMAP_PAIR(Type, CastFunc)								\
+	{ #Type, [](const String& value, void* out) {						\
+		Type val = static_cast<Type>(CastFunc(value));					\
+		Type* dst = reinterpret_cast<Type*>(out);						\
+		*dst = val;														\
 	} }
 
-	Map<String, std::function<void(Object*, FieldInfo*, const String&)>> xmlSetterMap = {
-		XML_SETTERMAP_PAIR(Int8, std::stoi),
-		XML_SETTERMAP_PAIR(Int16, std::stoi),
-		XML_SETTERMAP_PAIR(Int32, std::stoi),
-		XML_SETTERMAP_PAIR(Int64, std::stoll),
-		XML_SETTERMAP_PAIR(Float, std::stof),
-		XML_SETTERMAP_PAIR(Double, std::stod),
-		XML_SETTERMAP_PAIR(String)
+#define XML_IMPORTING_PAIR(Type, Importer)								\
+	{ #Type, [](const String& filename, Object** out) {					\
+		Importer importer(filename);									\
+		(*out) = importer.LoadResource();								\
+	} }
+
+	void RunRTOName(const String& value, Object* target, Object* root = nullptr) {
+		target->SetName(value);
+	}
+
+	void RunRTOField(const String& value, Object* target, Object* root) {
+		FieldInfo* field = root->GetType()->GetField(value);
+		field->Set(root, target);
+	}
+
+	Map<String, std::function<void(const String&, void*)>> xmlCastingMap = {
+		XML_CASTINGMAP_PAIR(Int8, std::stoi),
+		XML_CASTINGMAP_PAIR(Int16, std::stoi),
+		XML_CASTINGMAP_PAIR(Int32, std::stoi),
+		XML_CASTINGMAP_PAIR(Int64, std::stoll),
+		XML_CASTINGMAP_PAIR(Float, std::stof),
+		XML_CASTINGMAP_PAIR(Double, std::stod),
+		XML_CASTINGMAP_PAIR(String)
 	};
 
-	Object* XmlSerializer::Read() {
-		rapidxml::xml_node<>* node = m_node->first_node();
-		rapidxml::xml_attribute<>* attr = node->first_attribute();
+	Map<String, std::function<void(const String&, Object**)>> xmlImportingMap = {
+		XML_IMPORTING_PAIR(Mesh, MeshImport),
+		XML_IMPORTING_PAIR(Texture2D, TextureImport)
+	};
 
-		IClass * objClass = TypeMap::GetInstance()->GetAsClass(node->name());
-		Object* obj = objClass->CreateDefaultObject(ObjectArgument::Dummy())->As<Object>();
+	Map<String, std::function<void(const String&, Object*, Object*)>> xmlAttributeMap = {
+		{ "field", RunRTOField },
+		{ "name", RunRTOName }
+	};
 
-		while (attr != nullptr) {
-			FieldInfo* field = objClass->GetField(attr->name());
-			IType* fieldType = field->GetType();
-			
-			xmlSetterMap[fieldType->IType_GetName()](obj, field, attr->value());
-			attr = attr->next_attribute();
+	Object* ConvertXmlNodeToObject(rapidxml::xml_node<>* node) {
+		IClass* type = dynamic_cast<IClass*>(TypeMap::GetInstance()->GetAsType(node->name()));
+		return dynamic_cast<Object*>(type->CreateDefaultObject(ObjectArgument::Dummy()));
+	}
+
+	void DeserializeXmlAttribues(rapidxml::xml_attribute<>* xmlAttr, Object* rtoRoot, Object* rtoTarget) {
+		for (rapidxml::xml_attribute<>* attr = xmlAttr; attr != nullptr; attr = attr->next_attribute()) {
+			String attrNamespace;
+			String attrName;
+
+			std::stringstream ss(attr->name());
+			std::getline(ss, attrNamespace, ':');
+			std::getline(ss, attrName, ':');
+
+			if (attrNamespace == "rto") {
+				xmlAttributeMap[attrName](attr->value(), rtoTarget, rtoRoot);
+			} else if (attrNamespace == "imp") {
+
+			}
 		}
+	}
 
+	void DeserializeXmlChildNodes(rapidxml::xml_node<>* xmlRoot, Object* rtoRoot) {
+		for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
+			Object* target = ConvertXmlNodeToObject(node);
+			DeserializeXmlAttribues(node->first_attribute(), rtoRoot, target);
+			DeserializeXmlChildNodes(node, target);
+		}
+	}
+
+	Object* XmlSerializer::Read() {
+		rapidxml::xml_node<>* root = m_node->first_node();
+
+		Object* obj = ConvertXmlNodeToObject(root);
+		DeserializeXmlAttribues(root->first_attribute(), nullptr, obj);
+		DeserializeXmlChildNodes(root, obj);
 		return obj;
 	}
 
