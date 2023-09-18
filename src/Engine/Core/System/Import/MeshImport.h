@@ -21,6 +21,14 @@ namespace Engine {
         void ProcessNode(aiNode* node, const aiScene* scene, Mesh* outMesh);
         void ProcessMesh(aiMesh* mesh, const aiScene* scene, MeshDescription* outMeshDesc);
     };
+
+    class MeshImporter : public Importer {
+    public:
+        MeshImporter(const String& filename);
+        virtual ~MeshImporter() = default;
+
+        void ImportTo(Object* object) override;
+    };
 }
 
 #endif // MESHIMPORT_H

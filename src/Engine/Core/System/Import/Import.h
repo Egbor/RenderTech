@@ -1,6 +1,7 @@
 #ifndef IMPORT_H
 #define IMPORT_H
 
+#include "Engine/Object/Object.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
@@ -21,6 +22,19 @@ namespace Engine {
         virtual TResourceType* LoadResource(TArgs ...arg) {
             throw EngineException("[Import] LoadResource() is not an implementing method");
         }
+    };
+
+    class Importer {
+    private:
+        const String m_filename;
+
+    public:
+        Importer(const String& filename);
+        virtual ~Importer() = default;
+
+        const String& GetFilename() const;
+
+        virtual void ImportTo(Object* object);
     };
 }
 

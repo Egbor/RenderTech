@@ -5,7 +5,6 @@
 #include "Engine/Core/System/Import/TextureImport.h"
 
 #include <functional>
-#include <sstream>
 
 namespace Engine {
 	XmlSerializer::XmlSerializer(const String& filename, SerializationMode mode) 
@@ -27,20 +26,11 @@ namespace Engine {
 		*dst = val;														\
 	} }
 
-#define XML_IMPORTING_PAIR(Type, Importer)								\
-	{ #Type, [](const String& filename, Object** out) {					\
-		Importer importer(filename);									\
-		(*out) = importer.LoadResource();								\
-	} }
-
-	void RunRTOName(const String& value, Object* target, Object* root = nullptr) {
-		target->SetName(value);
-	}
-
-	void RunRTOField(const String& value, Object* target, Object* root) {
-		FieldInfo* field = root->GetType()->GetField(value);
-		field->Set(root, target);
-	}
+//#define XML_IMPORTING_PAIR(Type, Importer)								\
+//	{ #Type, [](const String& filename, Object** out) {					\
+//		Importer importer(filename);									\
+//		(*out) = importer.LoadResource();								\
+//	} }
 
 	Map<String, std::function<void(const String&, void*)>> xmlCastingMap = {
 		XML_CASTINGMAP_PAIR(Int8, std::stoi),
@@ -48,18 +38,63 @@ namespace Engine {
 		XML_CASTINGMAP_PAIR(Int32, std::stoi),
 		XML_CASTINGMAP_PAIR(Int64, std::stoll),
 		XML_CASTINGMAP_PAIR(Float, std::stof),
-		XML_CASTINGMAP_PAIR(Double, std::stod),
-		XML_CASTINGMAP_PAIR(String)
+		XML_CASTINGMAP_PAIR(Double, std::stod)
+//		XML_CASTINGMAP_PAIR(String)
 	};
 
-	Map<String, std::function<void(const String&, Object**)>> xmlImportingMap = {
-		XML_IMPORTING_PAIR(Mesh, MeshImport),
-		XML_IMPORTING_PAIR(Texture2D, TextureImport)
-	};
+	struct XmlFieldLocalStorage {
+		FieldInfo* field;
+		Int32 offset;
+	} xmlFieldLocalStorage;
+
+	void RunRTOField(const String& value, Object* target, Object* root) {
+		xmlFieldLocalStorage.field = root->GetType()->GetField(value);
+		//FieldInfo* field = root->GetType()->GetField(value);
+		//field->Set(root, target);
+	}
+
+	void RunRTOFieldId(const String& value, Object* target, Object* root) {
+		xmlCastingMap[TypeName<Int32>::name](value, &xmlFieldLocalStorage.offset);
+	}
+
+	void RunRTOName(const String& value, Object* target, Object* root) {
+		target->SetName(value);
+	}
+
+	void RunIMPMesh(const String& value, Object* target, Object* root) {
+		MeshImporter importer(value);
+		importer.ImportTo(target);
+	}
+
+	void SetRTOAsValue(Object* target, Object* root) {
+
+	}
+
+	void SetRTOAsObject(Object* target, Object* root) {
+		xmlFieldLocalStorage.field->Set(root, target);
+	}
+
+	void SetRTOAsElement(Object* target, Object* root) {
+		IArray* type = dynamic_cast<IArray*>(xmlFieldLocalStorage.field->GetType());
+		type->SetValue(xmlFieldLocalStorage.field->Get(root), xmlFieldLocalStorage.offset, target);
+	}
+
+	//Map<String, std::function<void(const String&, Object**)>> xmlImportingMap = {
+	//	XML_IMPORTING_PAIR(Mesh, MeshImport),
+	//	XML_IMPORTING_PAIR(Texture2D, TextureImport)
+	//};
 
 	Map<String, std::function<void(const String&, Object*, Object*)>> xmlAttributeMap = {
-		{ "field", RunRTOField },
-		{ "name", RunRTOName }
+		{ "rto:field", RunRTOField },
+		{ "rto:fieldId", RunRTOFieldId },
+		{ "rto:name", RunRTOName },
+		{ "imp:mesh", RunIMPMesh }
+	};
+
+	Array<std::function<void(Object*, Object*)>> xmlSetterArray = {
+		SetRTOAsValue,
+		SetRTOAsObject,
+		SetRTOAsElement
 	};
 
 	Object* ConvertXmlNodeToObject(rapidxml::xml_node<>* node) {
@@ -68,19 +103,12 @@ namespace Engine {
 	}
 
 	void DeserializeXmlAttribues(rapidxml::xml_attribute<>* xmlAttr, Object* rtoRoot, Object* rtoTarget) {
+		xmlFieldLocalStorage.field = nullptr;
 		for (rapidxml::xml_attribute<>* attr = xmlAttr; attr != nullptr; attr = attr->next_attribute()) {
-			String attrNamespace;
-			String attrName;
-
-			std::stringstream ss(attr->name());
-			std::getline(ss, attrNamespace, ':');
-			std::getline(ss, attrName, ':');
-
-			if (attrNamespace == "rto") {
-				xmlAttributeMap[attrName](attr->value(), rtoTarget, rtoRoot);
-			} else if (attrNamespace == "imp") {
-
-			}
+			xmlAttributeMap[attr->name()](attr->value(), rtoTarget, rtoRoot);
+		}
+		if (xmlFieldLocalStorage.field != nullptr) {
+			xmlSetterArray[static_cast<Int32>(xmlFieldLocalStorage.field->GetType()->GetType())](rtoTarget, rtoRoot);
 		}
 	}
 

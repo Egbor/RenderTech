@@ -10,14 +10,12 @@
       
 			<Mesh 
         rto:field="mesh" 
-        imp:mesh="assets/model/model.obj">
+        imp:mesh="/assets/model/model.obj">
         
-        <!--<Material rto:id="0" rto:field="materials" imp:material="assets/material/material.xml"/>-->
+        <Material rto:field="materials" rto:filedId="0" imp:material="/assets/material/material.mtl"/>
         
 			</Mesh>
       
     </MeshComponent>
-  
-    <TestComponent/>
   
 </ChangeableSolidObject>
