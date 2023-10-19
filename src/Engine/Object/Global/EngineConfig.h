@@ -1,7 +1,7 @@
 #ifndef ENGINECONFIG_H
 #define ENGINECONFIG_H
 
-#include "Engine/Core/Render/Api/Context.h"
+#include "Engine/Core/Render/Api/Interface/IContext.h"
 #include "Engine/Core/Render/Gui/GuiContext.h"
 #include "Engine/Core/System/Input/Input.h"
 
@@ -11,12 +11,12 @@ namespace Engine {
         EngineConfig();
         virtual ~EngineConfig() = default;
 
-        Context* m_context;
+        IContext* m_context;
         GuiContext* m_devguiContext;
         Input* m_input;
 
     public:
-        Context* GetContext() const;
+        IContext* GetContext() const;
         GuiContext* GetGuiContext() const;
         Input* GetInput() const;
 

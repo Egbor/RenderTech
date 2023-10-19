@@ -25,4 +25,29 @@ constexpr D3D11_INPUT_ELEMENT_DESC D3D11InputDesc[] = {
     { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT   , 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 };
 
+constexpr static UINT GetD3D11FormatSizeOf(DXGI_FORMAT format) {
+    switch (format) {
+    case DXGI_FORMAT_R32G32B32A32_FLOAT:
+        return 16;
+    case DXGI_FORMAT_R32_SINT:
+    case DXGI_FORMAT_R32_UINT:
+    case DXGI_FORMAT_R32_FLOAT:
+    case DXGI_FORMAT_R24G8_TYPELESS:
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
+    case DXGI_FORMAT_B8G8R8A8_UNORM:
+    case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+    case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+        return 4;
+    case DXGI_FORMAT_R16_SINT:
+    case DXGI_FORMAT_R16_UINT:
+    case DXGI_FORMAT_R8G8_UNORM:
+        return 2;
+    case DXGI_FORMAT_R8_UNORM:
+        return 1;
+    default:
+        break;
+    }
+    return 0;
+}
+
 #endif // DX11DEF_H

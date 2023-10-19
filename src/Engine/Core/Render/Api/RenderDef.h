@@ -94,6 +94,13 @@ namespace Engine {
         TS_ORM          = 3
     };
 
+    enum class TextureType {
+        TT_DEFAULT          = 0,
+        TT_CUBE             = 1,
+        TT_DEPTH            = 3,
+        TT_DEPTH_CUBE       = 4
+    };
+
     enum class TextureFormat {
         TF_R8_BMP,
         TF_R8G8_BMP,
@@ -108,7 +115,18 @@ namespace Engine {
         TF_R32_FLOAT,
         TF_R32G32B32A32_FLOAT,
         TF_R24G8_BMP,
+        TF_R24_BMP_G8_UINT,
         TF_UNKNOWN
+    };
+
+    union ClearArg {
+        Float rgba[4];
+        struct {
+            Float depth;
+            Int32 stencil;
+            bool clearDepth;
+            bool clearStencil;
+        } ds;
     };
 
     struct TextureInfo {

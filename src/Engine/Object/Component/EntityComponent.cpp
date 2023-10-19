@@ -8,6 +8,10 @@ namespace Engine {
         : Super(argument), m_register(nullptr), m_behaviorID(0) {
     }
 
+    void EntityComponent::CreateRenderState(IRenderPass* pass) {
+
+    }
+
     HandlerPtr& EntityComponent::GetHandler() {
         return m_register;
     }

@@ -5,6 +5,19 @@
 #include "Engine/Core/Render/Api/DX11/DX11Texture.h"
 
 namespace Engine {
+    class DX11TargetResourceData : ITargetResourceData {
+    public:
+        DX11TargetResourceData(ComPtr<ID3D11Device> d3dDevice, DX11Texture2DResourceData* data);
+        virtual ~DX11TargetResourceData() = default;
+
+        void Clear() override;
+
+        ComPtr<ID3D11View> GetD3D11View() const;
+
+    private:
+        ComPtr<ID3D11View> m_d3dView;
+    };
+
     CLASSTYPE(DX11Target)
     class DX11Target : public Target {
         GENERATE_BODY(DX11Target, Target);

@@ -1,21 +1,23 @@
 #include "Engine/Object/Class/Texture.h"
-#include "Engine/Core/System/Exception/EngineException.h"
-
-#include <algorithm>
+#include "Engine/Object/Global/EngineConfig.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(Texture)
 
     Texture::Texture(const ObjectArgument& argument)
-        : Super(argument) {
-    }
-
-    String Texture::GetTag() const {
-        throw EngineException("[Texture] Texture::GetTag() is abstract method without any features");
+        : Super(argument), m_nativeTexture(nullptr) {
     }
 
     TextureFormat Texture::GetFormat() const {
-        throw EngineException("[Texture] Texture::GetFormat() is abstract method without any features");
+        return m_nativeTexture->GetFormat();
+    }
+
+    Int32 Texture::GetWidth() const {
+        return m_nativeTexture->GetWidth();
+    }
+
+    Int32 Texture::GetHeight() const {
+        return m_nativeTexture->GetHeight();
     }
 
     GENERATE_INSTANTIATION(Texture2D)
@@ -25,30 +27,20 @@ namespace Engine {
 
     }
 
-    void Texture2D::Resize(Int32 height, Int32 width, TextureFormat format) {
-        throw EngineException("[Texture2D] Texture2D::Resize() is abstract method without any features");
+    void Texture2D::Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData) {
+        IRenderResourceFactory* factory = EngineConfig::GetInstance().GetContext()->QueryResourceFactory();
+        m_nativeTexture = factory->CreateTexture(TextureType::TT_DEFAULT, format, width, height, rawData);
     }
 
-    Int32 Texture2D::GetWidth() const {
-        throw EngineException("[Texture2D] Texture2D::GetWidth() is abstract method without any features");
-    }
+    GENERATE_INSTANTIATION(TextureCube)
 
-    Int32 Texture2D::GetHeight() const {
-        throw EngineException("[Texture2D] Texture2D::GetHeight() is abstract method without any features");
-    }
-
-    GENERATE_INSTANTIATION(CubeTexture2D)
-
-    CubeTexture2D::CubeTexture2D(const ObjectArgument& argument)
-        : Super(argument), m_faceId(0) {
+    TextureCube::TextureCube(const ObjectArgument& argument)
+        : Super(argument) {
 
     }
 
-    void CubeTexture2D::SetFaceId(Int32 id) {
-        m_faceId = std::clamp(id, 0, 5);
-    }
-
-    Int32 CubeTexture2D::GetFaceId() const {
-        return m_faceId;
+    void TextureCube::Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData) {
+        IRenderResourceFactory* factory = EngineConfig::GetInstance().GetContext()->QueryResourceFactory();
+        m_nativeTexture = factory->CreateTexture(TextureType::TT_CUBE, format, width, height, rawData);
     }
 }

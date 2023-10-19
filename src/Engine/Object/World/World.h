@@ -7,6 +7,8 @@
 #include "Engine/Object/Entity/Entity.h"
 #include "Engine/Object/EntityController/EntityController.h"
 
+#include "Engine/Core/System/Exception/EngineException.h"
+
 namespace Engine {
     CLASSTYPE(World)
     class World : public Object {

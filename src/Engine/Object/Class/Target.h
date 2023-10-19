@@ -2,6 +2,7 @@
 #define TARGET_H
 
 #include "Engine/Object/Class/Texture.h"
+#include "Engine/Core/Render/Api/Interface/ITargetResource.h"
 
 namespace Engine {
     struct TargetClear {

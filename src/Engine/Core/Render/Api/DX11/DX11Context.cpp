@@ -152,58 +152,90 @@ namespace Engine {
         return newTexture;
     }
 
-    DX11ContextFactory::DX11ContextFactory() {
-        InitializeRenderBinderFactory();
-        InitializeCubeTexture2DFactory();
-        InitializeRenderStateFactory();
-        InitializeTexture2DFactory();
-        InitializeBufferFactory();
-        InitializeShaderFactory();
-        InitializeTargetFactory();
+    IRenderResourceFactory* DX11Context::QueryResourceFactory() {
+        return dynamic_cast<IRenderResourceFactory*>(this);
     }
 
-    void DX11ContextFactory::InitializeRenderBinderFactory() {
-        binderFactory.Register(tagREALTIME_BUFFER_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11BufferBinder, DX11Context*>());
-        binderFactory.Register(tagREALTIME_SHADER_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11ShaderBinder, DX11Context*>());
-        binderFactory.Register(tagREALTIME_TARGET_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11RenderTargetBinder, DX11Context*>());
-        binderFactory.Register(tagREALTIME_TEXTURE_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11TextureBinder, DX11Context*>());
-        binderFactory.Register(tagREALTIME_VIEWPORT_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11ViewportBinder, DX11Context*>());
-        binderFactory.Register(tagREALTIME_DYNAMIC_BUFFER_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11DynamicBufferBinder, DX11Context*>());
+    IRenderPipeline* DX11Context::QueryPipeline() {
+        return dynamic_cast<IRenderPipeline*>(this);
     }
 
-    void DX11ContextFactory::InitializeCubeTexture2DFactory() {
-        cubeTexture2DFactory.Register(tagCubeTexture, new DefaultCreatorWith1Args<CubeTexture2D, DX11ResourceCubeTexture2D, ObjectArgument>());
-        cubeTexture2DFactory.Register(tagCubeMapTargetTexture, new DefaultCreatorWith1Args<CubeTexture2D, DX11OutputCubeTexture2D, ObjectArgument>());
+    ITextureResourceData* DX11Context::CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
+        return m_staticTextureFactory.Create(type, m_d3dDevice, format, width, height, data);
     }
 
-    void DX11ContextFactory::InitializeRenderStateFactory() {
-        stateFactory.Register(tagREALTIME_RASTERIZER_STATE, new DefaultCreatorWith1Args<RenderState, DX11RasterizerState, DX11Context*>());
-        stateFactory.Register(tagREALTIME_SAMPLER_STATE, new DefaultCreatorWith1Args<RenderState, DX11SamplerState, DX11Context*>());
-        stateFactory.Register(tagREALTIME_DEPTHSTENCIL_STATE, new DefaultCreatorWith1Args<RenderState, DX11DepthStencilState, DX11Context*>());
-        stateFactory.Register(tagREALTIME_BLEND_STATE, new DefaultCreatorWith1Args<RenderState, DX11BlendState, DX11Context*>());
+    ITextureResourceData* DX11Context::CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height) {
+        return m_renderTextureFactory.Create(type, m_d3dDevice, format, width, height);
     }
 
-    void DX11ContextFactory::InitializeBufferFactory() {
-        bufferFactory.Register(tagREALTIME_BUFFER_VERTEX, new DefaultCreatorWith1Args<Buffer, DX11VertexBuffer, ObjectArgument>());
-        bufferFactory.Register(tagREALTIME_BUFFER_INDEX, new DefaultCreatorWith1Args<Buffer, DX11IndexBuffer, ObjectArgument>());
-        bufferFactory.Register(tagREALTIME_BUFFER_VS_CONST_BUFFER, new DefaultCreatorWith1Args<Buffer, DX11VSConstBuffer, ObjectArgument>());
-        bufferFactory.Register(tagREALTIME_BUFFER_PS_CONST_BUFFER, new DefaultCreatorWith1Args<Buffer, DX11PSConstBuffer, ObjectArgument>());
+    void DX11Context::RegisterTextureFactory() {
+        m_staticTextureFactory.Register(TextureType::TT_DEFAULT, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
+            return new DX11Texture2DResourceData(d3dDevice, format, width, height, data[0]); });
+        m_staticTextureFactory.Register(TextureType::TT_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
+            return new DX11Texture2DResourceData(d3dDevice, format, width, height, data); });
+
+        m_renderTextureFactory.Register(TextureType::TT_DEFAULT, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11TextureRenderResourceData(d3dDevice, format, width, height, false); });
+        m_renderTextureFactory.Register(TextureType::TT_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11TextureRenderResourceData(d3dDevice, format, width, height, true); });
+        m_renderTextureFactory.Register(TextureType::TT_DEPTH, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11DepthStencilResourceData(d3dDevice, format, width, height, false); });
+        m_renderTextureFactory.Register(TextureType::TT_DEPTH_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11DepthStencilResourceData(d3dDevice, format, width, height, true); });
     }
 
-    void DX11ContextFactory::InitializeShaderFactory() {
-        shaderFactory.Register(tagREALTIME_SHADER_VERTEX, new DefaultCreatorWith1Args<Shader, DX11VertexShader, ObjectArgument>());
-        shaderFactory.Register(tagREALTIME_SHADER_FRAGMENT, new DefaultCreatorWith1Args<Shader, DX11PixelShader, ObjectArgument>());
-    }
+    //DX11ContextFactory::DX11ContextFactory() {
+    //    InitializeRenderBinderFactory();
+    //    InitializeCubeTexture2DFactory();
+    //    InitializeRenderStateFactory();
+    //    InitializeTexture2DFactory();
+    //    InitializeBufferFactory();
+    //    InitializeShaderFactory();
+    //    InitializeTargetFactory();
+    //}
 
-    void DX11ContextFactory::InitializeTexture2DFactory() {
-        texture2DFactory.Register(tagTexture, new DefaultCreatorWith1Args<Texture2D, DX11ResourceTexture2D, ObjectArgument>());
-        texture2DFactory.Register(tagTargetTexture, new DefaultCreatorWith1Args<Texture2D, DX11OutputTexture2D, ObjectArgument>());
-        texture2DFactory.Register(tagDepthStencilTargetTexture, new DefaultCreatorWith1Args<Texture2D, DX11OutputDepthStencilTexture2D, ObjectArgument>());
-    }
+    //void DX11ContextFactory::InitializeRenderBinderFactory() {
+    //    binderFactory.Register(tagREALTIME_BUFFER_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11BufferBinder, DX11Context*>());
+    //    binderFactory.Register(tagREALTIME_SHADER_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11ShaderBinder, DX11Context*>());
+    //    binderFactory.Register(tagREALTIME_TARGET_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11RenderTargetBinder, DX11Context*>());
+    //    binderFactory.Register(tagREALTIME_TEXTURE_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11TextureBinder, DX11Context*>());
+    //    binderFactory.Register(tagREALTIME_VIEWPORT_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11ViewportBinder, DX11Context*>());
+    //    binderFactory.Register(tagREALTIME_DYNAMIC_BUFFER_BINDER, new DefaultCreatorWith1Args<RenderBinderBase, DX11DynamicBufferBinder, DX11Context*>());
+    //}
 
-    void DX11ContextFactory::InitializeTargetFactory() {
-        targetFactory.Register(tagTargetTexture, new DefaultCreatorWith1Args<Target, DX11OutputTarget, ObjectArgument>());
-        targetFactory.Register(tagCubeMapTargetTexture, new DefaultCreatorWith1Args<Target, DX11OutputCubeTarget, ObjectArgument>());
-        targetFactory.Register(tagDepthStencilTargetTexture, new DefaultCreatorWith1Args<Target, DX11DepthStencilTarget, ObjectArgument>());
-    }
+    //void DX11ContextFactory::InitializeCubeTexture2DFactory() {
+    //    cubeTexture2DFactory.Register(tagCubeTexture, new DefaultCreatorWith1Args<CubeTexture2D, DX11ResourceCubeTexture2D, ObjectArgument>());
+    //    cubeTexture2DFactory.Register(tagCubeMapTargetTexture, new DefaultCreatorWith1Args<CubeTexture2D, DX11OutputCubeTexture2D, ObjectArgument>());
+    //}
+
+    //void DX11ContextFactory::InitializeRenderStateFactory() {
+    //    stateFactory.Register(tagREALTIME_RASTERIZER_STATE, new DefaultCreatorWith1Args<RenderState, DX11RasterizerState, DX11Context*>());
+    //    stateFactory.Register(tagREALTIME_SAMPLER_STATE, new DefaultCreatorWith1Args<RenderState, DX11SamplerState, DX11Context*>());
+    //    stateFactory.Register(tagREALTIME_DEPTHSTENCIL_STATE, new DefaultCreatorWith1Args<RenderState, DX11DepthStencilState, DX11Context*>());
+    //    stateFactory.Register(tagREALTIME_BLEND_STATE, new DefaultCreatorWith1Args<RenderState, DX11BlendState, DX11Context*>());
+    //}
+
+    //void DX11ContextFactory::InitializeBufferFactory() {
+    //    bufferFactory.Register(tagREALTIME_BUFFER_VERTEX, new DefaultCreatorWith1Args<Buffer, DX11VertexBuffer, ObjectArgument>());
+    //    bufferFactory.Register(tagREALTIME_BUFFER_INDEX, new DefaultCreatorWith1Args<Buffer, DX11IndexBuffer, ObjectArgument>());
+    //    bufferFactory.Register(tagREALTIME_BUFFER_VS_CONST_BUFFER, new DefaultCreatorWith1Args<Buffer, DX11VSConstBuffer, ObjectArgument>());
+    //    bufferFactory.Register(tagREALTIME_BUFFER_PS_CONST_BUFFER, new DefaultCreatorWith1Args<Buffer, DX11PSConstBuffer, ObjectArgument>());
+    //}
+
+    //void DX11ContextFactory::InitializeShaderFactory() {
+    //    shaderFactory.Register(tagREALTIME_SHADER_VERTEX, new DefaultCreatorWith1Args<Shader, DX11VertexShader, ObjectArgument>());
+    //    shaderFactory.Register(tagREALTIME_SHADER_FRAGMENT, new DefaultCreatorWith1Args<Shader, DX11PixelShader, ObjectArgument>());
+    //}
+
+    //void DX11ContextFactory::InitializeTexture2DFactory() {
+    //    texture2DFactory.Register(tagTexture, new DefaultCreatorWith1Args<Texture2D, DX11ResourceTexture2D, ObjectArgument>());
+    //    texture2DFactory.Register(tagTargetTexture, new DefaultCreatorWith1Args<Texture2D, DX11OutputTexture2D, ObjectArgument>());
+    //    texture2DFactory.Register(tagDepthStencilTargetTexture, new DefaultCreatorWith1Args<Texture2D, DX11OutputDepthStencilTexture2D, ObjectArgument>());
+    //}
+
+    //void DX11ContextFactory::InitializeTargetFactory() {
+    //    targetFactory.Register(tagTargetTexture, new DefaultCreatorWith1Args<Target, DX11OutputTarget, ObjectArgument>());
+    //    targetFactory.Register(tagCubeMapTargetTexture, new DefaultCreatorWith1Args<Target, DX11OutputCubeTarget, ObjectArgument>());
+    //    targetFactory.Register(tagDepthStencilTargetTexture, new DefaultCreatorWith1Args<Target, DX11DepthStencilTarget, ObjectArgument>());
+    //}
 }

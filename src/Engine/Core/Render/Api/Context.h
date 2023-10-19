@@ -15,7 +15,6 @@ namespace Engine {
     class Context {
     public:
         Context() = default;
-        Context(const Context&) = default;
         virtual ~Context() = default;
 
         virtual void DebugReport() = 0;

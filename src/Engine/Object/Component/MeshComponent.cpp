@@ -1,6 +1,5 @@
 #include "Engine/Object/Component/MeshComponent.h"
-
-#include "Engine/Core/System/Import/MeshImport.h"
+#include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(MeshComponent)
@@ -19,5 +18,12 @@ namespace Engine {
 
     UInt64 MeshComponent::GetBehaviorID() const {
         return MeshComponent::TypeIdClass();
+    }
+
+    void MeshComponent::CreateRenderState(IRenderPass* pass) {
+        if (pass->Is(RenderPassType::RP_BASE)) {
+            BaseRenderPass* baseRenderPass = dynamic_cast<BaseRenderPass*>(pass);
+
+        }
     }
 }

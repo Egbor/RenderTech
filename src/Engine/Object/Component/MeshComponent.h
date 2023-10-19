@@ -23,6 +23,8 @@ namespace Engine {
 
     protected:
         virtual UInt64 GetBehaviorID() const override;
+
+        void CreateRenderState(IRenderPass* pass) override;
     };
 }
 

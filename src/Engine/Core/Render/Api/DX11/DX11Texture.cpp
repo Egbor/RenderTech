@@ -1,23 +1,8 @@
 #include "Engine/Core/Render/Api/DX11/DX11Texture.h"
+#include "Engine/Core/Render/Api/DX11/DX11Context.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    DXGI_FORMAT gFormatTable[] = {
-        DXGI_FORMAT_R8_UNORM,
-        DXGI_FORMAT_R8G8_UNORM,
-        DXGI_FORMAT_R8G8B8A8_UNORM,
-        DXGI_FORMAT_B8G8R8A8_UNORM,
-        DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-        DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,
-        DXGI_FORMAT_R16_SINT,
-        DXGI_FORMAT_R32_SINT,
-        DXGI_FORMAT_R16_UINT,
-        DXGI_FORMAT_R32_UINT,
-        DXGI_FORMAT_R32_FLOAT,
-        DXGI_FORMAT_R32G32B32A32_FLOAT,
-        DXGI_FORMAT_R24G8_TYPELESS
-    };
-
     constexpr static TextureFormat ToTextureFormat(DXGI_FORMAT format) {
         switch (format) {
         case DXGI_FORMAT_R32G32B32A32_FLOAT:
@@ -52,361 +37,245 @@ namespace Engine {
         return TextureFormat::TF_UNKNOWN;
     }
 
-    constexpr static Int32 ToByteWidth(DXGI_FORMAT format) {
-        switch (format) {
-        case DXGI_FORMAT_R32G32B32A32_FLOAT:
-            return 16;
-        case DXGI_FORMAT_R32_SINT:
-        case DXGI_FORMAT_R32_UINT:
-        case DXGI_FORMAT_R32_FLOAT:
-        case DXGI_FORMAT_R24G8_TYPELESS:
-        case DXGI_FORMAT_R8G8B8A8_UNORM:
-        case DXGI_FORMAT_B8G8R8A8_UNORM:
-        case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
-        case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
-            return 4;
-        case DXGI_FORMAT_R16_SINT:
-        case DXGI_FORMAT_R16_UINT:
-        case DXGI_FORMAT_R8G8_UNORM:
-            return 2;
-        case DXGI_FORMAT_R8_UNORM:
-            return 1;
-        default:
+    void InitializeDimentionForD3D11RenderTarget2DDesc(D3D11_RTV_DIMENSION d3dDimension, UINT firstSlice, D3D11_RENDER_TARGET_VIEW_DESC* d3dOutRenderTargetViewDesc) {
+        switch (d3dDimension) {
+        case D3D11_RTV_DIMENSION_TEXTURE2D: {
+            d3dOutRenderTargetViewDesc->Texture2D.MipSlice = 0;
             break;
         }
-        return 0;
+        case D3D11_RTV_DIMENSION_TEXTURE2DARRAY: {
+            d3dOutRenderTargetViewDesc->Texture2DArray.MipSlice = 0;
+            d3dOutRenderTargetViewDesc->Texture2DArray.ArraySize = 1;
+            d3dOutRenderTargetViewDesc->Texture2DArray.FirstArraySlice = firstSlice;
+            break;
+        }
+        }
     }
 
-    constexpr static void InitializeD3D11Texture2DDescByDefault(D3D11_TEXTURE2D_DESC& desc) {
-        desc.Width = 0;
-        desc.Height = 0;
-        desc.MipLevels = 1;
-        desc.ArraySize = 1;
-        desc.Format = DXGI_FORMAT_UNKNOWN;
-        desc.SampleDesc.Count = 1;
-        desc.SampleDesc.Quality = 0;
-        desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.BindFlags = 0;
-        desc.CPUAccessFlags = 0;
-        desc.MiscFlags = 0;
+    void InitializeDimentionForD3D11DepthStencilDesc(D3D11_DSV_DIMENSION d3dDimension, UINT firstSlice, D3D11_DEPTH_STENCIL_VIEW_DESC* d3dOutDepthStencilViewDesc) {
+        switch (d3dDimension) {
+        case D3D11_DSV_DIMENSION_TEXTURE2D: {
+            d3dOutDepthStencilViewDesc->Texture2D.MipSlice = 0;
+            break;
+        }
+        case D3D11_DSV_DIMENSION_TEXTURE2DARRAY: {
+            d3dOutDepthStencilViewDesc->Texture2DArray.MipSlice = 0;
+            d3dOutDepthStencilViewDesc->Texture2DArray.ArraySize = 1;
+            d3dOutDepthStencilViewDesc->Texture2DArray.FirstArraySlice = firstSlice;
+            break;
+        }
+        }
     }
 
-    DXGI_FORMAT DX11Texture2DData::GetD3D11Format() const {
+    Map<TextureFormat, DXGI_FORMAT> d3dFormatTable = {
+        { TextureFormat::TF_R8_BMP, DXGI_FORMAT_R8_UNORM },
+        { TextureFormat::TF_R8G8_BMP, DXGI_FORMAT_R8G8_UNORM },
+        { TextureFormat::TF_R8G8B8A8_BMP, DXGI_FORMAT_R8G8B8A8_UNORM },
+        { TextureFormat::TF_B8G8R8A8_BMP, DXGI_FORMAT_B8G8R8A8_UNORM },
+        { TextureFormat::TF_R8G8B8A8_BMP_sRGB, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
+        { TextureFormat::TF_B8G8R8A8_BMP_sRGB, DXGI_FORMAT_B8G8R8A8_UNORM_SRGB },
+        { TextureFormat::TF_R16_INT, DXGI_FORMAT_R16_SINT },
+        { TextureFormat::TF_R32_INT, DXGI_FORMAT_R32_SINT },
+        { TextureFormat::TF_R16_UINT, DXGI_FORMAT_R16_UINT },
+        { TextureFormat::TF_R32_UINT, DXGI_FORMAT_R32_UINT },
+        { TextureFormat::TF_R32_FLOAT, DXGI_FORMAT_R32_FLOAT },
+        { TextureFormat::TF_R32G32B32A32_FLOAT, DXGI_FORMAT_R32G32B32A32_FLOAT },
+        { TextureFormat::TF_R24G8_BMP, DXGI_FORMAT_R24G8_TYPELESS },
+        { TextureFormat::TF_R24_BMP_G8_UINT, DXGI_FORMAT_D24_UNORM_S8_UINT }
+    };
+
+    DX11Texture2DDescription::DX11Texture2DDescription(Int32 width, Int32 height, TextureFormat format) {
+        m_d3dTexture2DDesc.Width = static_cast<UINT>(width);
+        m_d3dTexture2DDesc.Height = static_cast<UINT>(height);
+        m_d3dTexture2DDesc.Format = d3dFormatTable[format];
+        m_d3dTexture2DDesc.MipLevels = 1;
+        m_d3dTexture2DDesc.SampleDesc.Count = 1;
+        m_d3dTexture2DDesc.SampleDesc.Quality = 0;
+        m_d3dTexture2DDesc.Usage = D3D11_USAGE_DEFAULT;
+        m_d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        m_d3dTexture2DDesc.CPUAccessFlags = 0;
+        m_d3dTexture2DDesc.ArraySize = 0;
+        m_d3dTexture2DDesc.MiscFlags = 1;
+    }
+
+    void DX11Texture2DDescription::AddD3D11BindFlags(D3D11_BIND_FLAG d3dBindFlags) {
+        m_d3dTexture2DDesc.BindFlags |= d3dBindFlags;
+    }
+
+    void DX11Texture2DDescription::AddD3D11CubemapPreset() {
+        m_d3dTexture2DDesc.ArraySize = 6;
+        m_d3dTexture2DDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+    }
+
+    void DX11Texture2DDescription::RemoveD3D11BindFlags(D3D11_BIND_FLAG d3dBindFlags) {
+        m_d3dTexture2DDesc.BindFlags &= ~d3dBindFlags;
+    }
+    
+    void DX11Texture2DDescription::RemoveD3D11CubemapPreset() {
+        m_d3dTexture2DDesc.ArraySize = 0;
+        m_d3dTexture2DDesc.MiscFlags = 1;
+    }
+
+    const D3D11_TEXTURE2D_DESC* DX11Texture2DDescription::GetD3D11Texture2DDesc() const {
+        return &m_d3dTexture2DDesc;
+    }
+
+    DX11Texture2DSubresourceData::DX11Texture2DSubresourceData(Int32 stride, TextureFormat format, Int8* data) 
+        : m_d3dSubresourceData(1) {
+        m_d3dSubresourceData[0].pSysMem = data;
+        m_d3dSubresourceData[0].SysMemPitch = static_cast<UINT>(stride) * GetD3D11FormatSizeOf(d3dFormatTable[format]);
+        m_d3dSubresourceData[0].SysMemSlicePitch = 0;
+    }
+
+    DX11Texture2DSubresourceData::DX11Texture2DSubresourceData(Int32 stride, TextureFormat format, Array<Int8*> data) 
+        : m_d3dSubresourceData(data.size()) {
+        for (Size i = 0; i < m_d3dSubresourceData.size(); i++) {
+            m_d3dSubresourceData[i].pSysMem = data[i];
+            m_d3dSubresourceData[i].SysMemPitch = static_cast<UINT>(stride) * GetD3D11FormatSizeOf(d3dFormatTable[format]);
+            m_d3dSubresourceData[i].SysMemSlicePitch = 0;
+        }
+    }
+
+    const D3D11_SUBRESOURCE_DATA* DX11Texture2DSubresourceData::GetD3D11SubresourceData() const {
+        return m_d3dSubresourceData.data();
+    }
+
+    DX11TextureCommonResourceData::DX11TextureCommonResourceData() 
+        : m_d3dTexture2D(nullptr) {
+
+    }
+
+    TextureFormat DX11TextureCommonResourceData::GetFormat() const {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
         m_d3dTexture2D->GetDesc(&d3dTexture2DDesc);
-        return d3dTexture2DDesc.Format;
+        return ToTextureFormat(d3dTexture2DDesc.Format);
     }
 
-    UINT DX11Texture2DData::GetWidth() const {
+    Int32 DX11TextureCommonResourceData::GetWidth() const {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
         m_d3dTexture2D->GetDesc(&d3dTexture2DDesc);
-        return d3dTexture2DDesc.Width;
+        return static_cast<Int32>(d3dTexture2DDesc.Width);
     }
 
-    UINT DX11Texture2DData::GetHeight() const {
+    Int32 DX11TextureCommonResourceData::GetHeight() const {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
         m_d3dTexture2D->GetDesc(&d3dTexture2DDesc);
-        return d3dTexture2DDesc.Height;
+        return static_cast<Int32>(d3dTexture2DDesc.Height);
     }
 
-    void DX11Texture2DData::ReadBits(ComPtr<ID3D11Device> d3dDevice,
-                                     ComPtr<ID3D11DeviceContext> d3dContext,
-                                     UInt32 resourceId, Int8* bits, Size size) const {
+    bool DX11TextureCommonResourceData::IsCubemap() const {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
-        InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = GetWidth();
-        d3dTexture2DDesc.Height = GetHeight();
-        d3dTexture2DDesc.Format = GetD3D11Format();
-        d3dTexture2DDesc.Usage = D3D11_USAGE_STAGING;
-        d3dTexture2DDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-
-        ComPtr<ID3D11Texture2D> temp = CreateD3D11Texture2D(d3dDevice, &d3dTexture2DDesc, nullptr);
-        d3dContext->CopySubresourceRegion(temp.Get(), 0, 0, 0, 0, m_d3dTexture2D.Get(), resourceId, nullptr);
-
-        D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
-        d3dContext->Map(temp.Get(), 0, D3D11_MAP_READ, 0, &d3dMappedResource);
-        memcpy(bits, d3dMappedResource.pData, size);
+        m_d3dTexture2D->GetDesc(&d3dTexture2DDesc);
+        return d3dTexture2DDesc.MiscFlags == D3D11_RESOURCE_MISC_TEXTURECUBE;
     }
 
-    ComPtr<ID3D11Device> DX11Texture2DData::GetD3D11Device() const {
-        ComPtr<ID3D11Device> d3dDevice;
-        m_d3dTexture2D->GetDevice(&d3dDevice);
-        return d3dDevice;
-    }
-
-    ComPtr<ID3D11Texture2D> DX11Texture2DData::GetD3D11Texture2D() const {
+    ComPtr<ID3D11Texture2D> DX11TextureCommonResourceData::GetD3D11Texture2D() const {
         return m_d3dTexture2D;
     }
 
-    void DX11Texture2DData::Initialize(ComPtr<ID3D11Texture2D> d3dTexture) {
+    void DX11TextureCommonResourceData::CreateD3D11Texture2D(ComPtr<ID3D11Texture2D> d3dTexture) {
         m_d3dTexture2D = d3dTexture;
     }
 
-    void DX11Texture2DData::Initialize(ComPtr<ID3D11Device> d3dDevice,
-                                       D3D11_TEXTURE2D_DESC* d3dTexture2DDesc,
-                                       D3D11_SUBRESOURCE_DATA* d3dSubresourceData) {
-        Initialize(CreateD3D11Texture2D(d3dDevice, d3dTexture2DDesc, d3dSubresourceData));
-    }
-
-    ComPtr<ID3D11Texture2D> DX11Texture2DData::CreateD3D11Texture2D(ComPtr<ID3D11Device> d3dDevice,
-                                                                    D3D11_TEXTURE2D_DESC* d3dTexture2DDesc,
-                                                                    D3D11_SUBRESOURCE_DATA* d3dSubresourceData) {
-        ComPtr<ID3D11Texture2D> d3dTexture2D;
-
+    void DX11TextureCommonResourceData::CreateD3D11Texture2D(ComPtr<ID3D11Device> d3dDevice, const DX11Texture2DDescription* texture2DDesc) {
         HRESULT hr = 0;
-        if (FAILED(hr = d3dDevice->CreateTexture2D(d3dTexture2DDesc, d3dSubresourceData, &d3dTexture2D))) {
-            throw EngineException("[DX11Texture2DData] ID3DDevice::CreateTexture2D() failed");
+        if (FAILED(hr = d3dDevice->CreateTexture2D(texture2DDesc->GetD3D11Texture2DDesc(), nullptr, &m_d3dTexture2D))) {
+            throw EngineException("[DX11TextureCommonResourceData] DX11Texture2DResourceData::DX11Texture2DResourceData() failed");
         }
-        return d3dTexture2D;
     }
 
-    //GENERATE_RTTI_DEFINITIONS(DX11Texture2D)
-    GENERATE_INSTANTIATION(DX11Texture2D)
-
-    DX11Texture2D::DX11Texture2D(const ObjectArgument& argument)
-        : Super(argument), m_dxTexture2DWrapper() {
-
+    void DX11TextureCommonResourceData::CreateD3D11Texture2D(ComPtr<ID3D11Device> d3dDevice, const DX11Texture2DDescription* texture2DDesc, const DX11Texture2DSubresourceData* data) {
+        HRESULT hr = 0;
+        if (FAILED(hr = d3dDevice->CreateTexture2D(texture2DDesc->GetD3D11Texture2DDesc(), data->GetD3D11SubresourceData(), &m_d3dTexture2D))) {
+            throw EngineException("[DX11TextureCommonResourceData] DX11Texture2DResourceData::DX11Texture2DResourceData() failed");
+        }
     }
 
-    Int32 DX11Texture2D::GetWidth() const {
-        return static_cast<Int32>(m_dxTexture2DWrapper.GetWidth());
+    DX11Texture2DResourceData::DX11Texture2DResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Int8* data) {
+        DX11Texture2DDescription textureDesc(width, height, format);
+        DX11Texture2DSubresourceData textureSubresData(width, format, data);
+
+        CreateD3D11Texture2D(d3dDevice, &textureDesc, &textureSubresData);
     }
 
-    Int32 DX11Texture2D::GetHeight() const {
-        return static_cast<Int32>(m_dxTexture2DWrapper.GetHeight());
+    DX11Texture2DResourceData::DX11Texture2DResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
+        DX11Texture2DDescription textureDesc(width, height, format);
+        DX11Texture2DSubresourceData textureSubresData(width, format, data);
+        textureDesc.AddD3D11CubemapPreset();
+
+        CreateD3D11Texture2D(d3dDevice, &textureDesc, &textureSubresData);
     }
 
-    DX11Texture2DData& DX11Texture2D::Data() {
-        return m_dxTexture2DWrapper;
+    DX11TextureRenderResourceData::DX11TextureRenderResourceData(ComPtr<ID3D11Device> d3dDevice, ComPtr<ID3D11Texture2D> d3dTexture) {
+        CreateD3D11Texture2D(d3dTexture);
+        CreateD3D11RenderTargetViews(d3dDevice, GetFormat());
     }
 
-    TextureFormat DX11Texture2D::GetFormat() const {
-        return ToTextureFormat(m_dxTexture2DWrapper.GetD3D11Format());
-    }
-
-    void DX11Texture2D::GetD3D11ResourceDesc(D3D11_SHADER_RESOURCE_VIEW_DESC& desc) {
-        ZeroMemory(&desc, sizeof(desc));
-        desc.Format = Data().GetD3D11Format();
-        desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-        desc.Texture2D.MipLevels = 1;
-    }
-
-    void DX11Texture2D::Create(DX11Context* context, TextureInfo info) {
-        throw EngineException("[DX11Texture2D] DX11Texture2D::Create() is abstaract method without any features");
-    }
-
-    //GENERATE_RTTI_DEFINITIONS(DX11CubeTexture2D)
-    GENERATE_INSTANTIATION(DX11CubeTexture2D)
-
-    DX11CubeTexture2D::DX11CubeTexture2D(const ObjectArgument& argument)
-        : Super(argument), m_dxTexture2DWrapper() {
-
-    }
-
-    TextureFormat DX11CubeTexture2D::GetFormat() const {
-        return ToTextureFormat(m_dxTexture2DWrapper.GetD3D11Format());
-    }
-
-    Int32 DX11CubeTexture2D::GetWidth() const {
-        return static_cast<Int32>(m_dxTexture2DWrapper.GetWidth());
-    }
-
-    Int32 DX11CubeTexture2D::GetHeight() const {
-        return static_cast<Int32>(m_dxTexture2DWrapper.GetHeight());
-    }
-
-    DX11Texture2DData& DX11CubeTexture2D::Data() {
-        return m_dxTexture2DWrapper;
-    }
-
-    void DX11CubeTexture2D::GetD3D11ResourceDesc(D3D11_SHADER_RESOURCE_VIEW_DESC& desc) {
-        ZeroMemory(&desc, sizeof(desc));
-        desc.Format = Data().GetD3D11Format();
-        desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-        desc.TextureCube.MipLevels = 1;
-    }
-
-    void DX11CubeTexture2D::Create(DX11Context* context, TextureInfo info) {
-        throw EngineException("[DX11Texture2D] DX11Texture2D::Create() is abstaract method without any features");
-    }
-
-    //GENERATE_RTTI_DEFINITIONS(DX11ResourceTexture2D)
-    GENERATE_INSTANTIATION(DX11ResourceTexture2D)
-
-    DX11ResourceTexture2D::DX11ResourceTexture2D(const ObjectArgument& argument)
-        : Super(argument) {
-
-    }
-
-    void DX11ResourceTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
-        // Not implemented
-    }
-
-    String DX11ResourceTexture2D::GetTag() const {
-        return tagTexture;
-    }
-
-    void DX11ResourceTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        ComPtr<ID3D11Device> d3dDevice = context->GetD3D11Device();
-        D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
-        D3D11_SUBRESOURCE_DATA d3dSubresourceData;
-
-        InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(desc.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(desc.height);
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(desc.format)];
-        d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-
-        d3dSubresourceData.pSysMem = desc.data[0];
-        d3dSubresourceData.SysMemPitch = desc.width * ToByteWidth(d3dTexture2DDesc.Format);
-        d3dSubresourceData.SysMemSlicePitch = 0;
-
-        Data().Initialize(d3dDevice, &d3dTexture2DDesc, &d3dSubresourceData);
-    }
-
-    //GENERATE_RTTI_DEFINITIONS(DX11ResourceCubeTexture2D)
-    GENERATE_INSTANTIATION(DX11ResourceCubeTexture2D)
-
-    DX11ResourceCubeTexture2D::DX11ResourceCubeTexture2D(const ObjectArgument& argument)
-        : Super(argument) {
-
-    }
-
-    void DX11ResourceCubeTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
-        // Not implemented
-    }
-
-    String DX11ResourceCubeTexture2D::GetTag() const {
-        return tagCubeTexture;
-    }
-
-    void DX11ResourceCubeTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        ComPtr<ID3D11Device> d3dDevice = context->GetD3D11Device();
-        D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
-        D3D11_SUBRESOURCE_DATA d3dSubresourceData[6];
-
-        InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(desc.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(desc.height);
-        d3dTexture2DDesc.ArraySize = 6;
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(desc.format)];
-        d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        d3dTexture2DDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-        for (Int32 i = 0; i < 6; i++) {
-            d3dSubresourceData[i].pSysMem = desc.data[i];
-            d3dSubresourceData[i].SysMemPitch = desc.width * ToByteWidth(d3dTexture2DDesc.Format);
-            d3dSubresourceData[i].SysMemSlicePitch = 0;
+    DX11TextureRenderResourceData::DX11TextureRenderResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap) {
+        DX11Texture2DDescription textureDesc(width, height, format);
+        textureDesc.AddD3D11BindFlags(D3D11_BIND_RENDER_TARGET);
+        if (isCubemap) {
+            textureDesc.AddD3D11CubemapPreset();
         }
 
-        Data().Initialize(d3dDevice, &d3dTexture2DDesc, d3dSubresourceData);
+        CreateD3D11Texture2D(d3dDevice, &textureDesc);
+        CreateD3D11RenderTargetViews(d3dDevice, format);
     }
 
-    //GENERATE_RTTI_DEFINITIONS(DX11OutputTexture2D)
-    GENERATE_INSTANTIATION(DX11OutputTexture2D)
+    void DX11TextureRenderResourceData::CreateD3D11RenderTargetViews(ComPtr<ID3D11Device> d3dDevice, TextureFormat format) {
+        D3D11_RENDER_TARGET_VIEW_DESC  d3dRenderTargetViewDesc;
+        ZeroMemory(&d3dRenderTargetViewDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
+        d3dRenderTargetViewDesc.Format = d3dFormatTable[format];
 
-    DX11OutputTexture2D::DX11OutputTexture2D(const ObjectArgument& argument)
-        : Super(argument) {
+        if (IsCubemap()) {
+            d3dRenderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+            m_d3dViews.resize(6);
+        } else {
+            d3dRenderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+            m_d3dViews.resize(1);
+        }
 
+        for (Size i = 0; i < m_d3dViews.size(); i++) {
+            InitializeDimentionForD3D11RenderTarget2DDesc(d3dRenderTargetViewDesc.ViewDimension, i, &d3dRenderTargetViewDesc);
+
+            HRESULT hr = 0;
+            if (FAILED(hr = d3dDevice->CreateRenderTargetView(GetD3D11Texture2D().Get(), &d3dRenderTargetViewDesc, &m_d3dViews[i]))) {
+                throw EngineException("[DX11TextureRenderResourceData] ID3D11Device::CreateRenderTargetView() failed");
+            }
+        }
     }
 
-    String DX11OutputTexture2D::GetTag() const {
-        return tagTargetTexture;
+    DX11DepthStencilResourceData::DX11DepthStencilResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap) {
+        DX11Texture2DDescription textureDesc(width, height, format);
+        textureDesc.AddD3D11BindFlags(D3D11_BIND_DEPTH_STENCIL);
+        if (isCubemap) {
+            textureDesc.AddD3D11CubemapPreset();
+        }
+
+        CreateD3D11Texture2D(d3dDevice, &textureDesc);
+        CreateD3D11DepthStencilViews(d3dDevice, format);
     }
 
-    void DX11OutputTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
-        InitializeDX11Texture2DData(Data().GetD3D11Device(), { (UInt32)width, (UInt32)height, format });
-    }
+    void DX11DepthStencilResourceData::CreateD3D11DepthStencilViews(ComPtr<ID3D11Device> d3dDevice, TextureFormat format) {
+        D3D11_DEPTH_STENCIL_VIEW_DESC  d3dDepthStencilViewDesc;
+        ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+        d3dDepthStencilViewDesc.Format = d3dFormatTable[format];
 
-    void DX11OutputTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        InitializeDX11Texture2DData(context->GetD3D11Device(), desc);
-    }
+        if (IsCubemap()) {
+            d3dDepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+            m_d3dViews.resize(6);
+        } else {
+            d3dDepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+            m_d3dViews.resize(1);
+        }
 
-    void DX11OutputTexture2D::InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info) {
-        D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
+        for (Size i = 0; i < m_d3dViews.size(); i++) {
+            InitializeDimentionForD3D11DepthStencilDesc(d3dDepthStencilViewDesc.ViewDimension, i, &d3dDepthStencilViewDesc);
 
-        InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(info.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(info.height);
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(info.format)];
-        d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-
-        Data().Initialize(d3dDevice, &d3dTexture2DDesc, NULL);
-    }
-
-    //GENERATE_RTTI_DEFINITIONS(DX11OutputDepthStencilTexture2D)
-    GENERATE_INSTANTIATION(DX11OutputDepthStencilTexture2D)
-
-    DX11OutputDepthStencilTexture2D::DX11OutputDepthStencilTexture2D(const ObjectArgument& argument)
-        : Super(argument) {
-
-    }
-
-    String DX11OutputDepthStencilTexture2D::GetTag() const {
-        return tagDepthStencilTargetTexture;
-    }
-
-    void DX11OutputDepthStencilTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
-        InitializeDX11Texture2DData(Data().GetD3D11Device(), { (UInt32)width, (UInt32)height, format });
-    }
-
-    void DX11OutputDepthStencilTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        InitializeDX11Texture2DData(context->GetD3D11Device(), desc);
-    }
-
-    void DX11OutputDepthStencilTexture2D::InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info) {
-        D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
-
-        InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(info.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(info.height);
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(info.format)];
-        d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
-
-        Data().Initialize(d3dDevice, &d3dTexture2DDesc, NULL);
-    }
-
-    void DX11OutputDepthStencilTexture2D::GetD3D11ResourceDesc(D3D11_SHADER_RESOURCE_VIEW_DESC& desc) {
-        Super::GetD3D11ResourceDesc(desc);
-        desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-    }
-
-    //GENERATE_RTTI_DEFINITIONS(DX11OutputCubeTexture2D)
-    GENERATE_INSTANTIATION(DX11OutputCubeTexture2D)
-
-    DX11OutputCubeTexture2D::DX11OutputCubeTexture2D(const ObjectArgument& argument)
-        : Super(argument) {
-
-    }
-
-    void DX11OutputCubeTexture2D::ReadBits(DX11Context* context, Int8* bits, Size size) {
-        UInt32 resourceId = D3D11CalcSubresource(0, GetFaceId(), 1);
-        Data().ReadBits(context->GetD3D11Device(), context->GetD3D11Context(), resourceId, bits, size);
-    }
-
-    String DX11OutputCubeTexture2D::GetTag() const {
-        return tagCubeMapTargetTexture;
-    }
-
-    void DX11OutputCubeTexture2D::Resize(Int32 width, Int32 height, TextureFormat format) {
-        InitializeDX11Texture2DData(Data().GetD3D11Device(), { (UInt32)width, (UInt32)height, format });
-    }
-
-    void DX11OutputCubeTexture2D::Create(DX11Context* context, TextureInfo desc) {
-        InitializeDX11Texture2DData(context->GetD3D11Device(), desc);
-    }
-
-    void DX11OutputCubeTexture2D::InitializeDX11Texture2DData(ComPtr<ID3D11Device> d3dDevice, const TextureInfo& info) {
-        D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
-
-        InitializeD3D11Texture2DDescByDefault(d3dTexture2DDesc);
-        d3dTexture2DDesc.Width = static_cast<UINT>(info.width);
-        d3dTexture2DDesc.Height = static_cast<UINT>(info.height);
-        d3dTexture2DDesc.ArraySize = 6;
-        d3dTexture2DDesc.Format = gFormatTable[static_cast<Int32>(info.format)];
-        d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-        d3dTexture2DDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-        Data().Initialize(d3dDevice, &d3dTexture2DDesc, NULL);
+            HRESULT hr = 0;
+            if (FAILED(hr = d3dDevice->CreateDepthStencilView(GetD3D11Texture2D().Get(), &d3dDepthStencilViewDesc, &m_d3dViews[i]))) {
+                throw EngineException("[DX11TextureRenderResourceData] ID3D11Device::CreateRenderTargetView() failed");
+            }
+        }
     }
 }

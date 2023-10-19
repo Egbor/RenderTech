@@ -95,11 +95,4 @@ void EngineClass::AddObject(const String& filename) {
     XmlSerializer serializer(filename, SerializationMode::SM_READ);
     Object* obj = serializer.Read();
     DELETE_OBJECT(obj);
-    //ISerializer* root = nullptr;
-    //serializer.CreateSubobjectSerializer(&root);
-
-    //Entity* entity = m_world->SpawnEntity(ObjectClassType<Entity>::GetInstance(), Vector3(0.0f, 0.0f, 0.0f), Rotator(0.0f, 0.0f, 0.0f));
-    //entity->Deserialize(root);
-
-    //serializer.DispatchSubobjectSerializer(&root);
 }

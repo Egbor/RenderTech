@@ -2,6 +2,7 @@
 #define ENTITYCOMPONENT_H
 
 #include "Engine/Object/Object.h"
+#include "Engine/Rendering/Engine/Interface/IRenderPass.h"
 
 namespace Engine {
     CLASSTYPE(EntityComponent)
@@ -18,6 +19,8 @@ namespace Engine {
         virtual ~EntityComponent() = default;
 
         HandlerPtr& GetHandler();
+
+        virtual void CreateRenderState(IRenderPass* pass);
 
     protected:
         void Register();

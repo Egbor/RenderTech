@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "Engine/Core/Render/Api/RenderDef.h"
+#include "Engine/Core/Render/Api/Interface/ITextureResource.h"
 #include "Engine/Object/Object.h"
 
 namespace Engine {
@@ -11,11 +11,14 @@ namespace Engine {
 
     public:
         Texture(const ObjectArgument& argument);
-        Texture(const Texture&) = default;
         virtual ~Texture() = default;
 
-        virtual String GetTag() const;
-        virtual TextureFormat GetFormat() const;
+        Int32 GetWidth() const;
+        Int32 GetHeight() const;
+        TextureFormat GetFormat() const;
+
+    protected:
+        ITextureResourceData* m_nativeTexture;
     };
 
     CLASSTYPE(Texture2D)
@@ -23,30 +26,21 @@ namespace Engine {
         GENERATE_BODY(Texture2D, Texture)
 
     public:
-        Texture2D(const ObjectArgument& argument);
-        Texture2D(const Texture2D&) = default;
+        Texture2D(const ObjectArgument&);
         virtual ~Texture2D() = default;
 
-        virtual void Resize(Int32 height, Int32 width, TextureFormat format);
-
-        virtual Int32 GetWidth() const;
-        virtual Int32 GetHeight() const;
+        void Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData);
     };
 
-    CLASSTYPE(CubeTexture2D)
-    class CubeTexture2D : public Texture2D {
-        GENERATE_BODY(CubeTexture2D, Texture2D)
-
-    private:
-        Int32 m_faceId;
+    CLASSTYPE(TextureCube)
+    class TextureCube : public Texture {
+        GENERATE_BODY(TextureCube, Texture)
 
     public:
-        CubeTexture2D(const ObjectArgument& argument);
-        CubeTexture2D(const CubeTexture2D&) = default;
-        virtual ~CubeTexture2D() = default;
+        TextureCube(const ObjectArgument&);
+        virtual ~TextureCube() = default;
 
-        void SetFaceId(Int32 id);
-        Int32 GetFaceId() const;
+        void Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData);
     };
 }
 

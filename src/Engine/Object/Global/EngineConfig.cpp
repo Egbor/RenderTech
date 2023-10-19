@@ -11,7 +11,7 @@ namespace Engine {
 
     }
 
-    Context* EngineConfig::GetContext() const {
+    IContext* EngineConfig::GetContext() const {
         return m_context;
     }
 

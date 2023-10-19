@@ -4,6 +4,10 @@
 #include "Engine/Object/Global/EngineConfig.h"
 
 namespace Engine {
+    DX11TargetResourceData::DX11TargetResourceData(ComPtr<ID3D11Device> d3dDevice, DX11Texture2DResourceData* data) 
+        : m_d3dView(nullptr) {
+    }
+
     //GENERATE_RTTI_DEFINITIONS(DX11Target)
     GENERATE_INSTANTIATION(DX11Target)
 
