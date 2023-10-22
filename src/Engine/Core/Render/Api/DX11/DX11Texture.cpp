@@ -173,6 +173,22 @@ namespace Engine {
         return m_d3dTexture2D;
     }
 
+    ComPtr<ID3D11ShaderResourceView> DX11TextureCommonResourceData::GetD3D11ShaderResourceView(ComPtr<ID3D11Device> d3dDevice) {
+        D3D11_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
+        ZeroMemory(&d3dShaderResourceViewDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+        d3dShaderResourceViewDesc.Format = d3dFormatTable[GetFormat()];
+        d3dShaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        d3dShaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+        ComPtr<ID3D11ShaderResourceView> d3dShaderResourceView;
+
+        HRESULT hr = 0;
+        if (FAILED(hr = d3dDevice->CreateShaderResourceView(m_d3dTexture2D.Get(), &d3dShaderResourceViewDesc, &d3dShaderResourceView))) {
+            throw EngineException("[DX11TextureCommonResourceData] ID3D11Device::CreateShaderResourceView() failed");
+        }
+        return d3dShaderResourceView;
+    }
+
     void DX11TextureCommonResourceData::CreateD3D11Texture2D(ComPtr<ID3D11Texture2D> d3dTexture) {
         m_d3dTexture2D = d3dTexture;
     }

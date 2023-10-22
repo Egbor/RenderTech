@@ -14,11 +14,13 @@ namespace Engine {
 
     public:
         Material(const ObjectArgument& argument);
-        Material(const Material&) = default;
-        virtual ~Material();
+        virtual ~Material() = default;
 
         void SetTexture(TextureSlot slot, Texture2D* texture);
         Texture2D* GetTexture(TextureSlot slot) const;
+
+        Array<ITextureResourceData*> GetNativeTextureResources() const;
+        IShaderResourceData* GetNativeShaderResource() const;
     };
 }
 

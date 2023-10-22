@@ -6,31 +6,36 @@
 #include "Engine/Object/Class/Material.h"
 #include "Engine/Rendering/MeshDescription.h"
 
-namespace Engine {
-    constexpr static const char* argVertexBufferInfo = "vertexBufferInfo";
-    constexpr static const char* argIndexBufferInfo = "indexBufferInfo";
+#include "Engine/Core/Render/Api/Interface/IBufferResource.h"
 
-    CLASSTYPE(Submesh)
-    class Submesh : public Object {
-        GENERATE_BODY(Submesh, Object)
+namespace Engine {
+    //constexpr static const char* argVertexBufferInfo = "vertexBufferInfo";
+    //constexpr static const char* argIndexBufferInfo = "indexBufferInfo";
+
+    CLASSTYPE(MeshElement)
+    class MeshElement : public Object {
+        GENERATE_BODY(MeshElement, Object)
 
     private:
-        Buffer* m_vertexBuffer;
-        Buffer* m_indexBuffer;
-        Material* m_material;
+        //Buffer* m_vertexBuffer;
+        //Buffer* m_indexBuffer;
+        //Material* m_material;
+        IBufferResourceData* m_vertexBuffer;
+        IBufferResourceData* m_indexBuffer;
 
     public:
-        Submesh(const ObjectArgument& argument);
-        Submesh(const Submesh&) = default;
-        virtual ~Submesh();
+        MeshElement(const ObjectArgument& arguments);
+        virtual ~MeshElement();
 
-        UInt32 GetNumIndexies() const;
+        Int32 GetNumIndexies() const;
 
-        Buffer* GetVertexBuffer() const;
-        Buffer* GetIndexBuffer() const;
-        Material* GetMaterial() const;
+        IBufferResourceData* GetVertexBuffer() const;
+        IBufferResourceData* GetIndexBuffer() const;
 
-        void SetMaterial(Material* material);
+        void Create(const BufferInfo& vertexInfo, const BufferInfo& indexInfo);
+        //Material* GetMaterial() const;
+
+        //void SetMaterial(Material* material);
     };
 
     CLASSTYPE(Mesh)
@@ -38,20 +43,20 @@ namespace Engine {
         GENERATE_BODY(Mesh, Object)
 
     private:
-        Array<Submesh*> m_submeshes;
+        Array<MeshElement*> m_submeshes;
+        Array<Material*> m_materials;
 
     public:
         Mesh(const ObjectArgument& argument);
-        Mesh(const Mesh&) = default;
         virtual ~Mesh();
 
-        void AddSubmesh(MeshDescription* meshDesc);
+        void AddMeshElement(MeshDescription* meshDesc);
         void SetMaterial(Int32 slot, Material* material);
 
-        Submesh* GetSubmesh(Int32 slot) const;
+        MeshElement* GetMeshElement(Int32 slot) const;
         Material* GetMaterial(Int32 slot) const;
 
-        Int32 GetNumSubmeshes() const;
+        Int32 GetNumMeshElements() const;
         Int32 GetNumMaterials() const;
     };
 }

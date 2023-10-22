@@ -12,15 +12,21 @@ namespace Engine {
         }
     }
 
-    Material::~Material() {
-
-    }
-
     void Material::SetTexture(TextureSlot slot, Texture2D* texture) {
         m_textures[static_cast<Int32>(slot)] = texture;
     }
 
     Texture2D* Material::GetTexture(TextureSlot slot) const {
         return m_textures[static_cast<Int32>(slot)];
+    }
+
+    Array<ITextureResourceData*> Material::GetNativeTextureResources() const {
+        Array<ITextureResourceData*> nativeTextures;
+
+        nativeTextures.reserve(m_textures.size());
+        for (Texture2D* texture : m_textures) {
+            nativeTextures.push_back(texture->GetNativeResource());
+        }
+        return nativeTextures;
     }
 }

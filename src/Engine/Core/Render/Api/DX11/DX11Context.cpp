@@ -168,6 +168,27 @@ namespace Engine {
         return m_renderTextureFactory.Create(type, m_d3dDevice, format, width, height);
     }
 
+    IBufferResourceData* DX11Context::CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) {
+        return m_bufferFactory.Create(type, m_d3dDevice, size, strides, data);
+    }
+
+    void DX11Context::SetBuffers(const Array<IBufferResourceData*>& resources) {
+
+    }
+
+    void DX11Context::Draw(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) {
+        SetBuffer(vertexBuffer);
+        SetBuffer(indexBuffer);
+
+        m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        m_d3dContext->DrawIndexed(indexBuffer->GetNumElements(), 0, 0);
+    }
+
+    void DX11Context::Update(IBufferResourceData* buffer, Int32 size, const void* data) {
+        DX11Buffer* dxBuffer = dynamic_cast<DX11Buffer*>(buffer);
+        dxBuffer->Update(m_d3dContext, static_cast<UINT>(size), data);
+    }
+
     void DX11Context::RegisterTextureFactory() {
         m_staticTextureFactory.Register(TextureType::TT_DEFAULT, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
             return new DX11Texture2DResourceData(d3dDevice, format, width, height, data[0]); });
@@ -182,6 +203,15 @@ namespace Engine {
             return new DX11DepthStencilResourceData(d3dDevice, format, width, height, false); });
         m_renderTextureFactory.Register(TextureType::TT_DEPTH_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
             return new DX11DepthStencilResourceData(d3dDevice, format, width, height, true); });
+    }
+
+    void DX11Context::RegisterBufferFactory() {
+        m_bufferFactory.Register(BufferType::BT_VERTEX, [&](ComPtr<ID3D11Device> d3dDevice, Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(d3dDevice, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_INDEX, [&](ComPtr<ID3D11Device> d3dDevice, Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(d3dDevice, D3D11_USAGE_IMMUTABLE, D3D11_BIND_INDEX_BUFFER, 0, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_UNIFORM, [&](ComPtr<ID3D11Device> d3dDevice, Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(d3dDevice, D3D11_USAGE_DYNAMIC, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, size, strides, data); });
     }
 
     //DX11ContextFactory::DX11ContextFactory() {

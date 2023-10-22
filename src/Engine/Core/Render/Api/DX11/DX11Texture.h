@@ -2,9 +2,7 @@
 #define DX11TEXTURE_H
 
 #include "Engine/Core/Render/Api/DX11/DX11Def.h"
-
 #include "Engine/Core/Render/Api/Interface/ITextureResource.h"
-#include "Engine/Core/Render/Api/Interface/ITargetResource.h"
 
 namespace Engine {
     struct DX11Texture2DDescription {
@@ -46,6 +44,7 @@ namespace Engine {
         bool IsCubemap() const override;
 
         ComPtr<ID3D11Texture2D> GetD3D11Texture2D() const;
+        ComPtr<ID3D11ShaderResourceView> GetD3D11ShaderResourceView(ComPtr<ID3D11Device> d3dDevice);
 
     protected:
         void CreateD3D11Texture2D(ComPtr<ID3D11Texture2D> d3dTexture);

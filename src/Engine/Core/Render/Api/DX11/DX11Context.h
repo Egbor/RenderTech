@@ -71,12 +71,20 @@ namespace Engine {
 
         ITextureResourceData* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) override;
         ITextureResourceData* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height) override;
+        IBufferResourceData* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) override;
+
+        void SetBuffers(const Array<IBufferResourceData*>& resources) override;
+
+        void Draw(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) override;
+        void Update(IBufferResourceData* buffer, Int32 size, const void* data) override;
 
     private:
         void RegisterTextureFactory();
+        void RegisterBufferFactory();
 
         Factory<TextureType, ITextureResourceData, ComPtr<ID3D11Device>, TextureFormat, Int32, Int32, Array<Int8*>> m_staticTextureFactory;
         Factory<TextureType, ITextureResourceData, ComPtr<ID3D11Device>, TextureFormat, Int32, Int32> m_renderTextureFactory;
+        Factory<BufferType, IBufferResourceData, ComPtr<ID3D11Device>, Int32, Int32, const void*> m_bufferFactory;
     };
 }
 

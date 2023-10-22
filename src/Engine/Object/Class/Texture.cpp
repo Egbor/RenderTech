@@ -20,6 +20,10 @@ namespace Engine {
         return m_nativeTexture->GetHeight();
     }
 
+    ITextureResourceData* Texture::GetNativeResource() const {
+        return m_nativeTexture;
+    }
+
     GENERATE_INSTANTIATION(Texture2D)
 
     Texture2D::Texture2D(const ObjectArgument& argument)

@@ -4,9 +4,21 @@
 #include "Engine/Rendering/Engine/Interface/IRenderPass.h"
 
 namespace Engine {
+	class Mesh;
+
+	struct BRPModelResource {
+		Mesh* meshes;
+		Matrix4x4 world;
+	};
+
+	struct BRPCameraResource {
+		Matrix4x4 view;
+		Matrix4x4 proj;
+	};
+
 	class BaseRenderPass : public IRenderPass {
 	public:
-		BaseRenderPass(IContext* context);
+		BaseRenderPass(IContext* context, IShaderResourceData* vertexShader);
 		virtual ~BaseRenderPass();
 
 		void Launch(IRenderPipeline* pipeline) override;
@@ -14,6 +26,11 @@ namespace Engine {
 
 	private:
 		Array<ITextureResourceData*> m_gbuffer;
+		Array<IBufferResourceData*> m_ubuffer;
+		IShaderResourceData* m_vertexShader;
+
+		Array<BRPModelResource> m_modelResourceBatch;
+		BRPCameraResource m_cameraResource;
 	};
 }
 

@@ -17,6 +17,8 @@ namespace Engine {
         Int32 GetHeight() const;
         TextureFormat GetFormat() const;
 
+        ITextureResourceData* GetNativeResource() const;
+
     protected:
         ITextureResourceData* m_nativeTexture;
     };

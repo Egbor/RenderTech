@@ -101,6 +101,12 @@ namespace Engine {
         TT_DEPTH_CUBE       = 4
     };
 
+    enum class BufferType {
+        BT_VERTEX   = 0,
+        BT_INDEX    = 1,
+        BT_UNIFORM  = 2
+    };
+
     enum class TextureFormat {
         TF_R8_BMP,
         TF_R8G8_BMP,
@@ -149,20 +155,20 @@ namespace Engine {
 
 #define DYNAMIC_BUFFER __declspec(align(16))
 
-    struct DYNAMIC_BUFFER DynamicBufferCameraDesc {
+    struct DYNAMIC_BUFFER UniformBufferCameraDesc {
         Matrix4x4 WorldViewProjection;
         Matrix4x4 WorldView;
         Matrix4x4 invWorldView;
     };
 
-    struct DYNAMIC_BUFFER DynamicBufferAccumulationDesc {
+    struct DYNAMIC_BUFFER UniformBufferAccumulationDesc {
         Matrix4x4 WorldView;
         Matrix4x4 Projection;
         Matrix4x4 invProjection;
         Vector2 Resolution;
     };
 
-    struct DYNAMIC_BUFFER DynamicBufferLightDesc {
+    struct DYNAMIC_BUFFER UniformBufferLightDesc {
         Vector4 LightValue;
         Vector4 LightColor;
     };

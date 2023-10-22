@@ -2,9 +2,7 @@
 #define DX11BUFFER_H
 
 #include "Engine/Core/Render/Api/DX11/DX11Def.h"
-
 #include "Engine/Core/Render/Api/Interface/IBufferResource.h"
-#include "Engine/Core/Render/Api/Interface/IUpdatableBufferResource.h"
 
 //#include "Engine/Object/Class/Buffer.h"
 //#include "Engine/Core/Render/Api/DX11/DX11Context.h"
@@ -12,22 +10,23 @@
 namespace Engine {
     class DX11Buffer : public IBufferResourceData {
     public:
-        DX11Buffer(ComPtr<ID3D11Device> d3dDevice, UInt32 size, UInt32 strides, const void* data);
+        DX11Buffer(ComPtr<ID3D11Device> d3dDevice, D3D11_USAGE usage, D3D11_BIND_FLAG bindFlags, UINT cpuAccessFlags, UINT size, UINT strides, const void* data);
         virtual ~DX11Buffer() = default;
 
         Int32 GetNumBytes() const override;
         Int32 GetNumElements() const override;
 
+        void Update(ComPtr<ID3D11DeviceContext> d3dContext, UINT size, const void* data);
+
+        ComPtr<ID3D11Buffer> GetD3D11Buffer() const;
+
     private:
+        bool m_isUpdatable;
+
+    protected:
+        UINT m_strides;
+        UINT m_offset;
         ComPtr<ID3D11Buffer> m_d3dBuffer;
-    };
-
-    class DX11ConstBuffer : public DX11Buffer, IUpdatableBufferResource {
-    public:
-        DX11ConstBuffer(ComPtr<ID3D11Device> d3dDevice, UInt32 size, UInt32 strides, const void* data);
-        virtual ~DX11ConstBuffer() = default;
-
-        void Update() override;
     };
 
     //CLASSTYPE(DX11Buffer)

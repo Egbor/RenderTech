@@ -28,6 +28,8 @@ namespace Engine {
     protected:
         virtual UInt64 GetBehaviorID() const override;
 
+        void CreateRenderState(IRenderPass* pass) override;
+
     private:
         static constexpr Float defaultFOV = 60.0f * RADIAN_COEFFICIENT;
         static constexpr Float defaultFar = 1000.0f;

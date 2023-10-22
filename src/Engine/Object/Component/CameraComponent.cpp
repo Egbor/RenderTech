@@ -1,4 +1,5 @@
 #include "Engine/Object/Component/CameraComponent.h"
+#include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(CameraComponent)
@@ -22,5 +23,11 @@ namespace Engine {
 
     UInt64 CameraComponent::GetBehaviorID() const {
         return CameraComponent::TypeIdClass();
+    }
+
+    void CameraComponent::CreateRenderState(IRenderPass* pass) {
+        if (pass->Is(RenderPassType::RP_BASE)) {
+            BaseRenderPass* baseRenderPass = dynamic_cast<BaseRenderPass*>(pass);
+        }
     }
 }
