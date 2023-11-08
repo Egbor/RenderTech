@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include <list>
 #include <unordered_map>
 #include <memory>
@@ -53,6 +54,8 @@ namespace Engine {
     VALUETYPE(typename std::vector<T>, Array, GENERIC)
     template<typename T>
     using List = typename std::list<T>;
+    template<typename T>
+    using Queue = typename std::queue<T>;
 
     template<typename TKey, typename T>
     using MapIterator = typename Map<TKey, T>::iterator;

@@ -11,10 +11,9 @@ namespace Engine {
 		virtual ~DX11AbstractStage() = default;
 
 	protected:
-		void BindTextures(const Array<ITextureResourceData*>& resources, std::function<void(ComPtr<ID3D11DeviceContext>, const Array<ID3D11ShaderResourceView*>&)> bindCallback);
-		void BindBuffers(const Array<IBufferResourceData*>& resources, std::function<void(ComPtr<ID3D11DeviceContext>, const Array<ID3D11Buffer*>&)> bindCallback);
+		void BindTexturesWithCallback(const Array<ITextureResourceData*>& resources, std::function<void(ComPtr<ID3D11DeviceContext>, const Array<ID3D11ShaderResourceView*>&)> bindCallback);
+		void BindBuffersWithCallback(const Array<IBufferResourceData*>& resources, std::function<void(ComPtr<ID3D11DeviceContext>, const Array<ID3D11Buffer*>&)> bindCallback);
 
-	private:
 		DX11Context* m_context;
 	};
 
@@ -25,6 +24,7 @@ namespace Engine {
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
 		void BindBuffers(const Array<IBufferResourceData*>& resources) override;
+		void BindShader(IShaderResourceData* resource) override;
 	};
 
 	class DX11StagePS : public DX11AbstractStage {
@@ -34,6 +34,7 @@ namespace Engine {
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
 		void BindBuffers(const Array<IBufferResourceData*>& resources) override;
+		void BindShader(IShaderResourceData* resource) override;
 	};
 }
 

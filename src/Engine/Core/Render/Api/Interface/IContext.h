@@ -3,15 +3,14 @@
 
 #include "Engine/Core/Render/Api/Interface/IRenderResourceFactory.h"
 #include "Engine/Core/Render/Api/Interface/IRenderPipeline.h"
+#include "Engine/Core/Render/Api/Interface/ISwapChain.h"
 
 namespace Engine {
 	class IContext {
 	public:
-		virtual Int32 GetWidth() const = 0;
-		virtual Int32 GetHeight() const = 0;
-
 		virtual IRenderResourceFactory* QueryResourceFactory() = 0;
 		virtual IRenderPipeline* QueryPipeline() = 0;
+		virtual ISwapChain* QuerySwapChain() = 0;
 	};
 }
 

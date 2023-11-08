@@ -95,16 +95,21 @@ namespace Engine {
     };
 
     enum class TextureType {
-        TT_DEFAULT          = 0,
-        TT_CUBE             = 1,
-        TT_DEPTH            = 3,
-        TT_DEPTH_CUBE       = 4
+        TT_DEFAULT      = 0,
+        TT_CUBE         = 1,
+        TT_DEPTH        = 3,
+        TT_DEPTH_CUBE   = 4
     };
 
     enum class BufferType {
         BT_VERTEX   = 0,
         BT_INDEX    = 1,
         BT_UNIFORM  = 2
+    };
+
+    enum class ShaderType {
+        ST_VERTEX   = 0,
+        ST_PIXEL    = 1
     };
 
     enum class TextureFormat {
@@ -171,6 +176,12 @@ namespace Engine {
     struct DYNAMIC_BUFFER UniformBufferLightDesc {
         Vector4 LightValue;
         Vector4 LightColor;
+    };
+
+    struct DYNAMIC_BUFFER UniformBufferBase {
+        Matrix4x4 ViewProjection;
+        Matrix4x4 invWorld;
+        Matrix4x4 World;
     };
 }
 

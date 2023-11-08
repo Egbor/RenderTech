@@ -32,10 +32,13 @@ namespace Engine {
         Array<D3D11_SUBRESOURCE_DATA> m_d3dSubresourceData;
     };
 
-    class DX11TextureCommonResourceData : public ITextureResourceData {
+    class DX11Texture2D : public ITextureResourceData {
     public:
-        DX11TextureCommonResourceData();
-        virtual ~DX11TextureCommonResourceData() = default;
+        DX11Texture2D(ComPtr<ID3D11Texture2D> d3dTexture);
+        DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap);
+        DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Int8* data);
+        DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data);
+        virtual ~DX11Texture2D() = default;
 
         TextureFormat GetFormat() const override;
         Int32 GetWidth() const override;
@@ -46,46 +49,12 @@ namespace Engine {
         ComPtr<ID3D11Texture2D> GetD3D11Texture2D() const;
         ComPtr<ID3D11ShaderResourceView> GetD3D11ShaderResourceView(ComPtr<ID3D11Device> d3dDevice);
 
-    protected:
-        void CreateD3D11Texture2D(ComPtr<ID3D11Texture2D> d3dTexture);
+    private:
         void CreateD3D11Texture2D(ComPtr<ID3D11Device> d3dDevice, const DX11Texture2DDescription* texture2DDesc);
         void CreateD3D11Texture2D(ComPtr<ID3D11Device> d3dDevice, const DX11Texture2DDescription* texture2DDesc, const DX11Texture2DSubresourceData* data);
 
     private:
         ComPtr<ID3D11Texture2D> m_d3dTexture2D;
-    };
-
-    class DX11Texture2DResourceData : public DX11TextureCommonResourceData {
-    public:
-        DX11Texture2DResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Int8* data);
-        DX11Texture2DResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data);
-        virtual ~DX11Texture2DResourceData() = default;
-    };
-
-    class DX11TextureRenderResourceData : public DX11TextureCommonResourceData {
-    public:
-        DX11TextureRenderResourceData(ComPtr<ID3D11Device> d3dDevice, ComPtr<ID3D11Texture2D> d3dTexture);
-        DX11TextureRenderResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap);
-
-    private:
-        void CreateD3D11RenderTargetViews(ComPtr<ID3D11Device> d3dDevice, TextureFormat format);
-
-        Array<ComPtr<ID3D11RenderTargetView>> m_d3dViews;
-    };
-
-    class DX11DepthStencilResourceData : public DX11TextureCommonResourceData {
-    public:
-        DX11DepthStencilResourceData(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap);
-        virtual ~DX11DepthStencilResourceData() = default;
-
-        void SetDepthClearingEnable(bool enable);
-        void SetStencilClearingEnable(bool enable);
-
-    private:
-        void CreateD3D11DepthStencilViews(ComPtr<ID3D11Device> d3dDevice, TextureFormat format);
-
-        UINT clearFlag;
-        Array<ComPtr<ID3D11DepthStencilView>> m_d3dViews;
     };
 }
 
