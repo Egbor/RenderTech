@@ -24,17 +24,31 @@ namespace Engine {
         }
     };
 
-    class Importer {
-    private:
-        const String m_filename;
-
+    class LoaderBase {
     public:
-        Importer(const String& filename);
-        virtual ~Importer() = default;
+        LoaderBase(const String& filename);
+        virtual ~LoaderBase() = default;
 
         const String& GetFilename() const;
 
-        virtual void ImportTo(Object* object);
+    private:
+        const String m_filename;
+    };
+
+    class AbstractImporter : public LoaderBase {
+    public:
+        AbstractImporter(const String& filename);
+        virtual ~AbstractImporter() = default;
+
+        virtual void ImportTo(Object* object) = 0;
+    };
+
+    class AbstractLoader : public LoaderBase {      
+    public:
+        AbstractLoader(const String& fielname);
+        virtual ~AbstractLoader() = default;
+
+        virtual void* Load() = 0;
     };
 }
 

@@ -7,7 +7,7 @@
 #include "Engine/Core/Render/Api/DX11/DX11Stage.h"
 
 namespace Engine {
-    DX11Context::DX11Context(HWND hWnd, Int32 width, Int32 height) {
+    DX11Context::DX11Context(IWindow* window) {
         HRESULT hr = 0;
         Int32 flag = 0;
 
@@ -24,14 +24,14 @@ namespace Engine {
         DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
         ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
         dxgiSwapChainDesc.BufferCount = 1;
-        dxgiSwapChainDesc.BufferDesc.Width = static_cast<UINT>(width);
-        dxgiSwapChainDesc.BufferDesc.Height = static_cast<UINT>(height);
+        dxgiSwapChainDesc.BufferDesc.Width = static_cast<UINT>(window->GetWidth());
+        dxgiSwapChainDesc.BufferDesc.Height = static_cast<UINT>(window->GetHeight());
         dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
         dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 0;
         dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
         dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        dxgiSwapChainDesc.OutputWindow = hWnd;
+        dxgiSwapChainDesc.OutputWindow = reinterpret_cast<HWND>(window->WinId());
         dxgiSwapChainDesc.SampleDesc.Count = 1;
         dxgiSwapChainDesc.SampleDesc.Quality = 0;
         dxgiSwapChainDesc.Windowed = FALSE;
@@ -101,6 +101,10 @@ namespace Engine {
 
     IBufferResourceData* DX11Context::CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) {
         return m_bufferFactory.Create(type, m_d3dDevice, size, strides, data);
+    }
+
+    IShaderResourceData* DX11Context::CreateShader(ShaderType type, Size codeLength, const void* code) {
+        return m_shaderFactory.Create(type, m_d3dDevice, codeLength, code);
     }
 
     void DX11Context::SetTargets(const Array<ITargetResourceData*>& targets) {
@@ -187,5 +191,12 @@ namespace Engine {
             return new DX11IndexBuffer(d3dDevice, size, strides, data); });
         m_bufferFactory.Register(BufferType::BT_UNIFORM, [&](ComPtr<ID3D11Device> d3dDevice, Int32 size, Int32 strides, const void* data) {
             return new DX11ConstantBuffer(d3dDevice, size, strides, data); });
+    }
+
+    void DX11Context::RegisterShaderFactory() {
+        m_shaderFactory.Register(ShaderType::ST_VERTEX, [&](ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code) {
+            return new DX11VertexShader(d3dDevice, codeLength, code); });
+        m_shaderFactory.Register(ShaderType::ST_PIXEL, [&](ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code) {
+            return new DX11PixelShader(d3dDevice, codeLength, code); });
     }
 }

@@ -10,7 +10,7 @@ namespace Engine {
         DX11VertexShader(ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code);
         virtual ~DX11VertexShader() = default;
 
-        bool Is(ShaderType type) const;
+        bool Is(ShaderType type) const override;
 
         ComPtr<ID3D11InputLayout> GetD3D11Layout() const;
         ComPtr<ID3D11VertexShader> GetD3D11Shader() const;
@@ -25,7 +25,7 @@ namespace Engine {
         DX11PixelShader(ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code);
         virtual ~DX11PixelShader() = default;
 
-        bool Is(ShaderType type) const;
+        bool Is(ShaderType type) const override;
 
         ComPtr<ID3D11PixelShader> GetD3D11Shader() const;
 

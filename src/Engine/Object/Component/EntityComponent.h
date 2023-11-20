@@ -15,7 +15,6 @@ namespace Engine {
 
     public:
         EntityComponent(const ObjectArgument& argument);
-        EntityComponent(const EntityComponent&) = default;
         virtual ~EntityComponent() = default;
 
         HandlerPtr& GetHandler();

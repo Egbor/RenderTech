@@ -2,46 +2,26 @@
 #define RENDERENGINE_H
 
 #include "Engine/EngineDef.h"
-#include <thread>
-
+#include "Engine/Core/System/Platform/Interface/IWindow.h"
+#include "Engine/Rendering/Engine/Interface/IRenderPassContext.h"
 
 #include "Engine/Core/System/Time/Time.h"
-#include "Engine/Core/System/Input/Input.h"
-
 #include "Engine/Object/World/World.h"
-#include "Engine/Object/World/WorldMode.h"
-
-#include "Engine/Rendering/RenderSet/SceneRenderSet.h"
-#include "Engine/Rendering/RenderSet/GuiRenderSet.h"
-
-using namespace Engine;
 
 class EngineClass {
-private:
-    SwapChain* m_swapchain;
-    SceneRenderSet* m_rsScene;
-    GuiRenderSet* m_rsGui;
-
-    Time* m_time;
-    World* m_world;
-    WorldMode* m_mode;
-
 public:
-    EngineClass(UInt64 winId, UInt32 width, UInt32 height);
+    EngineClass(Engine::IWindow* window);
     virtual ~EngineClass();
 
-    void InvokeStartStage();
-    void InvokeUpdateStage();
-    void InvokeRenderStage();
+    void Run(Engine::World* world);
 
-    Context* GetContext() const;
-    GuiContext* GetGuiContext() const;
+    void OnWorldStart(Engine::Entity* entity);
+    void OnWorldUpdate(Engine::Entity* entity);
 
 private:
-    void InitializeWorld();
-    void InitializeInput(Input* input);
-
-    void AddObject(const String& filename);
+    Engine::Time* m_time;
+    Engine::IWindow* m_window;
+    Engine::IRenderPassContext* m_context;
 };
 
 #endif // RENDERENGINE_H

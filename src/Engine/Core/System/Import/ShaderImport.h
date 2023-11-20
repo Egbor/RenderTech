@@ -2,17 +2,31 @@
 #define SHADERIMPORT_H
 
 #include "Engine/Core/System/Import/Import.h"
-#include "Engine/Rendering/ShaderDescription.h"
+#include "Engine/Core/Render/Api/Interface/IContext.h"
 
 namespace Engine {
-    class ShaderImport : public Import<ShaderDescription> {
+    class ShaderLoader : public AbstractLoader {
     public:
-        ShaderImport(const String& filename);
-        ShaderImport(const ShaderImport&) = default;
-        virtual ~ShaderImport() = default;
+        ShaderLoader(IRenderResourceFactory* factory, ShaderType type, const String& filename);
+        virtual ~ShaderLoader() = default;
 
-        ShaderDescription* LoadResource() override;
+        IShaderResourceData* LoadShader();
+
+    private:
+        void* Load() override;
+
+        IRenderResourceFactory* m_factory;
+        ShaderType m_loadType;
     };
+
+    //class ShaderImport : public Import<ShaderDescription> {
+    //public:
+    //    ShaderImport(const String& filename);
+    //    ShaderImport(const ShaderImport&) = default;
+    //    virtual ~ShaderImport() = default;
+
+    //    ShaderDescription* LoadResource() override;
+    //};
 }
 
 #endif // SHADERIMPORT_H

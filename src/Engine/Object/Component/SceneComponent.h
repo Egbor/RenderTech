@@ -10,7 +10,7 @@ namespace Engine {
     class SceneComponent : public EntityComponent {
         GENERATE_BODY(SceneComponent, EntityComponent)
 
-    public:
+    private:
         PROPERTY(ValueType<Vector3>, position)
         Vector3 m_position;
         PROPERTY(ValueType<Vector3>, scale)
@@ -18,10 +18,10 @@ namespace Engine {
         PROPERTY(ValueType<Rotator>, rotation)
         Rotator m_rotation;
 
-    private:
-        SceneComponent* m_parent;
-        List<SceneComponent*> m_children;
-        ListIterator<SceneComponent*> m_childIterator;
+    //private:
+    //    SceneComponent* m_parent;
+    //    List<SceneComponent*> m_children;
+    //    ListIterator<SceneComponent*> m_childIterator;
 
     public:
         SceneComponent(const ObjectArgument& argument);
@@ -47,10 +47,19 @@ namespace Engine {
         Vector3 GetRight() const;
         Vector3 GetUp() const;
 
-        const List<SceneComponent*>& GetChildComponents() const;
+    //    const List<SceneComponent*>& GetChildComponents() const;
 
-    protected:
-        virtual UInt64 GetBehaviorID() const override;
+    //protected:
+    //    virtual UInt64 GetBehaviorID() const override;
+
+        SceneComponent* GetChildComponent(Int32 childIndex) const;
+        void GetChildrenComponents(Array<SceneComponent*>& components) const;
+
+    private:
+        SceneComponent* m_parent;
+        Array<SceneComponent*> m_children;
+
+        Int32 m_componentIndex;
     };
 }
 
