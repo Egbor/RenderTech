@@ -1,7 +1,6 @@
 #include "Engine/Core/System/Import/TextureImport.h"
 #include "Engine/Core/System/Exception/EngineException.h"
-
-#include "Engine/Object/Global/EngineConfig.h"
+#include "Engine/Core/Core.h"
 
 #include <FreeImage.h>
 #include <sstream>
@@ -115,68 +114,21 @@ namespace Engine {
         }
     }
 
-    TextureImport::TextureImport(const String& filename)
-        : Import(filename) {
+    void TextureImporter::ImportTo(const String& filename, Object* object) {
+        if (!object->Is(Texture2D::TypeIdClass())) {
+            throw EngineException("[TextureImporter] Object::Is() failed. Object is not a texture object");
+        }
 
-    }
+        FIBITMAP* dib = LoadFreeImageResource(filename);
 
-    Texture2D* TextureImport::LoadResource() {
-        FIBITMAP* dib = LoadFreeImageResource(GetImportingFilename());
+        Array<Int8*> data;
+        Int32 width = static_cast<Int32>(FreeImage_GetWidth(dib));
+        Int32 height = static_cast<Int32>(FreeImage_GetHeight(dib));
+        data.push_back(reinterpret_cast<Int8*>(FreeImage_GetBits(dib)));
 
-        TextureInfo info;
-        info.width = FreeImage_GetWidth(dib);
-        info.height = FreeImage_GetHeight(dib);
-        info.format = ToFormat(dib);
-        info.data.push_back((Int8*)FreeImage_GetBits(dib));
-
-        Texture2D* texture = EngineConfig::GetInstance().GetContext()->CreateTexture2D(tagTexture, info);
+        Texture2D* texture = object->As<Texture2D>();
+        texture->Create(width, height, ToFormat(dib), data);
 
         FreeImage_Unload(dib);
-        return texture;
-    }
-
-    CubeTextureImport::CubeTextureImport(const String& filename)
-        : Import(filename) {
-
-    }
-
-    CubeTexture2D* CubeTextureImport::LoadResource() {
-        TextureInfo info;
-        CubeTexture2D* texture;
-
-        Array<FIBITMAP*> dibs(6);
-        for (Int32 face = 0; face < dibs.size(); face++) {
-            std::stringstream ss;
-            ss << GetImportingFilename() << face;
-
-            dibs[face] = LoadFreeImageResource(ss.str());
-
-            info.width = FreeImage_GetWidth(dibs[face]);
-            info.height = FreeImage_GetHeight(dibs[face]);
-            info.format = ToFormat(dibs[face]);
-            info.data.push_back((Int8*)FreeImage_GetBits(dibs[face]));
-        }
-
-        texture = EngineConfig::GetInstance().GetContext()->CreateCubeTexture2D(tagCubeTexture, info);
-        UnloadFreeImageResources(dibs);
-
-        return texture;
-    }
-
-    void CubeTextureImport::SaveResource(CubeTexture2D* texture) {
-        for (Int32 face = 0; face < 6; face++) {
-            FIBITMAP* dib = FreeImage_AllocateT(ToFreeImageFormat(texture->GetFormat()),
-                                                texture->GetWidth(), texture->GetHeight());
-            Int8* bits = (Int8*)FreeImage_GetBits(dib);
-            Size bitsSize = GetFreeImageByteWidth(dib);
-
-            EngineConfig::GetInstance().GetContext()->ReadCubeTexture2D(texture, face, bits, bitsSize);
-
-            std::stringstream ss;
-            ss << GetImportingFilename() << face;// << GetImageExtention(GetFreeImageFormat(dib));
-
-            FreeImage_Save(GetFreeImageFormat(dib), dib, ss.str().c_str());
-            FreeImage_Unload(dib);
-        }
     }
 }

@@ -1,5 +1,5 @@
 #include "Engine/Object/Class/Texture.h"
-#include "Engine/Object/Global/EngineConfig.h"
+#include "Engine/Core/Core.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(Texture)
@@ -32,7 +32,7 @@ namespace Engine {
     }
 
     void Texture2D::Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData) {
-        IRenderResourceFactory* factory = EngineConfig::GetInstance().GetContext()->QueryResourceFactory();
+        IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
         m_nativeTexture = factory->CreateTexture(TextureType::TT_DEFAULT, format, width, height, rawData);
     }
 
@@ -44,7 +44,7 @@ namespace Engine {
     }
 
     void TextureCube::Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData) {
-        IRenderResourceFactory* factory = EngineConfig::GetInstance().GetContext()->QueryResourceFactory();
+        IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
         m_nativeTexture = factory->CreateTexture(TextureType::TT_CUBE, format, width, height, rawData);
     }
 }

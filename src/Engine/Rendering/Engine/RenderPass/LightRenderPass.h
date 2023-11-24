@@ -9,6 +9,7 @@ namespace Engine {
 		LightRenderPass();
 		virtual ~LightRenderPass() = default;
 
+		void Create(IRenderResourceFactory* factory, Int32 width, Int32 height) override;
 		void Launch(IRenderPipeline* pipeline) override;
 		bool Is(RenderPassType type) const override;
 	};

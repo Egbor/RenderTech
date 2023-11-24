@@ -8,6 +8,7 @@ namespace Engine {
 	class IRenderPassContext {
 	public:
 		virtual void Append(IRenderPass* pass) = 0;
+		virtual void ChangeRenderResolution(Int32 width, Int32 height) = 0;
 		virtual void Process(Array<SceneComponent*>& components) = 0;
 		virtual void Render() = 0;
 	};

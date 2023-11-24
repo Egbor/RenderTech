@@ -10,9 +10,9 @@ namespace Engine {
         : Super(argument), m_componentForRollRotation(nullptr) {
     }
 
-    void Actor::SetupInputComponent(InputComponent* component) {
-        component->ResetBinds();
-    }
+    //void Actor::SetupInputComponent(InputComponent* component) {
+    //    component->ResetBinds();
+    //}
 
     void Actor::OnStart() {
         Super::OnStart();

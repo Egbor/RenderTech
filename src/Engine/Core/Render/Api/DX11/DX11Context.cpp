@@ -107,6 +107,18 @@ namespace Engine {
         return m_shaderFactory.Create(type, m_d3dDevice, codeLength, code);
     }
 
+    void DX11Context::SetViewport(Int32 width, Int32 height) {
+        D3D11_VIEWPORT d3dViewport;
+        d3dViewport.TopLeftX = 0;
+        d3dViewport.TopLeftY = 0;
+        d3dViewport.Width = static_cast<FLOAT>(width);
+        d3dViewport.Height = static_cast<FLOAT>(height);
+        d3dViewport.MinDepth = 0.0f;
+        d3dViewport.MaxDepth = 1.0f;
+
+        m_d3dContext->RSSetViewports(1, &d3dViewport);
+    }
+
     void DX11Context::SetTargets(const Array<ITargetResourceData*>& targets) {
         Array<ID3D11RenderTargetView*> rendertargets;
         ID3D11DepthStencilView* depthstencil;
@@ -127,11 +139,11 @@ namespace Engine {
     IRenderStage* DX11Context::GetStage(RenderStage stage) {
         switch (stage) {
         case RenderStage::RS_VERTEX: {
-            static DX11StageVS vsStage(this);
+            static DX11StageVS vsStage(m_d3dDevice, m_d3dContext);
             return &vsStage;
         }
         case RenderStage::RS_PIXEL: {
-            static DX11StagePS psStage(this);
+            static DX11StagePS psStage(m_d3dDevice, m_d3dContext);
             return &psStage;
         }
         default:

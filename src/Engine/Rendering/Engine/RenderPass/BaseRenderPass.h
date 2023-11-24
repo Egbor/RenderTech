@@ -32,9 +32,10 @@ namespace Engine {
 
 	class BaseRenderPass : public IRenderPass {
 	public:
-		BaseRenderPass(IContext* context, IShaderResourceData* vertexShader);
+		BaseRenderPass();
 		virtual ~BaseRenderPass();
 
+		void Create(IRenderResourceFactory* factory, Int32 width, Int32 height) override;
 		void Launch(IRenderPipeline* pipeline) override;
 		bool Is(RenderPassType type) const override;
 

@@ -1,4 +1,5 @@
 #include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
+#include "Engine/Core/System/Import/ShaderImport.h"
 #include "Engine/Object/Class/Mesh.h"
 
 namespace Engine {
@@ -47,20 +48,28 @@ namespace Engine {
 		m_modelBatch.pop();
 	}
 
-	BaseRenderPass::BaseRenderPass(IContext* context, IShaderResourceData* vertexShader)
-		: m_gbuffer(), m_ubuffer(), m_vertexShader(vertexShader), m_queue(new BaseRenderPassQueue()) {
-		IRenderResourceFactory* factory = context->QueryResourceFactory();
-		m_gbuffer.Attach(factory->CreateTarget(TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, context->GetWidth(), context->GetHeight()));
-		m_gbuffer.Attach(factory->CreateTarget(TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, context->GetWidth(), context->GetHeight()));
-		m_gbuffer.Attach(factory->CreateTarget(TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, context->GetWidth(), context->GetHeight()));
-		m_gbuffer.Attach(factory->CreateTarget(TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, context->GetWidth(), context->GetHeight()));
+	BaseRenderPass::BaseRenderPass()
+		: m_gbuffer(), m_ubuffer(), m_vertexShader(nullptr), m_queue(new BaseRenderPassQueue()) {
 
-		UniformBufferCameraDesc cameraUniformBufferDesc;
-		m_ubuffer.Attach(factory->CreateBuffer(BufferType::BT_UNIFORM, 1, sizeof(UniformBufferCameraDesc), &cameraUniformBufferDesc));
 	}
 
 	BaseRenderPass::~BaseRenderPass() {
 		DELETE_OBJECT(m_queue);
+		DELETE_OBJECT(m_vertexShader);
+	}
+
+	void BaseRenderPass::Create(IRenderResourceFactory* factory, Int32 width, Int32 height) {
+		// GBuffer initialization
+		m_gbuffer.Attach(TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height);
+		m_gbuffer.Attach(TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
+		m_gbuffer.Attach(TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
+		m_gbuffer.Attach(TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+
+		// Constant buffers initialization
+		m_ubuffer.Attach<UniformBufferCameraDesc>(factory);
+
+		// Default shaders initialization
+		m_vertexShader = ShaderLoader::Load("assets/shaders/BaseVSShader.vso", ShaderType::ST_VERTEX);
 	}
 
 	void BaseRenderPass::Launch(IRenderPipeline* pipeline) {

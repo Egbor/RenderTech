@@ -1,5 +1,6 @@
 #include "Engine/Rendering/Engine/RenderPass/GBuffer.h"
 #include "Engine/Core/Render/Api/Interface/IContext.h"
+#include "Engine/Core/Core.h"
 
 namespace Engine {
 	GBuffer::GBuffer() 
@@ -14,6 +15,11 @@ namespace Engine {
 	Int32 GBuffer::Attach(ITargetResourceData* resource) {
 		m_targets.push_back(resource);
 		return static_cast<Int32>(m_targets.size() - 1);
+	}
+
+	Int32 GBuffer::Attach(TextureType type, TextureFormat format, Int32 width, Int32 height) {
+		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+		return this->Attach(factory->CreateTarget(TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height));
 	}
 
 	void GBuffer::Clear(IRenderPipeline* context) {
@@ -41,11 +47,6 @@ namespace Engine {
 
 	UBuffer::~UBuffer() {
 		DELETE_ARRAY_OF_OBJECTS(m_buffers);
-	}
-
-	Int32 UBuffer::Attach(IBufferResourceData* resource) {
-		m_buffers.push_back(resource);
-		return static_cast<Int32>(m_buffers.size() - 1);
 	}
 
 	const Array<IBufferResourceData*>& UBuffer::GetBuffers() const {

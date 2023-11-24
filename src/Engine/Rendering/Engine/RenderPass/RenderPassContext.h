@@ -2,14 +2,13 @@
 #define RENDER_PASS_CONTEXT_H
 
 #include "Engine/Rendering/Engine/Interface/IRenderPassContext.h"
-#include "Engine/Core/System/Platform/Interface/IWindow.h"
+#include "Engine/Core/Core.h"
 
 namespace Engine {
-	template<class RenderContext>
 	class RenderPassContext : public IRenderPassContext {
 	public:
 		RenderPassContext(IWindow* window) {
-			m_renderContext = new RenderContext(window);
+			ChangeRenderResolution(window->GetWidth(), window->GetHeight());
 		}
 
 		virtual ~RenderPassContext() {
@@ -17,7 +16,16 @@ namespace Engine {
 		}
 
 		void Append(IRenderPass* pass) override {
+			IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+			ISwapChain* swapchain = Core::GetInstance()->GetContext()->QuerySwapChain();
+
 			m_renderPassBatch.push_back(pass);
+			pass->Create(factory, swapchain->GetWidth(), swapchain->GetHeight());
+		}
+
+		void ChangeRenderResolution(Int32 width, Int32 height) {
+			IRenderPipeline* pipeline = Core::GetInstance()->GetContext()->QueryPipeline();
+			pipeline->SetViewport(width, height);
 		}
 
 		void Process(Array<SceneComponent*>& components) override {
@@ -29,11 +37,16 @@ namespace Engine {
 		}
 
 		void Render() override {
+			IRenderPipeline* pipeline = Core::GetInstance()->GetContext()->QueryPipeline();
+			ISwapChain* swapchain = Core::GetInstance()->GetContext()->QuerySwapChain();
 
+			for (IRenderPass* pass : m_renderPassBatch) {
+				pass->Launch(pipeline);
+			}
+			swapchain->Swap();
 		}
 
 	private:
-		IContext* m_renderContext;
 		Array<IRenderPass*> m_renderPassBatch;
 	};
 }

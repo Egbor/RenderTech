@@ -19,7 +19,7 @@ namespace Engine {
         Spectator(const Spectator&) = default;
         virtual ~Spectator();
 
-        void SetupInputComponent(InputComponent* component) override;
+        //void SetupInputComponent(InputComponent* component) override;
         void OnUpdate(Float deltaTime) override;
 
         void OnForwardMovement(Float value);

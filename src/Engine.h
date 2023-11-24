@@ -2,26 +2,26 @@
 #define RENDERENGINE_H
 
 #include "Engine/EngineDef.h"
+#include "Engine/Core/Render/Api/Interface/IContext.h"
 #include "Engine/Core/System/Platform/Interface/IWindow.h"
-#include "Engine/Rendering/Engine/Interface/IRenderPassContext.h"
 
 #include "Engine/Core/System/Time/Time.h"
 #include "Engine/Object/World/World.h"
 
-class EngineClass {
-public:
-    EngineClass(Engine::IWindow* window);
-    virtual ~EngineClass();
+namespace Engine {
+    class EngineClass {
+    public:
+        EngineClass(IWindow* window, IContext* context);
+        virtual ~EngineClass();
 
-    void Run(Engine::World* world);
+        void Run(World* world);
 
-    void OnWorldStart(Engine::Entity* entity);
-    void OnWorldUpdate(Engine::Entity* entity);
+        void OnWorldStart(Entity* entity);
+        void OnWorldUpdate(Entity* entity);
 
-private:
-    Engine::Time* m_time;
-    Engine::IWindow* m_window;
-    Engine::IRenderPassContext* m_context;
-};
+    private:
+        Time* m_time;
+    };
+}
 
 #endif // RENDERENGINE_H

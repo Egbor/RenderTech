@@ -11,6 +11,7 @@ namespace Engine {
 
 	class IRenderPass {
 	public:
+		virtual void Create(IRenderResourceFactory* factory, Int32 width, Int32 height) = 0;
 		virtual void Launch(IRenderPipeline* pipeline) = 0;
 		virtual bool Is(RenderPassType type) const = 0;
 	};

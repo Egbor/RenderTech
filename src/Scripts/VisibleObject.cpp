@@ -22,29 +22,29 @@ namespace Engine {
         m_meshComponent = ClassType<MeshComponent>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<MeshComponent>("MeshComponent");
         m_meshComponent->AttachToComponent(GetRootComponent());
 
-        MeshImport meshImport("./bin/models/SM_Gameboy.fbx");
-        TextureImport albedoImport("./bin/models/Gameboy_low_Gameboy_BaseColor.png");
-        TextureImport normalImport("./bin/models/Gameboy_low_Gameboy_Normal.png");
-        TextureImport metallicImport("./bin/models/Gameboy_low_Gameboy_Metallic.png");
-        TextureImport roughnessImport("./bin/models/Gameboy_low_Gameboy_Roughness.png");
-        TextureImport occlusionImport("./bin/models/Gameboy_low_Gameboy_AO.png");
+        //MeshImport meshImport("./bin/models/SM_Gameboy.fbx");
+        //TextureImport albedoImport("./bin/models/Gameboy_low_Gameboy_BaseColor.png");
+        //TextureImport normalImport("./bin/models/Gameboy_low_Gameboy_Normal.png");
+        //TextureImport metallicImport("./bin/models/Gameboy_low_Gameboy_Metallic.png");
+        //TextureImport roughnessImport("./bin/models/Gameboy_low_Gameboy_Roughness.png");
+        //TextureImport occlusionImport("./bin/models/Gameboy_low_Gameboy_AO.png");
 
-        Mesh* mesh = meshImport.LoadResource();
-        albedo = albedoImport.LoadResource();
-        normal = normalImport.LoadResource();
-        metallic = metallicImport.LoadResource();
-        roughness = roughnessImport.LoadResource();
-        ao = occlusionImport.LoadResource();
+        //Mesh* mesh = meshImport.LoadResource();
+        //albedo = albedoImport.LoadResource();
+        //normal = normalImport.LoadResource();
+        //metallic = metallicImport.LoadResource();
+        //roughness = roughnessImport.LoadResource();
+        //ao = occlusionImport.LoadResource();
 
-        Material* material = ClassType<Material>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<Material>();
-        material->SetTexture(TextureSlot::TS_ALBEDO, albedo);
-        material->SetTexture(TextureSlot::TS_NORMAL, normal);
-        material->SetTexture(TextureSlot::TS_METALLIC, metallic);
-        material->SetTexture(TextureSlot::TS_ROUGHNESS, roughness);
-        material->SetTexture(TextureSlot::TS_AO, ao);
+        //Material* material = ClassType<Material>::CreateObject(ObjectArgument::Dummy()); //CreateDefaultSubobject<Material>();
+        //material->SetTexture(TextureSlot::TS_ALBEDO, albedo);
+        //material->SetTexture(TextureSlot::TS_NORMAL, normal);
+        //material->SetTexture(TextureSlot::TS_METALLIC, metallic);
+        //material->SetTexture(TextureSlot::TS_ROUGHNESS, roughness);
+        //material->SetTexture(TextureSlot::TS_AO, ao);
 
-        m_meshComponent->SetMesh(mesh);
-        m_meshComponent->GetMesh()->SetMaterial(0, material);
+        //m_meshComponent->SetMesh(mesh);
+        //m_meshComponent->GetMesh()->SetMaterial(0, material);
 
         SetEntityLocation(Vector3(0.0f, -0.1f, -0.0f));
         SetEntityScale(Vector3(0.0009f, 0.0009f, 0.0009f));

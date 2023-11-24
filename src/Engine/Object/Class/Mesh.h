@@ -2,24 +2,17 @@
 #define MESH_H
 
 #include "Engine/Object/Object.h"
-#include "Engine/Object/Class/Buffer.h"
 #include "Engine/Object/Class/Material.h"
 #include "Engine/Rendering/MeshDescription.h"
 
 #include "Engine/Core/Render/Api/Interface/IBufferResource.h"
 
 namespace Engine {
-    //constexpr static const char* argVertexBufferInfo = "vertexBufferInfo";
-    //constexpr static const char* argIndexBufferInfo = "indexBufferInfo";
-
     CLASSTYPE(MeshElement)
     class MeshElement : public Object {
         GENERATE_BODY(MeshElement, Object)
 
     private:
-        //Buffer* m_vertexBuffer;
-        //Buffer* m_indexBuffer;
-        //Material* m_material;
         IBufferResourceData* m_vertexBuffer;
         IBufferResourceData* m_indexBuffer;
 
@@ -33,9 +26,6 @@ namespace Engine {
         IBufferResourceData* GetIndexBuffer() const;
 
         void Create(const BufferInfo& vertexInfo, const BufferInfo& indexInfo);
-        //Material* GetMaterial() const;
-
-        //void SetMaterial(Material* material);
     };
 
     CLASSTYPE(Mesh)

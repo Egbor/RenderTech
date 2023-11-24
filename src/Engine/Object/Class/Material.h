@@ -2,7 +2,7 @@
 #define MATERIAL_H
 
 #include "Engine/Object/Class/Texture.h"
-#include "Engine/Core/Render/Api/RenderDef.h"
+#include "Engine/Core/Render/Api/Interface/IShaderResource.h"
 
 namespace Engine {
     CLASSTYPE(Material)

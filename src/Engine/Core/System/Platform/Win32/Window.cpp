@@ -43,8 +43,8 @@ namespace Engine {
 	}
 
 	void Win32Window::Show() {
-		ShowWindow(hWnd, SW_SHOWDEFAULT);
-		UpdateWindow(hWnd);
+		ShowWindow(m_winId, SW_SHOWDEFAULT);
+		UpdateWindow(m_winId);
 	}
 
 	bool Win32Window::HasQuit() const {

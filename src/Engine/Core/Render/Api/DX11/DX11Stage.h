@@ -1,40 +1,36 @@
 #ifndef DX11STAGE_H
 #define DX11STAGE_H
 
-#include "Engine/Core/Render/Api/DX11/DX11Context.h"
+#include "Engine/Core/Render/Api/DX11/DX11Def.h"
 #include "Engine/Core/Render/Api/Interface/IRenderStage.h"
 
 namespace Engine {
-	class DX11AbstractStage : public IRenderStage {
+	class DX11StageVS : public IRenderStage {
 	public:
-		DX11AbstractStage(DX11Context* context);
-		virtual ~DX11AbstractStage() = default;
-
-	protected:
-		void BindTexturesWithCallback(const Array<ITextureResourceData*>& resources, std::function<void(ComPtr<ID3D11DeviceContext>, const Array<ID3D11ShaderResourceView*>&)> bindCallback);
-		void BindBuffersWithCallback(const Array<IBufferResourceData*>& resources, std::function<void(ComPtr<ID3D11DeviceContext>, const Array<ID3D11Buffer*>&)> bindCallback);
-
-		DX11Context* m_context;
-	};
-
-	class DX11StageVS : public DX11AbstractStage {
-	public:
-		DX11StageVS(DX11Context* context);
+		DX11StageVS(ComPtr<ID3D11Device> d3dDevice, ComPtr<ID3D11DeviceContext> d3dContext);
 		virtual ~DX11StageVS() = default;
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
 		void BindBuffers(const Array<IBufferResourceData*>& resources) override;
 		void BindShader(IShaderResourceData* resource) override;
+
+	private:
+		ComPtr<ID3D11Device> m_d3dDevice;
+		ComPtr<ID3D11DeviceContext> m_d3dContext;
 	};
 
-	class DX11StagePS : public DX11AbstractStage {
+	class DX11StagePS : public IRenderStage {
 	public:
-		DX11StagePS(DX11Context* d3dContext);
+		DX11StagePS(ComPtr<ID3D11Device> d3dDevice, ComPtr<ID3D11DeviceContext> d3dContext);
 		virtual ~DX11StagePS() = default;
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
 		void BindBuffers(const Array<IBufferResourceData*>& resources) override;
 		void BindShader(IShaderResourceData* resource) override;
+
+	private:
+		ComPtr<ID3D11Device> m_d3dDevice;
+		ComPtr<ID3D11DeviceContext> m_d3dContext;
 	};
 }
 

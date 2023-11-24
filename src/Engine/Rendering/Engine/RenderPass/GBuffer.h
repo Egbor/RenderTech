@@ -13,6 +13,7 @@ namespace Engine {
 		virtual ~GBuffer();
 
 		Int32 Attach(ITargetResourceData* resource);
+		Int32 Attach(TextureType type, TextureFormat format, Int32 width, Int32 height);
 		void Clear(IRenderPipeline* pipeline);
 
 		const Array<ITargetResourceData*>& GetTargets() const;
@@ -27,7 +28,14 @@ namespace Engine {
 		UBuffer();
 		virtual ~UBuffer();
 
-		Int32 Attach(IBufferResourceData* resource);
+		template<class BufferDesc>
+		Int32 Attach(IRenderResourceFactory* factory) {
+			BufferDesc bufferdesc;
+			IBufferResourceData* resource = factory->CreateBuffer(BufferType::BT_UNIFORM, 1, sizeof(BufferDesc), &bufferdesc);
+
+			m_buffers.push_back(resource);
+			return static_cast<Int32>(m_buffers.size() - 1);
+		}
 
 		const Array<IBufferResourceData*>& GetBuffers() const;
 		IBufferResourceData* GetBuffer(Int32 index) const;

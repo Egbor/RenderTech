@@ -36,6 +36,7 @@ namespace Engine {
         IBufferResourceData* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) override;
         IShaderResourceData* CreateShader(ShaderType type, Size codeLength, const void* code) override;
 
+        void SetViewport(Int32 width, Int32 height) override;
         void SetTargets(const Array<ITargetResourceData*>& targets) override;
         IRenderStage* GetStage(RenderStage stage) override;
         ITargetResourceData* GetOutputTarget() const override;

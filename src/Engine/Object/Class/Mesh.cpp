@@ -1,20 +1,12 @@
 #include "Engine/Object/Class/Mesh.h"
-#include "Engine/Object/Global/EngineConfig.h"
 #include "Engine/Core/System/Exception/EngineException.h"
+#include "Engine/Core/Core.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(MeshElement)
 
     MeshElement::MeshElement(const ObjectArgument& arguments) 
         : Super(arguments), m_vertexBuffer(nullptr), m_indexBuffer(nullptr) {
-        //BufferInfo vertexInfo;
-        //BufferInfo indexInfo;
-
-        //argument.Pull(argVertexBufferInfo, vertexInfo);
-        //argument.Pull(argIndexBufferInfo, indexInfo);
-
-         //context->CreateBuffer(tagREALTIME_BUFFER_VERTEX, vertexInfo);
-         //context->CreateBuffer(tagREALTIME_BUFFER_INDEX, indexInfo);
     }
 
     MeshElement::~MeshElement() {
@@ -35,20 +27,10 @@ namespace Engine {
     }
 
     void MeshElement::Create(const BufferInfo& vertexInfo, const BufferInfo& indexInfo) {
-        IContext* context = EngineConfig::GetInstance().GetContext();
-        IRenderResourceFactory* factory = context->QueryResourceFactory();
-
+        IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
         m_vertexBuffer = factory->CreateBuffer(BufferType::BT_VERTEX, vertexInfo.bufferSize, vertexInfo.typeSize, vertexInfo.data);
         m_indexBuffer = factory->CreateBuffer(BufferType::BT_INDEX, indexInfo.bufferSize, indexInfo.typeSize, indexInfo.data);
     }
-
-    //Material* Submesh::GetMaterial() const {
-    //    return m_material;
-    //}
-
-    //void Submesh::SetMaterial(Material* material) {
-    //    m_material = material;
-    //}
 
     GENERATE_INSTANTIATION(Mesh)
 

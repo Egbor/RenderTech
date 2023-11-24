@@ -2,7 +2,6 @@
 #define ACTOR_H
 
 #include "Engine/Object/Entity/Entity.h"
-#include "Engine/Object/Component/InputComponent.h"
 #include "Engine/Object/Component/CameraComponent.h"
 
 namespace Engine {
@@ -20,7 +19,7 @@ namespace Engine {
         Actor(const ObjectArgument& argument);
         virtual ~Actor() = default;
 
-        virtual void SetupInputComponent(InputComponent* component);
+        //virtual void SetupInputComponent(InputComponent* component);
 
         void OnStart() override;
         void OnUpdate(Float deltaTime) override;

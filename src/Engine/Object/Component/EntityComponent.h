@@ -22,9 +22,6 @@ namespace Engine {
         virtual void CreateRenderState(IRenderPass* pass);
 
     protected:
-        void Register();
-        void UnRegister();
-
         virtual UInt64 GetBehaviorID() const;
     };
 }

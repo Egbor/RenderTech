@@ -21,8 +21,8 @@ namespace Engine {
 
     Mesh* PointLightComponent::GetVolume() const {
         if (volume == nullptr) {
-            MeshImport import("./bin/models/sphere.obj");
-            volume = import.LoadResource();
+            /*MeshImport import("./bin/models/sphere.obj");*/
+            volume = nullptr; // import.LoadResource();
         }
         return volume;
     }

@@ -62,8 +62,7 @@ namespace Engine {
 	}
 
 	void RunIMPMesh(const String& value, Object* target, Object* root) {
-		MeshImporter importer(value);
-		importer.ImportTo(target);
+		MeshImporter::ImportTo(value, target);
 	}
 
 	void SetRTOAsValue(Object* target, Object* root) {

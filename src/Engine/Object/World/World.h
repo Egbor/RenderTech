@@ -2,11 +2,9 @@
 #define WORLD_H
 
 #include "Engine/Object/Object.h"
-#include "Engine/Object/World/WorldMode.h"
-
 #include "Engine/Object/Entity/Entity.h"
-#include "Engine/Object/EntityController/EntityController.h"
 
+#include "Engine/Core/Utils/Event.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
@@ -15,38 +13,16 @@ namespace Engine {
         GENERATE_BODY(World, Object)
 
     private:
-        //List<EntityController*> m_controllers;
         List<Entity*> m_entities;
-
-        //Event<Entity*> m_eventOnEntitySpawn;
-        //Event<Entity*> m_eventOnEntityDestroy;
 
     public:
         World(const ObjectArgument& argument);
         virtual ~World();
 
-        //void Start(WorldMode* mode);
-        //void Update(Float deltaTime);
-
         Entity* SpawnEntity(IClass* entityClass, const Vector3& location, const Rotator& rotation);
         void DestroyEntity(Entity* entity);
 
         void ForEachEntity(EventBase<Entity*>& callback);
-
-        //EntityController* AddController(IClass* controllerClass);
-        //void RemoveController(EntityController* controller);
-
-    //    void AddOnEntitySpawnEvent(EventBase<Entity*>& callback);
-    //    void AddOnEntityDestroyEvent(EventBase<Entity*>& callback);
-
-    //    void RemoveOnEntitySpawnEvent(EventBase<Entity*>& callback);
-    //    void RemoveOnEntityDestroyEvent(EventBase<Entity*>& callback);
-
-    //private:
-    //    void SetupWorld(WorldMode* mode);
-    //    void NotifyEntityControllers();
-    //    void NotifyEntitiesAboutStart();
-    //    void NotifyEntitiesAboutUpdate(Float deltaTime);
     };
 }
 
