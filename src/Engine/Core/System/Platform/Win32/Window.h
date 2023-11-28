@@ -16,6 +16,8 @@ namespace Engine {
 		bool HasQuit() const override;
 
 	private:
+		static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 		HWND m_winId;
 		String m_title;
 	};

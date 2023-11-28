@@ -4,10 +4,18 @@
 #include "Engine/Core/Render/Api/RenderDef.h"
 
 namespace Engine {
+	class IContext;
+
 	class IBufferResourceData {
 	public:
 		virtual Int32 GetNumBytes() const = 0;
 		virtual Int32 GetNumElements() const = 0;
+	};
+
+	class IDynamicResourceData {
+	public:
+		virtual RawData GetBufferData() = 0;
+		virtual void Update(IContext* context) = 0;
 	};
 }
 

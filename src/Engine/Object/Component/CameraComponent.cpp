@@ -25,14 +25,15 @@ namespace Engine {
         return CameraComponent::TypeIdClass();
     }
 
-    void CameraComponent::CreateRenderState(IRenderPass* pass) {
+    void CameraComponent::CreateRenderState(AbstractRenderPass* pass) {
         if (pass->Is(RenderPassType::RP_BASE)) {
             Vector3 eyePosition = GetWorldPosition();
             Vector3 focusPosition = GetForward() + eyePosition;
             Vector3 upDirection = GetUp();
+            Float aspectRatio = pass->GetRenderWidth() / pass->GetRenderHeight();
 
             Matrix4x4 view = Matrix4x4::CreateMatrixLookAt(eyePosition, focusPosition, upDirection);
-            Matrix4x4 proj = Matrix4x4::CreateMatrixPerspective(m_fov, 0, m_near, m_far);
+            Matrix4x4 proj = Matrix4x4::CreateMatrixPerspective(m_fov, aspectRatio, m_near, m_far);
 
             BaseRenderPass* baseRenderPass = dynamic_cast<BaseRenderPass*>(pass);
             baseRenderPass->SetViewProjection(view * proj);

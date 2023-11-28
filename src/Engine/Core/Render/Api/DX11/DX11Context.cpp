@@ -48,6 +48,14 @@ namespace Engine {
 
         Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
         m_backTarget = new DX11RenderTarget(m_d3dDevice, new DX11Texture2D(backBuffer), color);
+        
+        RegisterTextureFactory();
+        RegisterBufferFactory();
+        RegisterShaderFactory();
+    }
+
+    DX11Context::~DX11Context() {
+        DELETE_OBJECT(m_backTarget);
     }
 
     ComPtr<ID3D11Device> DX11Context::GetD3D11Device() const {
@@ -121,7 +129,7 @@ namespace Engine {
 
     void DX11Context::SetTargets(const Array<ITargetResourceData*>& targets) {
         Array<ID3D11RenderTargetView*> rendertargets;
-        ID3D11DepthStencilView* depthstencil;
+        ID3D11DepthStencilView* depthstencil = nullptr;
 
         for (Size i = 0; i < targets.size(); i++) {
             if (targets[i]->IsDepth()) {
@@ -134,6 +142,16 @@ namespace Engine {
         }
 
         m_d3dContext->OMSetRenderTargets(static_cast<UINT>(rendertargets.size()), rendertargets.data(), depthstencil);
+    }
+
+    void DX11Context::GetViewport(Viewport& viewport) {
+        D3D11_VIEWPORT d3dViewport;
+        UINT d3dViewportNum = 1;
+
+        m_d3dContext->RSGetViewports(&d3dViewportNum, &d3dViewport);
+
+        viewport.width = d3dViewport.Width;
+        viewport.height = d3dViewport.Height;
     }
 
     IRenderStage* DX11Context::GetStage(RenderStage stage) {
@@ -169,13 +187,6 @@ namespace Engine {
 
         m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         m_d3dContext->DrawIndexed(indexBuffer->GetNumElements(), 0, 0);
-    }
-
-    void DX11Context::Update(IBufferResourceData* buffer, const void* data, Int32 size) {
-        DX11ConstantBuffer* dxBuffer = dynamic_cast<DX11ConstantBuffer*>(buffer);
-        void* mem = dxBuffer->Lock(m_d3dContext);
-        memcpy(mem, data, dxBuffer->GetNumBytes());
-        dxBuffer->Unlock(m_d3dContext);
     }
 
     void DX11Context::RegisterTextureFactory() {

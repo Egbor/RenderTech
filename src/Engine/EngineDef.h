@@ -66,11 +66,27 @@ namespace Engine {
     template<typename T>
     using ConstListIterator = typename List<T>::const_iterator;
 
+    struct RawData {
+        RawData(void* data) 
+            : data(data) {
+
+        }
+
+        template<typename T>
+        T* As() {
+            return reinterpret_cast<T*>(data);
+        }
+
+        void* data;
+    };
+
 #define DELETE_OBJECT(obj) if ((obj) != nullptr) { delete (obj); (obj) = nullptr; }
 #define DELETE_ARRAY_OF_OBJECTS(arr) for (auto obj : (arr)) { DELETE_OBJECT(obj); }
 
 #define FIELD_AS_TEXT(field) #field
 #define IS_POWER_OF_TWO(x) (x && (!(x&(x-1))))
+
+#define INDEX_OF(value) static_cast<Int32>(value)
 
 }
 

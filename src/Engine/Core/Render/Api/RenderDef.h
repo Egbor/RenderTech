@@ -51,11 +51,9 @@ namespace Engine {
         RS_PIXEL = 1,
     };
 
-    struct RenderViewport {
-        Int32 width;
-        Int32 height;
-        Int32 topLeftX;
-        Int32 topLeftY;
+    struct Viewport {
+        Float width;
+        Float height;
     };
 
 #define tagREALTIME_BUFFER_BINDER           "BufferBinder"

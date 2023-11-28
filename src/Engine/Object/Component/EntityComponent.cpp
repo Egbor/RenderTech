@@ -7,7 +7,7 @@ namespace Engine {
         : Super(argument), m_register(nullptr), m_behaviorID(0) {
     }
 
-    void EntityComponent::CreateRenderState(IRenderPass* pass) {
+    void EntityComponent::CreateRenderState(AbstractRenderPass* pass) {
 
     }
 

@@ -1,4 +1,4 @@
-#ifndef IRENDER_SATGE_H
+#ifndef IRENDER_STAGE_H
 #define IRENDER_STAGE_H
 
 #include "Engine/Core/Render/Api/Interface/ITextureResource.h"

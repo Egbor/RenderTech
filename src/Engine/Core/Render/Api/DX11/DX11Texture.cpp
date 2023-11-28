@@ -47,7 +47,7 @@ namespace Engine {
         m_d3dTexture2DDesc.Usage = D3D11_USAGE_DEFAULT;
         m_d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         m_d3dTexture2DDesc.CPUAccessFlags = 0;
-        m_d3dTexture2DDesc.ArraySize = 0;
+        m_d3dTexture2DDesc.ArraySize = 1;
         m_d3dTexture2DDesc.MiscFlags = 1;
     }
 
@@ -65,7 +65,7 @@ namespace Engine {
     }
     
     void DX11Texture2DDescription::RemoveD3D11CubemapPreset() {
-        m_d3dTexture2DDesc.ArraySize = 0;
+        m_d3dTexture2DDesc.ArraySize = 1;
         m_d3dTexture2DDesc.MiscFlags = 1;
     }
 

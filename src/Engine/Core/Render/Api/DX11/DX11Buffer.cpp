@@ -1,4 +1,5 @@
 #include "Engine/Core/Render/Api/DX11/DX11Buffer.h"
+#include "Engine/Core/Render/Api/DX11/DX11Context.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
@@ -54,8 +55,21 @@ namespace Engine {
     }
 
     DX11ConstantBuffer::DX11ConstantBuffer(ComPtr<ID3D11Device> d3dDevice, UINT size, UINT strides, const void* data) 
-        : DX11Buffer(d3dDevice, D3D11_USAGE_DYNAMIC, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, size, strides, data) {
+        : DX11Buffer(d3dDevice, D3D11_USAGE_DYNAMIC, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, size, strides, data)
+        , m_data(size * strides) {
+        memcpy_s(&m_data[0], m_data.size(), data, size * strides);
+    }
 
+    RawData DX11ConstantBuffer::GetBufferData() {
+        return RawData(&m_data[0]);
+    }
+
+    void DX11ConstantBuffer::Update(IContext* context) {
+        DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+
+        void* data = Lock(dxContext->GetD3D11Context());
+        memcpy_s(data, GetNumBytes(), &m_data[0], m_data.size());
+        Unlock(dxContext->GetD3D11Context());
     }
 
     void* DX11ConstantBuffer::Lock(ComPtr<ID3D11DeviceContext> d3dContext) {

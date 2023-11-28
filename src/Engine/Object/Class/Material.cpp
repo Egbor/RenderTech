@@ -29,4 +29,8 @@ namespace Engine {
         }
         return nativeTextures;
     }
+
+    IShaderResourceData* Material::GetNativeShaderResource() const {
+        return nullptr;
+    }
 }

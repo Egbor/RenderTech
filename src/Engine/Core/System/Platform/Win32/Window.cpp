@@ -3,6 +3,15 @@
 constexpr static const char* gWindowClass = "RenderTech";
 
 namespace Engine {
+	LRESULT WINAPI Win32Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+		switch (msg) {
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		}
+		return DefWindowProc(hWnd, msg, wParam, lParam);
+	}
+
 	Win32Window::Win32Window(HINSTANCE hInstance, Int32 width, Int32 height) 
 		: m_title("RTDemo") {
 		WNDCLASSEX wndClass;
@@ -18,7 +27,10 @@ namespace Engine {
 		wndClass.hbrBackground = GetSysColorBrush(COLOR_BTNFACE);
 
 		RegisterClassEx(&wndClass);
-		m_winId = CreateWindowEx(NULL, gWindowClass, m_title.c_str(), WS_OVERLAPPEDWINDOW, 0, 0, width, height, NULL, NULL, hInstance, NULL);
+
+		RECT rect = { 0, 0, width, height };
+		AdjustWindowRect(&rect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, false);
+		m_winId = CreateWindowEx(NULL, gWindowClass, m_title.c_str(), WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, 0, 0, rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, hInstance, NULL);
 
 		if (!m_winId) {
 			MessageBox(NULL, TEXT("Window creation error occure!"), TEXT("Error"), MB_OK | MB_ICONERROR);
@@ -28,13 +40,13 @@ namespace Engine {
 
 	Int32 Win32Window::GetWidth() const {
 		RECT rectWindow;
-		GetWindowRect(m_winId, &rectWindow);
+		GetClientRect(m_winId, &rectWindow);
 		return static_cast<Int32>(rectWindow.right - rectWindow.left);
 	}
 
 	Int32 Win32Window::GetHeight() const {
 		RECT rectWindow;
-		GetWindowRect(m_winId, &rectWindow);
+		GetClientRect(m_winId, &rectWindow);
 		return static_cast<Int32>(rectWindow.bottom - rectWindow.top);
 	}
 

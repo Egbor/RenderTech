@@ -13,7 +13,7 @@ namespace Engine {
 		virtual ~Factory() = default;
 
 		TReturn* Create(TKey key, TArgs ...args) {
-			m_factoryMap[key](args);
+			return m_factoryMap[key](args...);
 		}
 
 		void Register(TKey key, FactoryMethod method) {
@@ -25,7 +25,7 @@ namespace Engine {
 		}
 
 	private:
-		static Map<TKey, FactoryMethod> m_factoryMap;
+		Map<TKey, FactoryMethod> m_factoryMap;
 	};
 }
 

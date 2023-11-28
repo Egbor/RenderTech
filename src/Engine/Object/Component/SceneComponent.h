@@ -18,11 +18,6 @@ namespace Engine {
         PROPERTY(ValueType<Rotator>, rotation)
         Rotator m_rotation;
 
-    //private:
-    //    SceneComponent* m_parent;
-    //    List<SceneComponent*> m_children;
-    //    ListIterator<SceneComponent*> m_childIterator;
-
     public:
         SceneComponent(const ObjectArgument& argument);
         SceneComponent(const SceneComponent&) = default;
@@ -46,11 +41,6 @@ namespace Engine {
         Vector3 GetForward() const;
         Vector3 GetRight() const;
         Vector3 GetUp() const;
-
-    //    const List<SceneComponent*>& GetChildComponents() const;
-
-    //protected:
-    //    virtual UInt64 GetBehaviorID() const override;
 
         SceneComponent* GetChildComponent(Int32 childIndex) const;
         void GetChildrenComponents(Array<SceneComponent*>& components) const;

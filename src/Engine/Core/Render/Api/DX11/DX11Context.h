@@ -15,11 +15,10 @@ namespace Engine {
         ComPtr<IDXGISwapChain> m_dxgiSwapChain;
 
         D3D_FEATURE_LEVEL m_d3dCurrentFeatureLevel;
-        //DX11ContextFactory m_factory;
 
     public:
         DX11Context(IWindow* window);
-        virtual ~DX11Context() = default;
+        virtual ~DX11Context();
 
         ComPtr<ID3D11Device> GetD3D11Device() const;
         ComPtr<ID3D11DeviceContext> GetD3D11Context() const;
@@ -38,12 +37,14 @@ namespace Engine {
 
         void SetViewport(Int32 width, Int32 height) override;
         void SetTargets(const Array<ITargetResourceData*>& targets) override;
+
+        void GetViewport(Viewport& viewport) override;
         IRenderStage* GetStage(RenderStage stage) override;
+
         ITargetResourceData* GetOutputTarget() const override;
 
         void Swap() override;
         void Draw(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) override;
-        void Update(IBufferResourceData* buffer, const void* data, Int32 size) override;
 
     private:
         void RegisterTextureFactory();

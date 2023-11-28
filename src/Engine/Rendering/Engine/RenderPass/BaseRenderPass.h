@@ -1,54 +1,32 @@
 #ifndef BASE_RENDER_PASS_H
 #define BASE_RENDER_PASS_H
 
-#include "Engine/Rendering/Engine/Interface/IRenderPass.h"
-#include "Engine/Rendering/Engine/RenderPass/GBuffer.h"
-#include "Engine/Object/Component/MeshComponent.h"
+#include "Engine/Rendering/Engine/RenderPass/AbstractRenderPass.h"
+#include "Engine/Object/Class/Mesh.h"
 
 namespace Engine {
-	class BaseRenderPassQueue {
-	public:
-		BaseRenderPassQueue();
-		virtual ~BaseRenderPassQueue() = default;
-
-		void SetViewProjection(Matrix4x4 viewproj);
-
-		Mesh* GetMesh();
-		UniformBufferBase& GetUniform();
-
-		bool IsEmpty() const;
-		void Add(MeshComponent* component);
-		void Next();
-
-	private:
-		struct BaseRenderModel {
-			Matrix4x4 world;
-			Mesh* mesh;
-		};
-
-		Queue<BaseRenderModel> m_modelBatch;
-		UniformBufferBase m_uniform;
+	struct RenderModel {
+		Matrix4x4 world;
+		Mesh* mesh;
 	};
 
-	class BaseRenderPass : public IRenderPass {
+	class BaseRenderPass : public AbstractRenderPass {
 	public:
 		BaseRenderPass();
 		virtual ~BaseRenderPass();
 
-		void Create(IRenderResourceFactory* factory, Int32 width, Int32 height) override;
-		void Launch(IRenderPipeline* pipeline) override;
+		void Initialize(ITargetResourceData* output) override;
+		void Launch(IRenderPipeline* pipeline, AbstractRenderPass* prev = nullptr) override;
 		bool Is(RenderPassType type) const override;
 
-		void AddToQueue(MeshComponent* component);
+		void SetModel(Matrix4x4 world, Mesh* mesh);
 		void SetViewProjection(Matrix4x4 viewproj);
 
 	private:
+		Mesh* UpdateAndGetFrontMesh();
+
 		IShaderResourceData* m_vertexShader;
-
-		GBuffer m_gbuffer;
-		UBuffer m_ubuffer;
-
-		BaseRenderPassQueue* m_queue;
+		Queue<RenderModel> m_models;
 	};
 }
 

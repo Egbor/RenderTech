@@ -2,8 +2,7 @@
 #define RENDERENGINE_H
 
 #include "Engine/EngineDef.h"
-#include "Engine/Core/Render/Api/Interface/IContext.h"
-#include "Engine/Core/System/Platform/Interface/IWindow.h"
+#include "Engine/Rendering/Engine/RenderPass/RenderPassContext.h"
 
 #include "Engine/Core/System/Time/Time.h"
 #include "Engine/Object/World/World.h"
@@ -21,6 +20,7 @@ namespace Engine {
 
     private:
         Time* m_time;
+        RenderPassContext* m_passContext;
     };
 }
 

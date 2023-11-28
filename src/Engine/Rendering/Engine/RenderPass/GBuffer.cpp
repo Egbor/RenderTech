@@ -1,6 +1,4 @@
 #include "Engine/Rendering/Engine/RenderPass/GBuffer.h"
-#include "Engine/Core/Render/Api/Interface/IContext.h"
-#include "Engine/Core/Core.h"
 
 namespace Engine {
 	GBuffer::GBuffer() 
@@ -22,9 +20,9 @@ namespace Engine {
 		return this->Attach(factory->CreateTarget(TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height));
 	}
 
-	void GBuffer::Clear(IRenderPipeline* context) {
+	void GBuffer::Clear() {
 		for (Size i = 0; i < m_targets.size(); i++) {
-			m_targets[i]->Clear(dynamic_cast<IContext*>(context));
+			m_targets[i]->Clear(Core::GetInstance()->GetContext());
 		}
 	}
 
@@ -49,11 +47,28 @@ namespace Engine {
 		DELETE_ARRAY_OF_OBJECTS(m_buffers);
 	}
 
-	const Array<IBufferResourceData*>& UBuffer::GetBuffers() const {
-		return m_buffers;
+
+	Int32 UBuffer::Attach(Int32 bufferSize) {
+		Array<Int8> dummy(bufferSize);
+
+		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+		IBufferResourceData* resource = factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), &dummy[0]);
+
+		m_buffers.push_back(resource);
+		return static_cast<Int32>(m_buffers.size() - 1);
 	}
 
-	IBufferResourceData* UBuffer::GetBuffer(Int32 index) const {
-		return m_buffers[index];
+	void UBuffer::Update(Int32 index) {
+		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_buffers[index]);
+		buffer->Update(Core::GetInstance()->GetContext());
+	}
+
+	RawData UBuffer::GetBufferData(Int32 index) const {
+		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_buffers[index]);
+		return buffer->GetBufferData();
+	}
+
+	const Array<IBufferResourceData*>& UBuffer::GetBuffers() const {
+		return m_buffers;
 	}
 }

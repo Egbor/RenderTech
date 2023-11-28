@@ -37,13 +37,19 @@ namespace Engine {
         virtual ~DX11IndexBuffer() = default;
     };
 
-    class DX11ConstantBuffer : public DX11Buffer {
+    class DX11ConstantBuffer : public DX11Buffer, IDynamicResourceData {
     public:
         DX11ConstantBuffer(ComPtr<ID3D11Device> d3dDevice, UINT size, UINT strides, const void* data);
         virtual ~DX11ConstantBuffer() = default;
 
+        RawData GetBufferData() override;
+        void Update(IContext* context) override;
+
+    private:
         void* Lock(ComPtr<ID3D11DeviceContext> d3dContext);
         void Unlock(ComPtr<ID3D11DeviceContext> d3dContext);
+
+        Array<Int8> m_data;
     };
 }
 

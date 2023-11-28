@@ -1,53 +1,49 @@
 #ifndef RENDER_PASS_CONTEXT_H
 #define RENDER_PASS_CONTEXT_H
 
-#include "Engine/Rendering/Engine/Interface/IRenderPassContext.h"
 #include "Engine/Core/Core.h"
 
+#include "Engine/Rendering/Engine/RenderPass/AbstractRenderPass.h"
+#include "Engine/Object/Component/SceneComponent.h"
+
 namespace Engine {
-	class RenderPassContext : public IRenderPassContext {
+	class RenderPassContext {
 	public:
-		RenderPassContext(IWindow* window) {
-			ChangeRenderResolution(window->GetWidth(), window->GetHeight());
+		RenderPassContext(IRenderPipeline* pipeline, Int32 width, Int32 height) {
+			pipeline->SetViewport(width, height);
 		}
 
 		virtual ~RenderPassContext() {
 			DELETE_ARRAY_OF_OBJECTS(m_renderPassBatch);
 		}
 
-		void Append(IRenderPass* pass) override {
-			IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-			ISwapChain* swapchain = Core::GetInstance()->GetContext()->QuerySwapChain();
-
+		void Append(AbstractRenderPass* pass, ISwapChain* swapchain) {
 			m_renderPassBatch.push_back(pass);
-			pass->Create(factory, swapchain->GetWidth(), swapchain->GetHeight());
+			pass->Initialize(swapchain->GetOutputTarget());
 		}
 
-		void ChangeRenderResolution(Int32 width, Int32 height) {
-			IRenderPipeline* pipeline = Core::GetInstance()->GetContext()->QueryPipeline();
-			pipeline->SetViewport(width, height);
-		}
-
-		void Process(Array<SceneComponent*>& components) override {
-			for (IRenderPass* pass : m_renderPassBatch) {
+		void Process(Array<SceneComponent*>& components) {
+			for (AbstractRenderPass* pass : m_renderPassBatch) {
 				for (SceneComponent* component : components) {
 					component->CreateRenderState(pass);
 				}
 			}
 		}
 
-		void Render() override {
-			IRenderPipeline* pipeline = Core::GetInstance()->GetContext()->QueryPipeline();
-			ISwapChain* swapchain = Core::GetInstance()->GetContext()->QuerySwapChain();
+		void Render(IContext* context) {
+			IRenderPipeline* pipeline = context->QueryPipeline();
+			ISwapChain* swapchain = context->QuerySwapChain();
 
-			for (IRenderPass* pass : m_renderPassBatch) {
-				pass->Launch(pipeline);
+			AbstractRenderPass* prevPass = nullptr;
+			for (AbstractRenderPass* pass : m_renderPassBatch) {
+				pass->Launch(pipeline, prevPass);
+				prevPass = pass;
 			}
 			swapchain->Swap();
 		}
 
 	private:
-		Array<IRenderPass*> m_renderPassBatch;
+		Array<AbstractRenderPass*> m_renderPassBatch;
 	};
 }
 
