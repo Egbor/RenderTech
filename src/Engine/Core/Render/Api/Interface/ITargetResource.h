@@ -8,6 +8,7 @@ namespace Engine {
 
 	class ITargetResourceData {
 	public:
+		virtual ~ITargetResourceData() = default;
 		virtual bool IsDepth() const = 0;
 		virtual void Clear(IContext* context) = 0;
 

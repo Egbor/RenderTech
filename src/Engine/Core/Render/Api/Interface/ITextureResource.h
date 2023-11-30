@@ -6,6 +6,7 @@
 namespace Engine {
 	class ITextureResourceData {
 	public:
+		virtual ~ITextureResourceData() = default;
 		virtual Int32 GetWidth() const = 0;
 		virtual Int32 GetHeight() const = 0;
 		virtual TextureFormat GetFormat() const = 0;

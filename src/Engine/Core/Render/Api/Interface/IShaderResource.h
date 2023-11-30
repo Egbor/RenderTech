@@ -6,6 +6,7 @@
 namespace Engine {
 	class IShaderResourceData {
 	public:
+		virtual ~IShaderResourceData() = default;
 		virtual bool Is(ShaderType type) const = 0;
 	};
 }

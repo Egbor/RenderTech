@@ -8,6 +8,7 @@
 namespace Engine {
 	class IContext {
 	public:
+		virtual ~IContext() = default;
 		virtual IRenderResourceFactory* QueryResourceFactory() = 0;
 		virtual IRenderPipeline* QueryPipeline() = 0;
 		virtual ISwapChain* QuerySwapChain() = 0;

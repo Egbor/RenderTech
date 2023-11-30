@@ -56,6 +56,7 @@ namespace Engine {
 
     DX11Context::~DX11Context() {
         DELETE_OBJECT(m_backTarget);
+        m_d3dContext->Flush();
     }
 
     ComPtr<ID3D11Device> DX11Context::GetD3D11Device() const {
@@ -157,11 +158,11 @@ namespace Engine {
     IRenderStage* DX11Context::GetStage(RenderStage stage) {
         switch (stage) {
         case RenderStage::RS_VERTEX: {
-            static DX11StageVS vsStage(m_d3dDevice, m_d3dContext);
+            static DX11StageVS vsStage(this);
             return &vsStage;
         }
         case RenderStage::RS_PIXEL: {
-            static DX11StagePS psStage(m_d3dDevice, m_d3dContext);
+            static DX11StagePS psStage(this);
             return &psStage;
         }
         default:

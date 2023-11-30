@@ -8,12 +8,14 @@ namespace Engine {
 
 	class IBufferResourceData {
 	public:
+		virtual ~IBufferResourceData() = default;
 		virtual Int32 GetNumBytes() const = 0;
 		virtual Int32 GetNumElements() const = 0;
 	};
 
 	class IDynamicResourceData {
 	public:
+		virtual ~IDynamicResourceData() = default;
 		virtual RawData GetBufferData() = 0;
 		virtual void Update(IContext* context) = 0;
 	};

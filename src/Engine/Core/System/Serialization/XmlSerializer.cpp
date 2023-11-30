@@ -98,7 +98,7 @@ namespace Engine {
 
 	Object* ConvertXmlNodeToObject(rapidxml::xml_node<>* node) {
 		IClass* type = dynamic_cast<IClass*>(TypeMap::GetInstance()->GetAsType(node->name()));
-		return dynamic_cast<Object*>(type->CreateDefaultObject(ObjectArgument::Dummy()));
+		return type->CreateDefaultObject(ObjectArgument::Dummy())->As<Object>();
 	}
 
 	void DeserializeXmlAttribues(rapidxml::xml_attribute<>* xmlAttr, Object* rtoRoot, Object* rtoTarget) {

@@ -128,6 +128,26 @@ namespace Engine {
         TF_UNKNOWN
     };
 
+    constexpr static TextureFormat AdjustTargetFormatForTexture(TextureFormat format) {
+        switch (format) {
+        case TextureFormat::TF_R24_BMP_G8_UINT:
+            return TextureFormat::TF_R24G8_BMP;
+        default:
+            break;
+        }
+        return format;
+    }
+
+    constexpr static TextureFormat AdjustTextureFormatForTarget(TextureFormat format) {
+        switch (format) {
+        case TextureFormat::TF_R24G8_BMP:
+            return TextureFormat::TF_R24_BMP_G8_UINT;
+        default:
+            break;
+        }
+        return format;
+    }
+
     union ClearArg {
         Float rgba[4];
         struct {

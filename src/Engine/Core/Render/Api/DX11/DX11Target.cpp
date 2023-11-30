@@ -9,7 +9,7 @@ namespace Engine {
 
         D3D11_RENDER_TARGET_VIEW_DESC  d3dRenderTargetViewDesc;
         ZeroMemory(&d3dRenderTargetViewDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
-        d3dRenderTargetViewDesc.Format = GetD3D11Format(texture->GetFormat());
+        d3dRenderTargetViewDesc.Format = GetD3D11Format(AdjustTextureFormatForTarget(texture->GetFormat()));
 
         if (texture->IsCubemap()) {
             m_d3dViews.resize(6);
@@ -62,7 +62,7 @@ namespace Engine {
         : m_data(texture), m_clearDepth(depth), m_clearStencil(stencil), m_clearFlags(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL ), m_viewId(0) {
         D3D11_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
         ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-        d3dDepthStencilViewDesc.Format = GetD3D11Format(texture->GetFormat());
+        d3dDepthStencilViewDesc.Format = GetD3D11Format(AdjustTextureFormatForTarget(texture->GetFormat()));
 
         if (texture->IsCubemap()) {
             m_d3dViews.resize(6);

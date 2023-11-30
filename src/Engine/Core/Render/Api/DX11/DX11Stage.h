@@ -5,9 +5,11 @@
 #include "Engine/Core/Render/Api/Interface/IRenderStage.h"
 
 namespace Engine {
+	class DX11Context;
+
 	class DX11StageVS : public IRenderStage {
 	public:
-		DX11StageVS(ComPtr<ID3D11Device> d3dDevice, ComPtr<ID3D11DeviceContext> d3dContext);
+		DX11StageVS(DX11Context* dxContext);
 		virtual ~DX11StageVS() = default;
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
@@ -15,13 +17,12 @@ namespace Engine {
 		void BindShader(IShaderResourceData* resource) override;
 
 	private:
-		ComPtr<ID3D11Device> m_d3dDevice;
-		ComPtr<ID3D11DeviceContext> m_d3dContext;
+		DX11Context* m_dxContext;
 	};
 
 	class DX11StagePS : public IRenderStage {
 	public:
-		DX11StagePS(ComPtr<ID3D11Device> d3dDevice, ComPtr<ID3D11DeviceContext> d3dContext);
+		DX11StagePS(DX11Context* dxContext);
 		virtual ~DX11StagePS() = default;
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
@@ -29,8 +30,7 @@ namespace Engine {
 		void BindShader(IShaderResourceData* resource) override;
 
 	private:
-		ComPtr<ID3D11Device> m_d3dDevice;
-		ComPtr<ID3D11DeviceContext> m_d3dContext;
+		DX11Context* m_dxContext;
 	};
 }
 

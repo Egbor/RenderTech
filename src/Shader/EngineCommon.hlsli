@@ -4,9 +4,9 @@
 #if defined(ENGINE_MESH_RENDERPASS)
 
 cbuffer VS_ENGINE_CAMERA_BUFFER : register(b0) {
-	float4x4 WorldViewProjection;
-	float4x4 WorldView;
-	float4x4 invWorldView;
+	float4x4 ViewProjection;
+	float4x4 invWorld;
+	float4x4 World;
 }
 
 Texture2D AlbedoTexture : register(t0);
@@ -42,9 +42,9 @@ sampler LinearSampler : register(s0);
 
 struct VertexShaderOutput {
 	float2 TexCoord : TEXCOORD1;
-	float3 vsTangent : TANGENT;
-	float3 vsBinormal : BINORMAL;
-	float3 vsNormal : NORMAL;
+	float3 wsTangent : TANGENT;
+	float3 wsBinormal : BINORMAL;
+	float3 wsNormal : NORMAL;
 	float4 Position : SV_POSITION;
 };
 

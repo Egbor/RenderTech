@@ -30,7 +30,9 @@ namespace Engine {
         case DXGI_FORMAT_R8G8_UNORM:
             return TextureFormat::TF_R8G8_BMP;
         case DXGI_FORMAT_R8_UNORM:
-            return TextureFormat::TF_UNKNOWN;
+            return TextureFormat::TF_R8_BMP;
+        case DXGI_FORMAT_D24_UNORM_S8_UINT:
+            return TextureFormat::TF_R24_BMP_G8_UINT;
         default:
             break;
         }
@@ -42,13 +44,13 @@ namespace Engine {
         m_d3dTexture2DDesc.Height = static_cast<UINT>(height);
         m_d3dTexture2DDesc.Format = GetD3D11Format(format);
         m_d3dTexture2DDesc.MipLevels = 1;
+        m_d3dTexture2DDesc.ArraySize = 1;
         m_d3dTexture2DDesc.SampleDesc.Count = 1;
         m_d3dTexture2DDesc.SampleDesc.Quality = 0;
         m_d3dTexture2DDesc.Usage = D3D11_USAGE_DEFAULT;
         m_d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         m_d3dTexture2DDesc.CPUAccessFlags = 0;
-        m_d3dTexture2DDesc.ArraySize = 1;
-        m_d3dTexture2DDesc.MiscFlags = 1;
+        m_d3dTexture2DDesc.MiscFlags = 0;
     }
 
     void DX11Texture2DDescription::AddD3D11BindFlags(D3D11_BIND_FLAG d3dBindFlags) {
@@ -66,7 +68,7 @@ namespace Engine {
     
     void DX11Texture2DDescription::RemoveD3D11CubemapPreset() {
         m_d3dTexture2DDesc.ArraySize = 1;
-        m_d3dTexture2DDesc.MiscFlags = 1;
+        m_d3dTexture2DDesc.MiscFlags = 0;
     }
 
     const D3D11_TEXTURE2D_DESC* DX11Texture2DDescription::GetD3D11Texture2DDesc() const {
@@ -99,9 +101,14 @@ namespace Engine {
     }
 
     DX11Texture2D::DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap) {
-        DX11Texture2DDescription textureDesc(width, height, format);
+        DX11Texture2DDescription textureDesc(width, height, AdjustTargetFormatForTexture(format));
 
-        textureDesc.AddD3D11BindFlags(D3D11_BIND_RENDER_TARGET);
+        if (format == TextureFormat::TF_R24G8_BMP || format == TextureFormat::TF_R24_BMP_G8_UINT) {
+            textureDesc.AddD3D11BindFlags(D3D11_BIND_DEPTH_STENCIL);
+        } else {
+            textureDesc.AddD3D11BindFlags(D3D11_BIND_RENDER_TARGET);
+        }
+
         if (isCubemap) {
             textureDesc.AddD3D11CubemapPreset();
         }

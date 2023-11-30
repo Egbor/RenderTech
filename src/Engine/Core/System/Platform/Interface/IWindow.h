@@ -6,6 +6,7 @@
 namespace Engine {
 	class IWindow {
 	public:
+		virtual ~IWindow() = default;
 		virtual Int32 GetWidth() const = 0;
 		virtual Int32 GetHeight() const = 0;
 		virtual UInt64 WinId() const = 0;

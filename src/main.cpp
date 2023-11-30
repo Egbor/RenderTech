@@ -2,6 +2,9 @@
 
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
 #include "Engine/Core/System/Platform/Win32/Window.h"
+
+#include "Engine/Core/Render/Api/DX11/DX11Def.h"
+
 //#include "imgui/imgui.h"
 //
 //extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -63,9 +66,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	window->Show();
 	engine->Run(world);
 
-	DELETE_OBJECT(engine);
-	DELETE_OBJECT(window);
 	DELETE_OBJECT(world);
+	DELETE_OBJECT(engine);
+
+	DELETE_OBJECT(context);
+	DELETE_OBJECT(window);
+
+#if defined(DEBUG) || defined(_DEBUG)
+	ComPtr<IDXGIDebug1> dxgiDebug;
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_IDXGIDebug1, &dxgiDebug))) {
+		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+	}
+#endif
 
 	//WNDCLASSEX wndClass;
 	//ZeroMemory(&wndClass, sizeof(wndClass));

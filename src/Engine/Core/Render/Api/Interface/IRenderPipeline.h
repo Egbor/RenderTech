@@ -6,6 +6,7 @@
 namespace Engine {
 	class IRenderPipeline {
 	public:
+		virtual ~IRenderPipeline() = default;
 		virtual void Draw(IBufferResourceData* vertex, IBufferResourceData* index) = 0;
 
 		virtual void SetViewport(Int32 width, Int32 height) = 0;
