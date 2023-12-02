@@ -1,4 +1,7 @@
-#include "Engine/Core/System/Import/MeshImport.h"
+#include "Engine/Core/System/Resource/Resource.h"
+#include "Engine/Core/System/Exception/EngineException.h"
+
+#include "Engine/Object/Class/Mesh.h"
 #include "Engine/Rendering/MeshAttributes.h"
 
 #include <assimp\Importer.hpp>
@@ -50,11 +53,8 @@ namespace Engine {
         }
     }
 
-    void MeshImporter::ImportTo(const String& filename, Object* object) {
-        if (!object->Is(Mesh::TypeIdClass())) {
-            throw EngineException("[MeshImporter] Object::Is() failed. Object is not a mesh object");
-        }
-
+    template<>
+    Mesh* Resource::Load(const String& filename) {
         Assimp::Importer importer;
 
         importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80.0f);
@@ -71,9 +71,12 @@ namespace Engine {
         );
 
         if (scene == nullptr) {
-            throw new EngineException("[MeshImport] Failed to load model: " + filename);
+            throw new EngineException("[Resource] Failed to load model");
         }
 
-        StartMeshImportingProcess(scene->mRootNode, scene, object->As<Mesh>());
+        Mesh* mesh = ClassType<Mesh>::CreateObject(ObjectArgument::Dummy());
+        StartMeshImportingProcess(scene->mRootNode, scene, mesh);
+
+        return mesh;
     }
 }

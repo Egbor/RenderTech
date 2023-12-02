@@ -26,6 +26,8 @@ namespace Engine {
 		GBuffer& GetGBuffer();
 		UBuffer& GetUBuffer();
 
+		static IShaderResourceData* LoadShader(const String& filename, ShaderType type);
+
 	private:
 		GBuffer m_gbuffer;
 		UBuffer m_ubuffer;

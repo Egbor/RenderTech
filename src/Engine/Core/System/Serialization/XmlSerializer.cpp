@@ -1,9 +1,6 @@
 #include "Engine/Core/System/Serialization/XmlSerializer.h"
 #include "Engine/Object/Object.h"
 
-#include "Engine/Core/System/Import/MeshImport.h"
-#include "Engine/Core/System/Import/TextureImport.h"
-
 #include <functional>
 
 namespace Engine {
@@ -62,7 +59,7 @@ namespace Engine {
 	}
 
 	void RunIMPMesh(const String& value, Object* target, Object* root) {
-		MeshImporter::ImportTo(value, target);
+		//MeshImporter::ImportTo(value, target);
 	}
 
 	void SetRTOAsValue(Object* target, Object* root) {

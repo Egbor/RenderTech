@@ -1,5 +1,4 @@
 #include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
-#include "Engine/Core/System/Import/ShaderImport.h"
 
 namespace Engine {
 	enum class UBuffer_BaseRenderPass {
@@ -30,7 +29,7 @@ namespace Engine {
 		GetUBuffer().Attach(sizeof(UniformBufferBase));
 
 		// Default shaders initialization
-		m_vertexShader = ShaderLoader::Load("assets/shaders/BaseVSShader.cso", ShaderType::ST_VERTEX);
+		m_vertexShader = LoadShader("assets/shaders/BaseVSShader.cso", ShaderType::ST_VERTEX);
 	}
 
 	void BaseRenderPass::Launch(IRenderPipeline* pipeline, AbstractRenderPass* prev) {

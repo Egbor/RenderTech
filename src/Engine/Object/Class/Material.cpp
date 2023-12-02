@@ -1,36 +1,36 @@
 #include "Engine/Object/Class/Material.h"
-
-#include "Engine/Core/System/Import/TextureImport.h"
+#include "Engine/Core/Core.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(Material)
 
     Material::Material(const ObjectArgument& argument)
-        : Super(argument), m_textures(5) {
-        for (Size i = 0; i < m_textures.size(); i++) {
-            m_textures[i] = nullptr;
-        }
+        : Super(argument), m_textures(), m_shader(nullptr) {
     }
 
-    void Material::SetTexture(TextureSlot slot, Texture2D* texture) {
-        m_textures[static_cast<Int32>(slot)] = texture;
+    Material::~Material() {
+        DELETE_ARRAY_OF_OBJECTS(m_textures);
+        DELETE_OBJECT(m_shader);
     }
 
-    Texture2D* Material::GetTexture(TextureSlot slot) const {
-        return m_textures[static_cast<Int32>(slot)];
+    void Material::AddTexture(Texture2D* texture) {
+        m_textures.push_back(texture);
+    }
+
+    void Material::SetShader(const Array<Int8>& bytecode) {
+        IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+        m_shader = factory->CreateShader(ShaderType::ST_PIXEL, bytecode.size(), bytecode.data());
     }
 
     Array<ITextureResourceData*> Material::GetNativeTextureResources() const {
-        Array<ITextureResourceData*> nativeTextures;
-
-        nativeTextures.reserve(m_textures.size());
-        for (Texture2D* texture : m_textures) {
-            nativeTextures.push_back(texture->GetNativeResource());
+        Array<ITextureResourceData*> nativeTextures(m_textures.size());
+        for (Size i = 0; i < nativeTextures.size(); i++) {
+            nativeTextures[i] = m_textures[i]->GetNativeResource();
         }
         return nativeTextures;
     }
 
     IShaderResourceData* Material::GetNativeShaderResource() const {
-        return nullptr;
+        return m_shader;
     }
 }

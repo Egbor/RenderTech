@@ -11,13 +11,14 @@ namespace Engine {
 
     private:
         Array<Texture2D*> m_textures;
+        IShaderResourceData* m_shader;
 
     public:
         Material(const ObjectArgument& argument);
-        virtual ~Material() = default;
+        virtual ~Material();
 
-        void SetTexture(TextureSlot slot, Texture2D* texture);
-        Texture2D* GetTexture(TextureSlot slot) const;
+        void AddTexture(Texture2D* texture);
+        void SetShader(const Array<Int8>& bytecode);
 
         Array<ITextureResourceData*> GetNativeTextureResources() const;
         IShaderResourceData* GetNativeShaderResource() const;

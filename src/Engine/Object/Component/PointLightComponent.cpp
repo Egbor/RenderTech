@@ -1,5 +1,4 @@
 #include "Engine/Object/Component/PointLightComponent.h"
-#include "Engine/Core/System/Import/MeshImport.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(PointLightComponent)

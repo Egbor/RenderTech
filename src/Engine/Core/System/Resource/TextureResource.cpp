@@ -1,9 +1,10 @@
-#include "Engine/Core/System/Import/TextureImport.h"
+#include "Engine/Core/System/Resource/Resource.h"
 #include "Engine/Core/System/Exception/EngineException.h"
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Render/Api/RenderDef.h"
+
+#include "Engine/Object/Class/Texture.h"
 
 #include <FreeImage.h>
-#include <sstream>
 
 namespace Engine {
     TextureFormat ToFormat(FIBITMAP* dib) {
@@ -48,7 +49,7 @@ namespace Engine {
     }
 
     FREE_IMAGE_TYPE ToFreeImageFormat(TextureFormat format) {
-        switch(format) {
+        switch (format) {
         case TextureFormat::TF_R8G8B8A8_BMP:
         case TextureFormat::TF_B8G8R8A8_BMP:
             return FIT_BITMAP;
@@ -98,7 +99,8 @@ namespace Engine {
 
             if (strides < 32) {
                 dibExd = FreeImage_ConvertTo32Bits(dib);
-            } else {
+            }
+            else {
                 dibExd = FreeImage_ConvertToRGBAF(dib);
             }
 
@@ -114,11 +116,8 @@ namespace Engine {
         }
     }
 
-    void TextureImporter::ImportTo(const String& filename, Object* object) {
-        if (!object->Is(Texture2D::TypeIdClass())) {
-            throw EngineException("[TextureImporter] Object::Is() failed. Object is not a texture object");
-        }
-
+    template<>
+    Texture2D* Resource::Load(const String& filename) {
         FIBITMAP* dib = LoadFreeImageResource(filename);
 
         Array<Int8*> data;
@@ -126,9 +125,11 @@ namespace Engine {
         Int32 height = static_cast<Int32>(FreeImage_GetHeight(dib));
         data.push_back(reinterpret_cast<Int8*>(FreeImage_GetBits(dib)));
 
-        Texture2D* texture = object->As<Texture2D>();
+        Texture2D* texture = ClassType<Texture2D>::CreateObject(ObjectArgument::Dummy());
         texture->Create(width, height, ToFormat(dib), data);
 
         FreeImage_Unload(dib);
+
+        return texture;
     }
 }
