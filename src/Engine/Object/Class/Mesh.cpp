@@ -46,6 +46,7 @@ namespace Engine {
     void Mesh::AddMeshElement(MeshDescription* meshDesc) {
         MeshElement* element = ClassType<MeshElement>::CreateObject(ObjectArgument::Dummy());
         element->Create(meshDesc->GetMeshInfo(), meshDesc->GetFaceInfo());
+
         m_submeshes.push_back(element);
         m_materials.push_back(nullptr);
     }

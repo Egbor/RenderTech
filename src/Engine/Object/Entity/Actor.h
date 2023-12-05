@@ -3,6 +3,8 @@
 
 #include "Engine/Object/Entity/Entity.h"
 #include "Engine/Object/Component/CameraComponent.h"
+#include "Engine/Object/Component/InputComponent.h"
+#include "Engine/Object/Component/MovementComponent.h"
 
 namespace Engine {
     CLASSTYPE(Actor)
@@ -10,29 +12,31 @@ namespace Engine {
         GENERATE_BODY(Actor, Entity)
 
     private:
-        Vector3 m_movement;
-        Rotator m_rotation;
+        //Rotator m_rotation;
 
-        SceneComponent* m_componentForRollRotation;
+        //SceneComponent* m_componentForRollRotation;
+
+        MovementComponent* m_movementComponent;
+        InputComponent* m_inputComponent;
 
     public:
         Actor(const ObjectArgument& argument);
-        virtual ~Actor() = default;
+        virtual ~Actor();
 
-        //virtual void SetupInputComponent(InputComponent* component);
+        virtual void SetupInputComponent(InputComponent* component);
 
         void OnStart() override;
         void OnUpdate(Float deltaTime) override;
 
         void AddMovement(const Vector3& offset);
-        void AddPitchRotation(Float value);
-        void AddRollRotation(Float value);
+    //    void AddPitchRotation(Float value);
+    //    void AddRollRotation(Float value);
 
-    protected:
-        void AllowControlCameraRotation(CameraComponent* component);
+    //protected:
+    //    void AllowControlCameraRotation(CameraComponent* component);
 
-    private:
-        void ResetMovement();
+    //private:
+    //    void ResetMovement();
     };
 }
 

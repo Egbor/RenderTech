@@ -7,7 +7,7 @@
 namespace Engine {
     class DX11RenderTarget : public ITargetResourceData {
     public:
-        DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float color[4]);
+        DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float* color);
         virtual ~DX11RenderTarget();
 
         bool IsDepth() const override;

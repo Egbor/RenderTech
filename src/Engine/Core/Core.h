@@ -3,6 +3,7 @@
 
 #include "Engine/Core/Render/Api/Interface/IContext.h"
 #include "Engine/Core/System/Platform/Interface/IWindow.h"
+#include "Engine/Core/System/Platform/Interface/IInputable.h"
 
 namespace Engine {
 	class Core {
@@ -13,6 +14,7 @@ namespace Engine {
 	public:
 		IContext* GetContext() const;
 		IWindow* GetWindow() const;
+		Input* GetInput() const;
 		
 		void Initialize(IWindow* window, IContext* context);
 		

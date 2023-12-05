@@ -27,7 +27,6 @@ namespace Engine {
         MeshDescription desc;
         MeshAttributes meshAttributes(desc);
 
-        outMesh->AddMeshElement(&desc);
         for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
             VertexID v = desc.CreateVertex();
             TryImportVector3DData(meshAttributes.GetVertexPositions(), v, mesh->mVertices, i);
@@ -41,6 +40,8 @@ namespace Engine {
             aiFace face = mesh->mFaces[i];
             desc.CreateFace({ (int)face.mIndices[0], (int)face.mIndices[1], (int)face.mIndices[2] });
         }
+
+        outMesh->AddMeshElement(&desc);
     }
 
     void StartMeshImportingProcess(aiNode* node, const aiScene* scene, Mesh* outMesh) {

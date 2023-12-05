@@ -3,8 +3,16 @@
 constexpr static const char* gWindowClass = "RenderTech";
 
 namespace Engine {
+	Win32Input& Win32Window::GetWin32Input() {
+		static Win32Input input;
+		return input;
+	}
+
 	LRESULT WINAPI Win32Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		switch (msg) {
+		case WM_INPUT:
+			GetWin32Input().UpdateInputDevices(wParam, lParam);
+			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
@@ -36,6 +44,8 @@ namespace Engine {
 			MessageBox(NULL, TEXT("Window creation error occure!"), TEXT("Error"), MB_OK | MB_ICONERROR);
 			exit(-1);
 		}
+
+		GetWin32Input().InitializeInputDevices();
 	}
 
 	Int32 Win32Window::GetWidth() const {
@@ -64,10 +74,15 @@ namespace Engine {
 		ZeroMemory(&msg, sizeof(msg));
 
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			GetWin32Input().ResetInputDevices(&msg);
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 
 		return msg.message == WM_QUIT;
+	}
+
+	Input* Win32Window::GetInput() const {
+		return &GetWin32Input();
 	}
 }

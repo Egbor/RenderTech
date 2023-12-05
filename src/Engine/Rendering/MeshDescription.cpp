@@ -30,7 +30,7 @@ namespace Engine {
     }
 
     BufferInfo MeshDescription::GetFaceInfo() {
-        return { m_faces.data(), static_cast<UInt32>(m_faces.size()), sizeof(MeshFace) };
+        return { m_faces.data(), static_cast<UInt32>(m_faces.size() * 3), sizeof(UInt32) };
     }
 
     Array<MeshVertex>& MeshDescription::Vertices() {

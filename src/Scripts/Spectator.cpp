@@ -16,19 +16,19 @@ namespace Engine {
         DELETE_OBJECT(m_cameraComponent);
     }
 
-    //void Spectator::SetupInputComponent(InputComponent* component) {
-    //    Super::SetupInputComponent(component);
-    //    component->BindAxis("Forword", this, &Spectator::OnForwardMovement);
-    //    component->BindAxis("Right", this, &Spectator::OnRightMovement);
-    //    component->BindAxis("LookRight", this, &Spectator::AddPitchRotation);
-    //    component->BindAxis("LookUp", this, &Spectator::AddRollRotation);
-    //    component->BindAxis("RMB", this, &Spectator::OnMouseActive);
-    //}
+    void Spectator::SetupInputComponent(InputComponent* component) {
+        Super::SetupInputComponent(component);
+        component->BindAxis("Forword", this, &Spectator::OnForwardMovement);
+        component->BindAxis("Right", this, &Spectator::OnRightMovement);
+        //component->BindAxis("LookRight", this, &Spectator::AddPitchRotation);
+        //component->BindAxis("LookUp", this, &Spectator::AddRollRotation);
+        //component->BindAxis("RMB", this, &Spectator::OnMouseActive);
+    }
 
     void Spectator::OnUpdate(Float deltaTime) {
         Super::OnUpdate(deltaTime);
 
-        AllowControlCameraRotation(nullptr);
+        //AllowControlCameraRotation(nullptr);
     }
 
     void Spectator::OnForwardMovement(Float value) {
@@ -39,8 +39,8 @@ namespace Engine {
        AddMovement(GetEntityRight() * value);
     }
 
-    void Spectator::OnMouseActive(Float value) {
-        AllowControlCameraRotation(m_cameraComponent);
-        //m_isMouseActive = (value > 0.0f);
-    }
+    //void Spectator::OnMouseActive(Float value) {
+    //    //AllowControlCameraRotation(m_cameraComponent);
+    //    //m_isMouseActive = (value > 0.0f);
+    //}
 }

@@ -61,7 +61,7 @@ namespace Engine {
 		Array<Int8> dummy(bufferSize);
 
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		return ProcessCommonAttachment(m_buffers, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), &dummy[0]), true);
+		return ProcessCommonAttachment(m_buffers, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), dummy.data()), true);
 	}
 
 	void UBuffer::Update(Int32 index) {

@@ -53,6 +53,9 @@
 //	return DefWindowProc(hWnd, msg, wParam, lParam);
 //}
 
+#include "Scripts/Spectator.h"
+#include "Scripts/VisibleObject.h"
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	Engine::IWindow* window = new Engine::Win32Window(hInstance, 800, 600);
 	Engine::IContext* context = new Engine::DX11Context(window);
@@ -62,6 +65,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	Engine::EngineClass* engine = new Engine::EngineClass(window, context);
 	Engine::World* world = Engine::ClassType<Engine::World>::CreateObject(Engine::ObjectArgument::Dummy());
+
+	world->SpawnEntity(Engine::ClassOf<Engine::Spectator>::value, Engine::Vector3(0.0f, 0.0f, -1.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
+	world->SpawnEntity(Engine::ClassOf<Engine::VisibleObject>::value, Engine::Vector3(0.0f, 0.0f, 0.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
 
 	window->Show();
 	engine->Run(world);

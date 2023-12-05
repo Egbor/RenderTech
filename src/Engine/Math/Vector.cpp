@@ -56,6 +56,16 @@ namespace Engine {
         return result.x;
     }
 
+    float Vector3::Abs() {
+        XMVECTOR xmVector = XMLoadFloat3(this);
+        XMVECTOR xmAbsVector = XMVectorAbs(xmVector);
+
+        Vector3 result;
+        XMStoreFloat3(&result, xmAbsVector);
+
+        return result.x;
+    }
+
     Vector3 Vector3::operator-() {
         XMVECTOR xmVector1 = XMLoadFloat3(this);
         XMVECTOR xmVector = -xmVector1;

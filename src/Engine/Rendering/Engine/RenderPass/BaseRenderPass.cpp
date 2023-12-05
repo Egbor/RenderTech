@@ -20,7 +20,7 @@ namespace Engine {
 		Int32 height = GetRenderHeight();
 
 		// GBuffer initialization
-		GetGBuffer().Attach(TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height);
+		GetGBuffer().Attach(/*TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height*/ output);
 		GetGBuffer().Attach(TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
 		GetGBuffer().Attach(TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
 		GetGBuffer().Attach(TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);

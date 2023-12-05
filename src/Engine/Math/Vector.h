@@ -35,6 +35,7 @@ namespace Engine {
         Vector3 Normalize();
         Vector3 Cross(const Vector3& vector);
         float Dot(const Vector3& vector);
+        float Abs();
 
         Vector3 operator-();
 

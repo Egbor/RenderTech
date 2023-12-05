@@ -3,9 +3,9 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    DX11RenderTarget::DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float color[4])
+    DX11RenderTarget::DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float* color)
         : m_data(texture), m_viewId(0) {
-        memcpy_s(m_clearColor, 4, color, 4);
+        memcpy_s(m_clearColor, sizeof(m_clearColor), color, sizeof(m_clearColor));
 
         D3D11_RENDER_TARGET_VIEW_DESC  d3dRenderTargetViewDesc;
         ZeroMemory(&d3dRenderTargetViewDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));

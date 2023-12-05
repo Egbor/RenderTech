@@ -176,7 +176,7 @@ namespace Engine {
     }
 
     void DX11Context::Swap() {
-        m_dxgiSwapChain->Present(1, 0);
+        m_dxgiSwapChain->Present(0, 0);
     }
 
     void DX11Context::Draw(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) {
@@ -196,7 +196,7 @@ namespace Engine {
         m_staticTextureFactory.Register(TextureType::TT_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
             return new DX11Texture2D(d3dDevice, format, width, height, data); });
 
-        Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        static Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
         m_renderTargetFactory.Register(TextureType::TT_DEFAULT, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
             return new DX11RenderTarget(d3dDevice, new DX11Texture2D(d3dDevice, format, width, height, false), color); });

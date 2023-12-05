@@ -3,6 +3,8 @@
 #include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
 #include "Engine/Rendering/Engine/RenderPass/LightRenderPass.h"
 
+#include "Engine/Core/System/Platform/Common/Input.h"
+
 namespace Engine {
 	EngineClass::EngineClass(IWindow* window, IContext* context) 
 		: m_time(new Time()) {
@@ -10,7 +12,7 @@ namespace Engine {
 
 		m_passContext = new RenderPassContext(context->QueryPipeline(), window->GetWidth(), window->GetHeight());
 		m_passContext->Append(new BaseRenderPass(), context->QuerySwapChain());
-		m_passContext->Append(new LightRenderPass(), context->QuerySwapChain());
+		//m_passContext->Append(new LightRenderPass(), context->QuerySwapChain());
 	}
 
 	EngineClass::~EngineClass() {

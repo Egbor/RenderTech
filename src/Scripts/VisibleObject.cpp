@@ -14,13 +14,13 @@ namespace Engine {
         m_meshComponent = ClassType<MeshComponent>::CreateObject(ObjectArgument::Dummy());
         m_meshComponent->AttachToComponent(GetRootComponent());
 
-        Mesh* mesh = Resource::Load<Mesh*>("assets/meshes/SM_Gameboy.fbx");
+        Mesh* mesh = Resource::Load<Mesh*>("assets/models/SM_Gameboy.fbx");
         Material* material = Resource::Load<Material*>("assets/materials/SM_Gameboy.xml");
         mesh->SetMaterial(0, material);
 
         m_meshComponent->SetMesh(mesh);
 
-        SetEntityLocation(Vector3(0.0f, -0.1f, -0.0f));
+        //SetEntityLocation(Vector3(0.0f, -0.1f, -0.0f));
         SetEntityScale(Vector3(0.0009f, 0.0009f, 0.0009f));
     }
 

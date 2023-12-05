@@ -16,6 +16,10 @@ namespace Engine {
 		return m_window;
 	}
 
+	Input* Core::GetInput() const {
+		return dynamic_cast<IInputable*>(m_window)->GetInput();
+	}
+
 	void Core::Initialize(IWindow* window, IContext* context) {
 		m_window = window;
 		m_context = context;
