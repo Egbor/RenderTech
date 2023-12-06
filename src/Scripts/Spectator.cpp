@@ -10,6 +10,8 @@ namespace Engine {
         : Super(argument) {
         m_cameraComponent = ClassType<CameraComponent>::CreateObject(ObjectArgument::Dummy());
         m_cameraComponent->AttachToComponent(GetRootComponent());
+
+        AllowControlCameraRotation(m_cameraComponent);
     }
 
     Spectator::~Spectator() {
@@ -20,15 +22,12 @@ namespace Engine {
         Super::SetupInputComponent(component);
         component->BindAxis("Forword", this, &Spectator::OnForwardMovement);
         component->BindAxis("Right", this, &Spectator::OnRightMovement);
-        //component->BindAxis("LookRight", this, &Spectator::AddPitchRotation);
-        //component->BindAxis("LookUp", this, &Spectator::AddRollRotation);
-        //component->BindAxis("RMB", this, &Spectator::OnMouseActive);
+        component->BindAxis("Horizontal", this, &Spectator::AddPitch);
+        component->BindAxis("Vertical", this, &Spectator::AddRoll);
     }
 
     void Spectator::OnUpdate(Float deltaTime) {
         Super::OnUpdate(deltaTime);
-
-        //AllowControlCameraRotation(nullptr);
     }
 
     void Spectator::OnForwardMovement(Float value) {
@@ -38,9 +37,4 @@ namespace Engine {
     void Spectator::OnRightMovement(Float value) {
        AddMovement(GetEntityRight() * value);
     }
-
-    //void Spectator::OnMouseActive(Float value) {
-    //    //AllowControlCameraRotation(m_cameraComponent);
-    //    //m_isMouseActive = (value > 0.0f);
-    //}
 }

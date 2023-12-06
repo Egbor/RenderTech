@@ -7,7 +7,7 @@
 
 namespace Engine {
 	EngineClass::EngineClass(IWindow* window, IContext* context) 
-		: m_time(new Time()) {
+		: m_time(new Time()), m_gameThread(new EngineThread()), m_renderThread(new EngineThread) {
 		Core::GetInstance()->Initialize(window, context);
 
 		m_passContext = new RenderPassContext(context->QueryPipeline(), window->GetWidth(), window->GetHeight());
@@ -16,37 +16,46 @@ namespace Engine {
 	}
 
 	EngineClass::~EngineClass() {
+		DELETE_OBJECT(m_renderThread);
+		DELETE_OBJECT(m_gameThread);
+
 		DELETE_OBJECT(m_time);
 		DELETE_OBJECT(m_passContext);
 	}
 
 	void EngineClass::Run(World* world) {
-		static EventBase<Entity*>& onStart = Delegate<EngineClass, Entity*>::Allocate(this, &EngineClass::OnWorldStart);
-		static EventBase<Entity*>& onUpdate = Delegate<EngineClass, Entity*>::Allocate(this, &EngineClass::OnWorldUpdate);
-
+		EngineThreadSync sync(2);
 		IWindow* window = Core::GetInstance()->GetWindow();
-		IContext* context = Core::GetInstance()->GetContext();
 
 		m_time->Start();
+		m_gameThread->Start(sync, Delegate<EngineClass>::Allocate(this, &EngineClass::RunGameThread));
+		m_renderThread->Start(sync, Delegate<EngineClass>::Allocate(this, &EngineClass::RunRenderThread));
 
-		world->ForEachEntity(onStart);
 		while (!window->HasQuit()) {
-			world->ForEachEntity(onUpdate);
-
-			m_passContext->Render(context);
-			m_time->Tick();
+			sync.Allow();
 		}
+
+		m_gameThread->Wait();
+		m_renderThread->Wait();
 	}
 
-	void EngineClass::OnWorldStart(Entity* entity) {
-		entity->OnStart();
+	void EngineClass::RunGameThread() {
+		m_time->Tick();
 	}
 
-	void EngineClass::OnWorldUpdate(Entity* entity) {
-		entity->OnUpdate(m_time->DeltaTime());
-
-		Array<SceneComponent*> components;
-		entity->GetRootComponent()->GetChildrenComponents(components);
-		m_passContext->Process(components);
+	void EngineClass::RunRenderThread() {
+		m_passContext->Render(Core::GetInstance()->GetContext());
 	}
+
+	//void EngineClass::OnWorldStart(Entity* entity) {
+	//	entity->OnStart();
+	//}
+
+	//void EngineClass::OnWorldUpdate(Entity* entity) {
+	//	entity->OnUpdate(m_time->DeltaTime());
+
+	//	Array<SceneComponent*> components;
+	//	entity->GetRootComponent()->GetChildrenComponents(components);
+	//	m_passContext->Process(components);
+	//}
 }

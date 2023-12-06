@@ -11,6 +11,8 @@ namespace Engine {
         : Super(argument) {
         m_inputComponent = ClassType<InputComponent>::CreateObject(ObjectArgument::Dummy());
         m_movementComponent = ClassType<MovementComponent>::CreateObject(ObjectArgument::Dummy());
+
+        m_movementComponent->AssociateWithActor(this);
     }
 
     Actor::~Actor() {
@@ -29,45 +31,29 @@ namespace Engine {
     void Actor::OnUpdate(Float deltaTime) {
         Super::OnUpdate(deltaTime);
 
-        m_movementComponent->UpdateMovement(this, deltaTime);
-        m_inputComponent->UpdateInputs(1.0f);
+        m_movementComponent->UpdateMovement(deltaTime);
+        m_inputComponent->UpdateInputs();
 
-        Vector3 position = GetRootComponent()->GetWorldPosition();
+        //Vector3 position = GetRootComponent()->GetWorldPosition();
 
-        std::stringstream ss;
-        ss << "Position: " << position.x << ", " << position.y << ", " << position.z << "(" << deltaTime << ")" << std::endl;
-        OutputDebugStringA(ss.str().c_str());
-
-       /* AddEntityLocation(m_movement.Normalize() * deltaTime);*/
-
-        //if (m_componentForRollRotation != nullptr) {
-        //    AddEntityRotation(Rotator(0.0f, m_rotation.y * deltaTime, 0.0f));
-        //    Float oldRoll = m_componentForRollRotation->GetLocalRotation().x;
-        //    Float newRoll = std::clamp(oldRoll + m_rotation.x * deltaTime, -90.0f, 90.0f);
-        //    m_componentForRollRotation->SetLocalRotation(Rotator(newRoll, 0.0f, 0.0f));
-        //}
-
-        //ResetMovement();
+        //std::stringstream ss;
+        //ss << "Position: " << position.x << ", " << position.y << ", " << position.z << "(" << deltaTime << ")" << std::endl;
+        //OutputDebugStringA(ss.str().c_str());
     }
 
     void Actor::AddMovement(const Vector3& offset) {
         m_movementComponent->AddMoveVector(offset);
     }
 
-    //void Actor::AddPitchRotation(Float value) {
-    //    m_rotation.y = 3000.0f * value;
-    //}
+    void Actor::AddPitch(Float value) {
+        m_movementComponent->AddActorRotator(Rotator(0.0f, value * 15.0f, 0.0f));
+    }
 
-    //void Actor::AddRollRotation(Float value) {
-    //    m_rotation.x = 3000.0f * value;
-    //}
+    void Actor::AddRoll(Float value) {
+        m_movementComponent->AddCameraRotator(Rotator(value * 15.0f, 0.0f, 0.0f));
+    }
 
-    //void Actor::AllowControlCameraRotation(CameraComponent* component) {
-    //    m_componentForRollRotation = component;
-    //}
-
-    //void Actor::ResetMovement() {
-    //    m_movement = Vector3::zero;
-    //    m_rotation = Rotator(0.0f, 0.0f, 0.0f);
-    //}
+    void Actor::AllowControlCameraRotation(CameraComponent* component) {
+        m_movementComponent->AssociateWithCamera(component);
+    }
 }

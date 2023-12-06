@@ -5,7 +5,7 @@
 namespace Engine {
     Time::Time()
         : m_secondsPerCount(0.0), m_deltaTime(-1.0), m_baseTime(0), m_pauseTime(0)
-        , m_stopTime(0), m_prevTime(0), m_currTime(0), m_stopped(false) {
+        , m_stopTime(0), m_prevTime(0), m_currTime(0), m_stopped(true) {
         Int64 countsPerSec;
         QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
         m_secondsPerCount = 1.0 / (Double)countsPerSec;

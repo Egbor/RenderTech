@@ -20,6 +20,12 @@ namespace Engine {
 
         Rotator operator*(Float value) const;
         Rotator operator/(Float value) const;
+
+        void operator+=(const Rotator& rotator);
+        void operator-=(const Rotator& rotator);
+
+        void operator*=(const Float value);
+        void operator/=(const Float value);
     };
 }
 

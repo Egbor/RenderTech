@@ -8,9 +8,9 @@ namespace Engine {
 
 	}
 
-	void InputComponent::UpdateInputs(Float deltaTime) {
+	void InputComponent::UpdateInputs() {
 		Input* input = Core::GetInstance()->GetInput();
 		input->NotifyAboutActionTriggering(&m_config);
-		input->NotifyAboutAxisTriggering(&m_config, deltaTime);
+		input->NotifyAboutAxisTriggering(&m_config);
 	}
 }

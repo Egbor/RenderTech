@@ -33,7 +33,7 @@ namespace Engine {
 		void AddAxis(const String& tag, EventBase<Float>& callback);
 
 		void NotifyAboutActionTriggering(const InputConfig* config);
-		void NotifyAboutAxisTriggering(const InputConfig* config, Float value);
+		void NotifyAboutAxisTriggering(const InputConfig* confi);
 
 	protected:
 		void SetValueInKeymap(InputKey key, InputValue value);

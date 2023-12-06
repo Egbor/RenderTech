@@ -74,4 +74,20 @@ namespace Engine {
 
         return result;
     }
+
+    void Rotator::operator+=(const Rotator& rotator) {
+        *this = *this + rotator;
+    }
+
+    void Rotator::operator-=(const Rotator& rotator) {
+        *this = *this - rotator;
+    }
+
+    void Rotator::operator*=(const Float value) {
+        *this = *this * value;
+    }
+
+    void Rotator::operator/=(const Float value) {
+        *this = *this * value;
+    }
 }

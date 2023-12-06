@@ -30,7 +30,7 @@ namespace Engine {
 			input->AddAxis(tag, Delegate<TOwner, Float>::Allocate(owner, method));
 		}
 
-		void UpdateInputs(Float deltaTime);
+		void UpdateInputs();
 	};
 }
 

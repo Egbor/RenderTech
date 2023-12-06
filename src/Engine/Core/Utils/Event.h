@@ -91,6 +91,8 @@ namespace Engine {
 
 	template<class TOwner, class ...TArgs>
 	class Delegate : public EventBase<TArgs...> {
+		friend TOwner;
+
 	private:
 		using TDelegate = Delegate<TOwner, TArgs...>;
 		using TMethod = Method<TOwner, TArgs...>;

@@ -12,10 +12,6 @@ namespace Engine {
         GENERATE_BODY(Actor, Entity)
 
     private:
-        //Rotator m_rotation;
-
-        //SceneComponent* m_componentForRollRotation;
-
         MovementComponent* m_movementComponent;
         InputComponent* m_inputComponent;
 
@@ -28,15 +24,12 @@ namespace Engine {
         void OnStart() override;
         void OnUpdate(Float deltaTime) override;
 
+    protected:
         void AddMovement(const Vector3& offset);
-    //    void AddPitchRotation(Float value);
-    //    void AddRollRotation(Float value);
+        void AddPitch(Float value);
+        void AddRoll(Float value);
 
-    //protected:
-    //    void AllowControlCameraRotation(CameraComponent* component);
-
-    //private:
-    //    void ResetMovement();
+        void AllowControlCameraRotation(CameraComponent* component);
     };
 }
 

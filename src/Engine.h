@@ -1,9 +1,10 @@
 #ifndef RENDERENGINE_H
 #define RENDERENGINE_H
 
+#include "EngineThread.h"
 #include "Engine/EngineDef.h"
-#include "Engine/Rendering/Engine/RenderPass/RenderPassContext.h"
 
+#include "Engine/Rendering/Engine/RenderPass/RenderPassContext.h"
 #include "Engine/Core/System/Time/Time.h"
 #include "Engine/Object/World/World.h"
 
@@ -15,12 +16,18 @@ namespace Engine {
 
         void Run(World* world);
 
-        void OnWorldStart(Entity* entity);
-        void OnWorldUpdate(Entity* entity);
-
     private:
+        //void OnWorldStart(Entity* entity);
+        //void OnWorldUpdate(Entity* entity);
+
+        void RunGameThread();
+        void RunRenderThread();
+
         Time* m_time;
         RenderPassContext* m_passContext;
+
+        EngineThread* m_gameThread;
+        EngineThread* m_renderThread;
     };
 }
 

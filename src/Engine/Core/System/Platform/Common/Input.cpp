@@ -20,11 +20,11 @@ namespace Engine{
 		}
 	}
 
-	void Input::NotifyAboutAxisTriggering(const InputConfig* config, Float value) {
+	void Input::NotifyAboutAxisTriggering(const InputConfig* config) {
 		for (auto axis = m_axis.begin(); axis != m_axis.end(); axis++) {
 			const Array<InputBinding<Float>>& bindings = config->GetAxis(axis->first);
 			for (auto binding = bindings.begin(); binding != bindings.end(); binding++) {
-				axis->second(binding->inputValue * m_keymap[binding->inputKey].axisValue * value);
+				axis->second(binding->inputValue * m_keymap[binding->inputKey].axisValue);
 			}
 		}
 	}
