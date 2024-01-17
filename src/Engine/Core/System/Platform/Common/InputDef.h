@@ -1,6 +1,8 @@
 #ifndef INPUT_DEF_H
 #define INPUT_DEF_H
 
+#include "Engine/EngineDef.h"
+
 namespace Engine {
     enum class InputKey {
         IK_A = 0x41,
@@ -68,6 +70,17 @@ namespace Engine {
     struct InputBinding {
         InputKey inputKey;
         TBindValue inputValue;
+    };
+
+    struct InputValue {
+        InputValue() : axisValue(0.0f) {};
+        InputValue(Float value) : axisValue(value) {};
+        InputValue(InputEvent value) : actionValue(value) {};
+
+        union {
+            Float axisValue;
+            InputEvent actionValue;
+        };
     };
 }
 

@@ -22,7 +22,7 @@ namespace Engine {
 		}
 	}
 
-	void Win32Input::ResetInputDevices(const MSG* msg) {
+	void Win32Input::ResetInputDevices() {
 		SetValueInKeymap(InputKey::IK_MOUSE_X, static_cast<InputValue>(0.0f));
 		SetValueInKeymap(InputKey::IK_MOUSE_Y, static_cast<InputValue>(0.0f));
 	}
@@ -45,5 +45,9 @@ namespace Engine {
 				SetValueInKeymap(InputKey::IK_MOUSE_Y, static_cast<InputValue>(rawinput->data.mouse.lLastY));
 			}
 		}
+	}
+
+	void Win32Input::Refresh() {
+		ResetInputDevices();
 	}
 }

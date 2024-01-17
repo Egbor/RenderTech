@@ -11,8 +11,10 @@ namespace Engine {
 		virtual ~Win32Input() = default;
 
 		void InitializeInputDevices();
-		void ResetInputDevices(const MSG* msg);
+		void ResetInputDevices();
 		void UpdateInputDevices(WPARAM wParam, LPARAM lParam);
+
+		void Refresh() override;
 	};
 }
 

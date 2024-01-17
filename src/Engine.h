@@ -14,20 +14,21 @@ namespace Engine {
         EngineClass(IWindow* window, IContext* context);
         virtual ~EngineClass();
 
-        void Run(World* world);
+        void Run();
+        World* GetWorld() const;
 
     private:
-        //void OnWorldStart(Entity* entity);
-        //void OnWorldUpdate(Entity* entity);
+        void SyncEntry();
+        void GameThreadEntry();
+        void RenderThreadEntry();
 
-        void RunGameThread();
-        void RunRenderThread();
+        void InvokeEntitiesRenderUpdate(Entity* entity);
 
         Time* m_time;
+        World* m_world;
         RenderPassContext* m_passContext;
 
-        EngineThread* m_gameThread;
-        EngineThread* m_renderThread;
+        EngineThreadPool* m_threadpool;
     };
 }
 

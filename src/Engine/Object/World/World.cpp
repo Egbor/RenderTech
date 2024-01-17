@@ -34,4 +34,16 @@ namespace Engine {
             callback.Invoke(entity);
         }
     }
+
+    void World::Start() {
+        for (Entity* entity : m_entities) {
+            entity->OnStart();
+        }
+    }
+
+    void World::Update(Float deltaTime) {
+        for (Entity* entity : m_entities) {
+            entity->OnUpdate(deltaTime);
+        }
+    }
 }

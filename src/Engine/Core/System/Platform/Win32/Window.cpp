@@ -73,7 +73,7 @@ namespace Engine {
 		MSG msg;
 		ZeroMemory(&msg, sizeof(msg));
 
-		GetWin32Input().ResetInputDevices(&msg);
+		//GetWin32Input().ResetInputDevices(&msg);
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

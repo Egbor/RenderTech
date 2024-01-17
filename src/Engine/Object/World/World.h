@@ -22,6 +22,9 @@ namespace Engine {
         Entity* SpawnEntity(IClass* entityClass, const Vector3& location, const Rotator& rotation);
         void DestroyEntity(Entity* entity);
 
+        void Start();
+        void Update(Float deltaTime);
+
         void ForEachEntity(EventBase<Entity*>& callback);
     };
 }

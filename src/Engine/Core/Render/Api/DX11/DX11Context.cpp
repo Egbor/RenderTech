@@ -34,7 +34,7 @@ namespace Engine {
         dxgiSwapChainDesc.OutputWindow = reinterpret_cast<HWND>(window->WinId());
         dxgiSwapChainDesc.SampleDesc.Count = 1;
         dxgiSwapChainDesc.SampleDesc.Quality = 0;
-        dxgiSwapChainDesc.Windowed = FALSE;
+        dxgiSwapChainDesc.Windowed = TRUE;
 
         if (FAILED(hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, flag, features, ARRAYSIZE(features), D3D11_SDK_VERSION, &dxgiSwapChainDesc,
             &m_dxgiSwapChain, &m_d3dDevice, &m_d3dCurrentFeatureLevel, &m_d3dContext))) {

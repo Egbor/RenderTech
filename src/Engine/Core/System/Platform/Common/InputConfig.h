@@ -1,7 +1,6 @@
 #ifndef INPUT_CONFIG_H
 #define INPUT_CONFIG_H
 
-#include "Engine/EngineDef.h"
 #include "Engine/Core/System/Platform/Common/InputDef.h"
 
 namespace Engine {

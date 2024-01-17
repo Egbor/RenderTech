@@ -60,21 +60,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Engine::IWindow* window = new Engine::Win32Window(hInstance, 800, 600);
 	Engine::IContext* context = new Engine::DX11Context(window);
 
-	int width = window->GetWidth();
-	int height = window->GetHeight();
-
 	Engine::EngineClass* engine = new Engine::EngineClass(window, context);
-	Engine::World* world = Engine::ClassType<Engine::World>::CreateObject(Engine::ObjectArgument::Dummy());
+	Engine::World* world = engine->GetWorld();
 
 	world->SpawnEntity(Engine::ClassOf<Engine::Spectator>::value, Engine::Vector3(0.0f, 0.0f, -1.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
 	world->SpawnEntity(Engine::ClassOf<Engine::VisibleObject>::value, Engine::Vector3(0.0f, 0.0f, 0.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
 
 	window->Show();
-	engine->Run(world);
+	engine->Run();
 
-	DELETE_OBJECT(world);
 	DELETE_OBJECT(engine);
-
 	DELETE_OBJECT(context);
 	DELETE_OBJECT(window);
 

@@ -29,6 +29,10 @@ namespace Engine{
 		}
 	}
 
+	void Input::Refresh() {
+
+	}
+
 	void Input::SetValueInKeymap(InputKey key, InputValue value) {
 		m_keymap[key] = value;
 	}

@@ -23,6 +23,11 @@ namespace Engine {
 		bool operator!=(const TEventBase& other) const {
 			return !(*this == other);
 		}
+
+		static void Free(EventBase<TArgs...>& del) {
+			EventBase<TArgs...>* temp = &del;
+			delete temp;
+		}
 	};
 
 	template<class TOwner, class ...TArgs>
@@ -117,10 +122,5 @@ namespace Engine {
         static Delegate<TOwner, TArgs...>& Allocate(TOwner* owner, typename TMethod::TMethodPtr method) {
             return *new Delegate(owner, method);
         }
-
-		static void Free(Delegate<TOwner, TArgs...>& del) {
-			EventBase<TArgs...>* temp = &del;
-			delete temp;
-		}
 	};
 }
