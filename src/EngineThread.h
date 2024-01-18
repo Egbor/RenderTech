@@ -13,18 +13,20 @@
 
 namespace Engine {
 	enum class EngineThreadStatus {
-		ETS_Sync		= 0x01,
-		ETS_Progress	= 0x02,
-		ETS_Ready		= 0x04,
-		ETS_Terminate	= 0x08,
+		ETS_Terminate,
+		ETS_Progress,
+		ETS_Pause,
 	};
 
-#define IS_ETS_FREEZE(status) (((status) == EngineThreadStatus::ETS_Ready) || ((status) == EngineThreadStatus::ETS_Terminate))
+	struct EngineThreadSyncSlot {
+		EngineThreadStatus status;
+		bool isSynced;
+	};
 
 	class EngineThreadSync {
 	public:
 		EngineThreadSync(EventBase<>& callback, const Int32 syncLimit) 
-			: m_syncCallback(callback), m_threadSyncLimit(syncLimit - 1) {
+			: m_syncCallback(callback), m_syncSlots() {
 
 		}
 
@@ -32,78 +34,102 @@ namespace Engine {
 			EventBase<>::Free(m_syncCallback);
 		}
 
-		bool Sync(EngineThreadStatus& status) {
+		bool Sync(EngineThreadStatus status, Int32 slotId) {
 			std::unique_lock lock(m_mutex);
 
-			if (!IS_ETS_FREEZE(status) && (m_syncBatch.size() >= m_threadSyncLimit)) {
-				lock.unlock();
+			UpdateSyncSlot(slotId, status);
 
+			if (!HasUnsyncedSlot()) {
 				m_syncCallback.Invoke();
-				ResumeAllThreads();
+				UnsyncAllSyncSlots();
+				m_cv.notify_all();
 			} else {
-				PauseThread(lock, status);
+				m_cv.wait(lock, [&]() { return !m_syncSlots[slotId].isSynced; });
 			}
 
-			if (status != EngineThreadStatus::ETS_Terminate) {
-				status = EngineThreadStatus::ETS_Progress;
-			}
-
-			return status == EngineThreadStatus::ETS_Progress;
+			return !HasProgressSlot();
 		}
 
-		void Run() {
-			ResumeAllThreads();
+		Int32 ReserveSyncSlot() {
+			m_syncSlots.push_back({});
+			return m_syncSlots.size() - 1;
 		}
 
 	private:
-		void ResumeAllThreads() {
-			for (Int32 i = 0; i < m_syncBatch.size(); i++) {
-				*m_syncBatch[i] = EngineThreadStatus::ETS_Sync;
+		void UnsyncAllSyncSlots() {
+			for (Int32 i = 0; i < m_syncSlots.size(); i++) {
+				m_syncSlots[i].isSynced = false;
 			}
-			m_cv.notify_all();
 		}
 
-		void PauseThread(std::unique_lock<std::mutex>& lock, EngineThreadStatus& status) {
-			m_syncBatch.push_back(&status);
-			m_cv.wait(lock, [&]() { return (status == EngineThreadStatus::ETS_Sync) || (status == EngineThreadStatus::ETS_Terminate); });
-			m_syncBatch.pop_back();
+		void UpdateSyncSlot(Int32 slotId, EngineThreadStatus status) {
+			m_syncSlots[slotId].status = status;
+			m_syncSlots[slotId].isSynced = true;
+		}
+
+		bool HasProgressSlot() {
+			for (Int32 i = 0; i < m_syncSlots.size(); i++) {
+				if (m_syncSlots[i].status == EngineThreadStatus::ETS_Progress) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool HasUnsyncedSlot() {
+			for (Int32 i = 0; i < m_syncSlots.size(); i++) {
+				if (!m_syncSlots[i].isSynced) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		std::condition_variable m_cv;
 		std::mutex m_mutex;
 
-		const Int32 m_threadSyncLimit;
-		Array<EngineThreadStatus*> m_syncBatch;
-
+		Array<EngineThreadSyncSlot> m_syncSlots;
 		EventBase<>& m_syncCallback;
 	};
 
 	class EngineThread {
 	public:
-		EngineThread() : m_hasExit(false), m_status(EngineThreadStatus::ETS_Ready) {}
-		virtual ~EngineThread() = default;
+		EngineThread() 
+			: m_status(EngineThreadStatus::ETS_Pause) {
+
+		}
+
+		virtual ~EngineThread() {
+			m_thread.join();
+		}
 
 		template<class ...TArgs>
 		void Start(EngineThreadSync& sync, EventBase<TArgs...>& callback, TArgs... args) {
 			m_thread = std::thread([&]() {
-				while (sync.Sync(m_status)) {
-					callback.Invoke(args...);
+				bool isSyncExit = false;
+				Int32 syncId = sync.ReserveSyncSlot();
+
+				while (!isSyncExit) {
+					if (m_status != EngineThreadStatus::ETS_Pause) {
+						isSyncExit = sync.Sync(m_status.load(), syncId);
+						callback.Invoke(args...);
+					}
 				}
 				EventBase<TArgs...>::Free(callback);
 			});
 		}
 
+		void Resume() {
+			m_status = EngineThreadStatus::ETS_Progress;
+		}
+
 		void Exit() {
-			//m_hasExit = true;
 			m_status = EngineThreadStatus::ETS_Terminate;
-			m_thread.join();
 		}
 
 	private:
 		std::thread m_thread;
-		bool m_hasExit;
-
-		EngineThreadStatus m_status;
+		std::atomic<EngineThreadStatus> m_status;
 	};
 
 	class EngineThreadPool {
@@ -129,7 +155,9 @@ namespace Engine {
 		}
 
 		void Start() {
-			m_sync->Run();
+			for (Int32 i = 0; i < m_pool.size(); i++) {
+				m_pool[i]->Resume();
+			}
 		}
 
 		void Reset() {
