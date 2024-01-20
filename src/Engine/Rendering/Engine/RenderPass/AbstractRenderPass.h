@@ -25,12 +25,14 @@ namespace Engine {
 	protected:
 		GBuffer& GetGBuffer();
 		UBuffer& GetUBuffer();
+		Samplers& GetSamplers();
 
 		static IShaderResourceData* LoadShader(const String& filename, ShaderType type);
 
 	private:
 		GBuffer m_gbuffer;
 		UBuffer m_ubuffer;
+		Samplers m_samplers;
 	};
 }
 

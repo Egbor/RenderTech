@@ -22,6 +22,10 @@ namespace Engine {
 		return m_ubuffer;
 	}
 
+	Samplers& AbstractRenderPass::GetSamplers() {
+		return m_samplers;
+	}
+
 	IShaderResourceData* AbstractRenderPass::LoadShader(const String& filename, ShaderType type) {
 		const Array<Int8> code = Resource::Load<const Array<Int8>>(filename);
 

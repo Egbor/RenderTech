@@ -51,6 +51,27 @@ namespace Engine {
         RS_PIXEL = 1,
     };
 
+    enum class StateType {
+        ST_BLEND            = 0,
+        ST_SAMPLER          = 1,
+        ST_DEPTH_STENCIL    = 2,
+        ST_RASTERIZER       = 3
+    };
+
+    enum class SamplerFilter {
+        SF_POINT        = 0,
+        SF_LINEAR       = 1,
+        SF_ANISOTROPIC  = 2
+    };
+
+    enum class SamplerAddress {
+        SA_WRAP         = 0,
+        SA_MIRROR       = 1,
+        SA_CLAMP        = 2,
+        SA_BORDER       = 3,
+        SA_MIRROR_ONCE  = 4
+    };
+
     struct Viewport {
         Float width;
         Float height;

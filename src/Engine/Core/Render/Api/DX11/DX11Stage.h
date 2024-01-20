@@ -14,6 +14,7 @@ namespace Engine {
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
 		void BindBuffers(const Array<IBufferResourceData*>& resources) override;
+		void BindSamplers(const Array<AbstractSamplerState*>& resources) override;
 		void BindShader(IShaderResourceData* resource) override;
 
 	private:
@@ -27,6 +28,7 @@ namespace Engine {
 
 		void BindTextures(const Array<ITextureResourceData*>& resources) override;
 		void BindBuffers(const Array<IBufferResourceData*>& resources) override;
+		void BindSamplers(const Array<AbstractSamplerState*>& resources) override;
 		void BindShader(IShaderResourceData* resource) override;
 
 	private:

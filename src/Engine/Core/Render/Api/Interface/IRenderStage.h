@@ -4,6 +4,7 @@
 #include "Engine/Core/Render/Api/Interface/ITextureResource.h"
 #include "Engine/Core/Render/Api/Interface/IBufferResource.h"
 #include "Engine/Core/Render/Api/Interface/IShaderResource.h"
+#include "Engine/Core/Render/Api/Interface/IStateResource.h"
 
 namespace Engine {
 	class IRenderStage {
@@ -11,6 +12,7 @@ namespace Engine {
 		virtual ~IRenderStage() = default;
 		virtual void BindTextures(const Array<ITextureResourceData*>& resources) = 0;
 		virtual void BindBuffers(const Array<IBufferResourceData*>& resources) = 0;
+		virtual void BindSamplers(const Array<AbstractSamplerState*>& resources) = 0;
 		virtual void BindShader(IShaderResourceData* resource) = 0;
 	};
 }

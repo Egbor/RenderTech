@@ -20,13 +20,16 @@ namespace Engine {
 		Int32 height = GetRenderHeight();
 
 		// GBuffer initialization
-		GetGBuffer().Attach(/*TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height*/ output);
-		GetGBuffer().Attach(TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
-		GetGBuffer().Attach(TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
-		GetGBuffer().Attach(TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+		GetGBuffer().InitNewResource(/*TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height*/ output);
+		GetGBuffer().InitNewResource(TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
+		GetGBuffer().InitNewResource(TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
+		GetGBuffer().InitNewResource(TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+
+		// Samplers initializtion
+		GetSamplers().InitNewResource();
 
 		// Constant buffers initialization
-		GetUBuffer().Attach(sizeof(UniformBufferBase));
+		GetUBuffer().InitNewResource(sizeof(UniformBufferBase));
 
 		// Default shaders initialization
 		m_vertexShader = LoadShader("assets/shaders/BaseVSShader.cso", ShaderType::ST_VERTEX);
@@ -36,6 +39,7 @@ namespace Engine {
 		IRenderStage* vsStage = pipeline->GetStage(RenderStage::RS_VERTEX);
 		IRenderStage* psStage = pipeline->GetStage(RenderStage::RS_PIXEL);
 
+		psStage->BindSamplers(GetSamplers().GetResources());
 		vsStage->BindBuffers(GetUBuffer().GetBuffers());
 		vsStage->BindShader(m_vertexShader);
 		pipeline->SetTargets(GetGBuffer().GetTargets());

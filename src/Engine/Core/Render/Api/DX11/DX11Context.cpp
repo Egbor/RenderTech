@@ -5,6 +5,7 @@
 #include "Engine/Core/Render/Api/DX11/DX11Shader.h"
 #include "Engine/Core/Render/Api/DX11/DX11Target.h"
 #include "Engine/Core/Render/Api/DX11/DX11Stage.h"
+#include "Engine/Core/Render/Api/DX11/DX11SamplerState.h"
 
 namespace Engine {
     DX11Context::DX11Context(IWindow* window) {
@@ -49,6 +50,7 @@ namespace Engine {
         Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
         m_backTarget = new DX11RenderTarget(m_d3dDevice, new DX11Texture2D(backBuffer), color);
         
+        RegisterStateFactory();
         RegisterTextureFactory();
         RegisterBufferFactory();
         RegisterShaderFactory();
@@ -98,6 +100,10 @@ namespace Engine {
 
     ISwapChain* DX11Context::QuerySwapChain() {
         return dynamic_cast<ISwapChain*>(this);
+    }
+
+    IStateResourceData* DX11Context::CreateState(StateType type) {
+        return m_stateFactory.Create(type);
     }
 
     ITextureResourceData* DX11Context::CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
@@ -188,6 +194,12 @@ namespace Engine {
 
         m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         m_d3dContext->DrawIndexed(indexBuffer->GetNumElements(), 0, 0);
+    }
+
+    void DX11Context::RegisterStateFactory() {
+        m_stateFactory.Register(StateType::ST_SAMPLER, [&]() {
+            return new DX11SamplerState();
+        });
     }
 
     void DX11Context::RegisterTextureFactory() {

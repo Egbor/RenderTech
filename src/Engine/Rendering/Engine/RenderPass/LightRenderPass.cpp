@@ -6,7 +6,7 @@ namespace Engine {
 	}
 
 	void LightRenderPass::Initialize(ITargetResourceData* output) {
-		GetGBuffer().Attach(output);
+		GetGBuffer().InitNewResource(output);
 	}
 
 	void LightRenderPass::Launch(IRenderPipeline* pipeline, AbstractRenderPass* prev) {

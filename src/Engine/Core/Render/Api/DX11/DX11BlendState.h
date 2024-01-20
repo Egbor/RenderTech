@@ -2,10 +2,9 @@
 #define DX11BLENDSTATE_H
 
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
-#include "Engine/Core/Render/Api/State/BlendState.h"
 
 namespace Engine {
-    class DX11BlendState : public BlendState {
+    class DX11BlendState {
     private:
         DX11Context* m_dxContext;
 
@@ -17,16 +16,16 @@ namespace Engine {
         DX11BlendState(const DX11BlendState&) = default;
         virtual ~DX11BlendState() = default;
 
-        void SetSourceFactor(RenderOutput target, Blend factor) override;
-        void SetDestinationFactor(RenderOutput target, Blend factor) override;
-        void SetOperation(RenderOutput target, BlendOperation operation) override;
+        //void SetSourceFactor(RenderOutput target, Blend factor) override;
+        //void SetDestinationFactor(RenderOutput target, Blend factor) override;
+        //void SetOperation(RenderOutput target, BlendOperation operation) override;
 
-        void SetEnable(RenderOutput target, bool enable) override;
+        //void SetEnable(RenderOutput target, bool enable) override;
 
-        void Reset() override;
+        //void Reset() override;
 
-        void Bind() override;
-        void UnBind() override;
+        //void Bind() override;
+        //void UnBind() override;
     };
 }
 

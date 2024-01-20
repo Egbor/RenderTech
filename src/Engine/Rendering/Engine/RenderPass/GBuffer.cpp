@@ -2,8 +2,8 @@
 
 namespace Engine {
 	template<class TResourceData>
-	Int32 ProcessCommonAttachment(Array<BufferResourceWrapper<TResourceData>>& arr, TResourceData* resource, bool isNative) {
-		arr.push_back(BufferResourceWrapper<TResourceData>(resource, isNative));
+	Int32 ProcessCommonAttachment(Array<ResourceWrapper<TResourceData>>& arr, TResourceData* resource, bool isNative) {
+		arr.push_back(ResourceWrapper<TResourceData>(resource, isNative));
 		return static_cast<Int32>(arr.size() - 1);
 	}
 
@@ -12,15 +12,15 @@ namespace Engine {
 
 	}
 
-	GBuffer::~GBuffer() {
-		//DELETE_ARRAY_OF_OBJECTS(m_targets);
-	}
+	//GBuffer::~GBuffer() {
+	//	//DELETE_ARRAY_OF_OBJECTS(m_targets);
+	//}
 
-	Int32 GBuffer::Attach(ITargetResourceData* resource) {
+	Int32 GBuffer::InitNewResource(ITargetResourceData* resource) {
 		return ProcessCommonAttachment(m_targets, resource, false);
 	}
 
-	Int32 GBuffer::Attach(TextureType type, TextureFormat format, Int32 width, Int32 height) {
+	Int32 GBuffer::InitNewResource(TextureType type, TextureFormat format, Int32 width, Int32 height) {
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
 		return ProcessCommonAttachment(m_targets, factory->CreateTarget(type, format, width, height), true);
 	}
@@ -52,12 +52,12 @@ namespace Engine {
 
 	}
 
-	UBuffer::~UBuffer() {
-		//DELETE_ARRAY_OF_OBJECTS(m_buffers);
-	}
+	//UBuffer::~UBuffer() {
+	//	//DELETE_ARRAY_OF_OBJECTS(m_buffers);
+	//}
 
 
-	Int32 UBuffer::Attach(Int32 bufferSize) {
+	Int32 UBuffer::InitNewResource(Int32 bufferSize) {
 		Array<Int8> dummy(bufferSize);
 
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
@@ -78,6 +78,24 @@ namespace Engine {
 		Array<IBufferResourceData*> result(m_buffers.size());
 		for (Size i = 0; i < result.size(); i++) {
 			result[i] = m_buffers[i].GetResource();
+		}
+		return result;
+	}
+
+	Samplers::Samplers() 
+		: m_states() {
+
+	}
+
+	Int32 Samplers::InitNewResource() {
+		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+		return ProcessCommonAttachment(m_states, dynamic_cast<AbstractSamplerState*>(factory->CreateState(StateType::ST_SAMPLER)), true);
+	}
+
+	const Array<AbstractSamplerState*> Samplers::GetResources() const {
+		Array<AbstractSamplerState*> result(m_states.size());
+		for (Size i = 0; i < result.size(); i++) {
+			result[i] = m_states[i].GetResource();
 		}
 		return result;
 	}
