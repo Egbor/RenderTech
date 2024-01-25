@@ -9,12 +9,6 @@ cbuffer VS_ENGINE_CAMERA_BUFFER : register(b0) {
 	float4x4 World;
 }
 
-Texture2D AlbedoTexture : register(t0);
-Texture2D NormalTexture : register(t1);
-Texture2D MetalicTexture : register(t2);
-Texture2D RoughnessTexture : register(t3);
-Texture2D AmbiantTexture : register(t4);
-
 #endif
 
 #if defined(ENGINE_LIGHT_RENDERPASS)
@@ -73,12 +67,12 @@ float4 FindViewFromDepth(float depth, float2 uv, float4x4 invProjection) {
 	return viewSpacePosition;
 }
 
-/*float4 FindWorldFromDepth(float depth, float2 uv, float4x4 invView, float4x4 invProjection) {
+float4 FindWorldFromDepth(float depth, float2 uv, float4x4 invView, float4x4 invProjection) {
 	float4 viewSpacePosition = FindViewFromDepth(depth, uv, invProjection);
 	float4 worldSpacePosition = mul(viewSpacePosition, invView);
 
 	return worldSpacePosition;
-}*/
+}
 
 float4 MapNormal(float3x3 TBN, Texture2D tex, sampler sam, float2 uv) {
 	float3 normal = GetCorrectedNormalCoordinate(tex.Sample(sam, uv).xyz);

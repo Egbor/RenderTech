@@ -1,38 +1,32 @@
 #ifndef DX11DEPTHSTENCILSTATE_H
 #define DX11DEPTHSTENCILSTATE_H
 
+#include "Engine/Core/Render/Api/Interface/IStateResource.h"
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
 
 namespace Engine {
-    class DX11DepthStencilState {
+    class DX11DepthStencilState : public AbstractDepthStencilState {
     private:
-        DX11Context* m_dxContext;
-
-        UINT m_stencilRef;
         D3D11_DEPTH_STENCIL_DESC m_d3dDepthStencilDesc;
 
     public:
-        DX11DepthStencilState(DX11Context* dxContext);
-        DX11DepthStencilState(const DX11DepthStencilState&) = default;
+        DX11DepthStencilState();
         virtual ~DX11DepthStencilState() = default;
 
-        //void SetDepthTestComparisonFunction(ComparisonFunction func) override;
-        //void SetStencilTestComparisonBackFunction(ComparisonFunction func) override;
-        //void SetStencilTestComparisonFrontFunction(ComparisonFunction func) override;
+        void Reset() override;
 
-        //void SetStencilTestBackOperation(StencilConditions conditions) override;
-        //void SetStencilTestFrontOperation(StencilConditions conditions) override;
+        void SetDepthTestComparisonFunction(ComparisonFunction func) override;
+        void SetStencilTestComparisonBackFunction(ComparisonFunction func) override;
+        void SetStencilTestComparisonFrontFunction(ComparisonFunction func) override;
 
-        //void SetDepthTestEnable(bool enable) override;
-        //void SetStencilTestEnable(bool enable) override;
+        void SetStencilTestBackOperation(StencilConditions conditions) override;
+        void SetStencilTestFrontOperation(StencilConditions conditions) override;
 
-        //void SetDepthWriteEnable(bool enable) override;
-        //void SetStencilRef(UInt32 ref) override;
+        void SetDepthTestEnable(bool enable) override;
+        void SetStencilTestEnable(bool enable) override;
+        void SetDepthWriteEnable(bool enable) override;
 
-        //void Reset() override;
-
-        //void Bind() override;
-        //void UnBind() override;
+        ComPtr<ID3D11DepthStencilState> GetD3D11DepthStencilState(ComPtr<ID3D11Device> d3dDevice);
     };
 }
 

@@ -22,10 +22,11 @@ namespace Engine {
 
     void MeshComponent::CreateRenderState(AbstractRenderPass* pass) {
         if (pass->Is(RenderPassType::RP_BASE)) {
-            Matrix4x4 world = Matrix4x4::CreateMatrixWorld(GetWorldPosition(), GetWorldRotation(), GetWorldScale());
-
             BaseRenderPass* baseRenderPass = dynamic_cast<BaseRenderPass*>(pass);
-            baseRenderPass->SetModel(world, m_mesh);
+            RenderModel& model = baseRenderPass->ReserveModelInQueue();
+
+            model.mesh = m_mesh;
+            model.world = Matrix4x4::CreateMatrixWorld(GetWorldPosition(), GetWorldRotation(), GetWorldScale());
         }
     }
 }

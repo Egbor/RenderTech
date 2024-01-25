@@ -1,5 +1,11 @@
 #include "Shader/EngineCommon.hlsli"
 
+Texture2D AlbedoTexture : register(t0);
+Texture2D NormalTexture : register(t1);
+Texture2D MetalicTexture : register(t2);
+Texture2D RoughnessTexture : register(t3);
+Texture2D AmbiantTexture : register(t4);
+
 PixelShaderOutput main(VertexShaderOutput input) {
 	PixelShaderOutput output;
 

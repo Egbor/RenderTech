@@ -8,18 +8,17 @@ namespace Engine {
     class PointLightComponent : public LightComponent {
         GENERATE_BODY(PointLightComponent, LightComponent)
 
-    private:
-        static Mesh* volume;
-
     public:
         PointLightComponent(const ObjectArgument& argument);
-        PointLightComponent(const PointLightComponent&) = default;
         virtual ~PointLightComponent() = default;
 
         void SetRadius(Float radius);
         Float GetRadius() const;
 
-        Mesh* GetVolume() const override;
+        void CreateRenderState(AbstractRenderPass* pass) override;
+
+    private:
+        Float m_radius;
     };
 }
 

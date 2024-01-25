@@ -20,16 +20,17 @@ namespace Engine {
 		Int32 height = GetRenderHeight();
 
 		// GBuffer initialization
-		GetGBuffer().InitNewResource(/*TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height*/ output);
-		GetGBuffer().InitNewResource(TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
-		GetGBuffer().InitNewResource(TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
-		GetGBuffer().InitNewResource(TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+		GetGBuffer().InitNewResource(RBS_SLOT1,/*TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height*/ output);
+		GetGBuffer().InitNewResource(RBS_SLOT1, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
+		GetGBuffer().InitNewResource(RBS_SLOT1, TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
+		GetGBuffer().InitNewResource(RBS_SLOT1, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
 
 		// Samplers initializtion
-		GetSamplers().InitNewResource();
+		GetSamplers().InitNewResource(RBS_SLOT1);
 
 		// Constant buffers initialization
-		GetUBuffer().InitNewResource(sizeof(UniformBufferBase));
+		m_bufferObjectId = GetUBuffer().InitNewResource(RBS_SLOT1, sizeof(UB_Object));
+		m_bufferObjectHelperId = GetUBuffer().InitNewResource(RBS_SLOT1, sizeof(UB_ObjectHelper));
 
 		// Default shaders initialization
 		m_vertexShader = LoadShader("assets/shaders/BaseVSShader.cso", ShaderType::ST_VERTEX);
@@ -39,19 +40,19 @@ namespace Engine {
 		IRenderStage* vsStage = pipeline->GetStage(RenderStage::RS_VERTEX);
 		IRenderStage* psStage = pipeline->GetStage(RenderStage::RS_PIXEL);
 
-		psStage->BindSamplers(GetSamplers().GetResources());
-		vsStage->BindBuffers(GetUBuffer().GetBuffers());
+		psStage->BindSamplers(GetSamplers().GetResources(RBS_SLOT1));
+		vsStage->BindBuffers(GetUBuffer().GetResources(RBS_SLOT1));
 		vsStage->BindShader(m_vertexShader);
 		pipeline->SetTargets(GetGBuffer().GetTargets());
 
 		GetGBuffer().Clear();
 
-		for (; !m_models.empty(); m_models.pop()) {
-			Mesh* mesh = UpdateAndGetFrontMesh();
+		for (RenderModel& model = m_queue.back(); !m_queue.empty(); m_queue.pop_back()) {
+			UpdateBaseBuffer(model);
 
-			for (Int32 meshElementId = 0; meshElementId < mesh->GetNumMeshElements(); meshElementId++) {
-				MeshElement* element = mesh->GetMeshElement(meshElementId);
-				Material* material = mesh->GetMaterial(meshElementId);
+			for (Int32 meshElementId = 0; meshElementId < model.mesh->GetNumMeshElements(); meshElementId++) {
+				MeshElement* element = model.mesh->GetMeshElement(meshElementId);
+				Material* material = model.mesh->GetMaterial(meshElementId);
 
 				psStage->BindTextures(material->GetNativeTextureResources());
 				psStage->BindShader(material->GetNativeShaderResource());
@@ -64,21 +65,24 @@ namespace Engine {
 		return type == RenderPassType::RP_BASE;
 	}
 
-	void BaseRenderPass::SetModel(Matrix4x4 world, Mesh* mesh) {
-		m_models.push({ world, mesh });
+	RenderModel& BaseRenderPass::ReserveModelInQueue() {
+		m_queue.push_back({});
+		return m_queue.back();
 	}
 
-	void BaseRenderPass::SetViewProjection(Matrix4x4 viewproj) {
-		UniformBufferBase* desc = GetUBuffer().GetBufferData(INDEX_OF(UBuffer_BaseRenderPass::UB_Camera)).As<UniformBufferBase>();
-		desc->ViewProjection = viewproj.Transpose();
+	void BaseRenderPass::SetCamera(Matrix4x4 view, Matrix4x4 proj) {
+		UB_Object* ubObject = GetUBuffer().GetBufferData(m_bufferObjectId).As<UB_Object>();
+		ubObject->ViewProjection = (view * proj).Transpose();
 	}
 
-	Mesh* BaseRenderPass::UpdateAndGetFrontMesh() {
-		UniformBufferBase* desc = GetUBuffer().GetBufferData(INDEX_OF(UBuffer_BaseRenderPass::UB_Camera)).As<UniformBufferBase>();
-		desc->World = m_models.front().world.Transpose();
-		desc->invWorld = m_models.front().world.Inverse().Transpose();
-		GetUBuffer().Update(INDEX_OF(UBuffer_BaseRenderPass::UB_Camera));
+	void BaseRenderPass::UpdateBaseBuffer(RenderModel& model) {
+		UB_Object* ubObject = GetUBuffer().GetBufferData(m_bufferObjectId).As<UB_Object>();
+		UB_ObjectHelper* ubObjectHelper = GetUBuffer().GetBufferData(m_bufferObjectHelperId).As<UB_ObjectHelper>();
 
-		return m_models.front().mesh;
+		ubObject->World = model.world.Transpose();
+		ubObjectHelper->invWorld = model.world.Inverse().Transpose();
+
+		GetUBuffer().Update(m_bufferObjectId);
+		GetUBuffer().Update(m_bufferObjectHelperId);
 	}
 }

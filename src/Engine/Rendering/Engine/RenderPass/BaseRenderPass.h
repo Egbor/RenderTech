@@ -2,14 +2,8 @@
 #define BASE_RENDER_PASS_H
 
 #include "Engine/Rendering/Engine/RenderPass/AbstractRenderPass.h"
-#include "Engine/Object/Class/Mesh.h"
 
 namespace Engine {
-	struct RenderModel {
-		Matrix4x4 world;
-		Mesh* mesh;
-	};
-
 	class BaseRenderPass : public AbstractRenderPass {
 	public:
 		BaseRenderPass();
@@ -19,14 +13,17 @@ namespace Engine {
 		void Launch(IRenderPipeline* pipeline, AbstractRenderPass* prev = nullptr) override;
 		bool Is(RenderPassType type) const override;
 
-		void SetModel(Matrix4x4 world, Mesh* mesh);
-		void SetViewProjection(Matrix4x4 viewproj);
+		RenderModel& ReserveModelInQueue();
+		void SetCamera(Matrix4x4 view, Matrix4x4 proj);
 
 	private:
-		Mesh* UpdateAndGetFrontMesh();
+		void UpdateBaseBuffer(RenderModel& model);
+
+		Int32 m_bufferObjectId;
+		Int32 m_bufferObjectHelperId;
 
 		IShaderResourceData* m_vertexShader;
-		Queue<RenderModel> m_models;
+		Array<RenderModel> m_queue;
 	};
 }
 

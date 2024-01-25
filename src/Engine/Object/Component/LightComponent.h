@@ -13,15 +13,18 @@ namespace Engine {
         PROPERTY(ValueType<Vector4>, color)
         Vector4 m_color;
 
+        PROPERTY(ValueType<Float>, brightness)
+        Float m_brightness;
+
     public:
         LightComponent(const ObjectArgument& argument);
         virtual ~LightComponent() = default;
 
         void SetColor(const Vector4& rgb);
-        Vector4 GetColor() const;
+        void SetBrightness(const Float& brightness);
 
-        virtual Mesh* GetVolume() const;
-        virtual Vector4 GetValue() const;
+        Vector4 GetColor() const;
+        Float GetBrightness() const;
 
     protected:
         virtual UInt64 GetBehaviorID() const override;

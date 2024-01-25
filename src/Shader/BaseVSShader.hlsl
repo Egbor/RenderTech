@@ -4,8 +4,8 @@ VertexShaderOutput main(float3 position : POSITION, float3 tangent : TANGENT,
                         float3 binormal : BINORMAL, float3 normal : NORMAL, float2 uv : TEXCOORD0) {
     VertexShaderOutput output;
 
-    float4x4 WorldViewProjection = mul(tarnspose(World), ViewProjection);
-    output.Position = mul(float4(position.xyz, 1.0f), WorldViewProjection);
+    float4x4 wvp = mul(tarnspose(World), ViewProjection);
+    output.Position = mul(float4(position.xyz, 1.0f), wvp);
     output.TexCoord = GetCorrectedTextureCoordinate(uv);
 
     output.wsTangent = mul(tangent, (float3x3)World);

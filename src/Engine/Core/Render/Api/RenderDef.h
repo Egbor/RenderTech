@@ -131,6 +131,12 @@ namespace Engine {
         ST_PIXEL    = 1
     };
 
+    enum class LightType {
+        LT_POINT        = 0,
+        LT_SPOT         = 1,
+        LT_DIRECTIONAL  = 2
+    };
+
     enum class TextureFormat {
         TF_R8_BMP,
         TF_R8G8_BMP,
@@ -199,28 +205,25 @@ namespace Engine {
 
 #define DYNAMIC_BUFFER __declspec(align(16))
 
-    struct DYNAMIC_BUFFER UniformBufferCameraDesc {
-        Matrix4x4 WorldViewProjection;
-        Matrix4x4 WorldView;
-        Matrix4x4 invWorldView;
+    struct DYNAMIC_BUFFER UB_Object {
+        Matrix4x4 ViewProjection;
+        Matrix4x4 World;
     };
 
-    struct DYNAMIC_BUFFER UniformBufferAccumulationDesc {
-        Matrix4x4 WorldView;
-        Matrix4x4 Projection;
+    struct DYNAMIC_BUFFER UB_ObjectHelper {
+        Matrix4x4 invWorld;
+        Matrix4x4 invView;
         Matrix4x4 invProjection;
+    };
+
+    struct DYNAMIC_BUFFER UB_System {
         Vector2 Resolution;
     };
 
-    struct DYNAMIC_BUFFER UniformBufferLightDesc {
-        Vector4 LightValue;
-        Vector4 LightColor;
-    };
-
-    struct DYNAMIC_BUFFER UniformBufferBase {
-        Matrix4x4 ViewProjection;
-        Matrix4x4 invWorld;
-        Matrix4x4 World;
+    struct DYNAMIC_BUFFER UB_Light {
+        Vector4 Color;
+        Vector4 Value;
+        Vector4 Brightness;
     };
 }
 

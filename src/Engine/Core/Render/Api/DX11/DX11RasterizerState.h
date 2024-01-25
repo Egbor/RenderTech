@@ -1,26 +1,24 @@
 #ifndef DX11RASTERIZERSTATE_H
 #define DX11RASTERIZERSTATE_H
 
+#include "Engine/Core/Render/Api/Interface/IStateResource.h"
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
 
 namespace Engine {
-    class DX11RasterizerState {
+    class DX11RasterizerState : public AbstaractRasterizerState {
     private:
-        DX11Context* m_dxContext;
         D3D11_RASTERIZER_DESC m_d3dRasterizerDesc;
 
     public:
-        DX11RasterizerState(DX11Context* dxContext);
-        DX11RasterizerState(const DX11RasterizerState&) = default;
+        DX11RasterizerState();
         virtual ~DX11RasterizerState() = default;
 
-        //void SetCullMode(CullMode mode) override;
-        //void SetDepthClipEnable(bool enable) override;
+        void Reset() override;
 
-        //void Reset() override;
+        void SetCullMode(CullMode mode) override;
+        void SetDepthClipEnable(bool enable) override;
 
-        //void Bind() override;
-        //void UnBind() override;
+        ComPtr<ID3D11RasterizerState> GetD3D11RasterizerState(ComPtr<ID3D11Device> d3dDevice);
     };
 }
 
