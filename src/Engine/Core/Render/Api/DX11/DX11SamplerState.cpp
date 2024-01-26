@@ -16,11 +16,11 @@ namespace Engine {
         D3D11_TEXTURE_ADDRESS_MIRROR_ONCE
     };
 
-    DX11SamplerState::DX11SamplerState() {
+    DX11SamplerStateData::DX11SamplerStateData() {
         Reset();
     }
 
-    void DX11SamplerState::Reset() {
+    void DX11SamplerStateData::Reset() {
         m_d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
         m_d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
         m_d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -36,26 +36,35 @@ namespace Engine {
         m_d3dSamplerDesc.BorderColor[3] = 1.0f;
     }
 
-    void DX11SamplerState::SetAddress(SamplerAddress address) {
-        UInt32 addressId = static_cast<UInt32>(address);
-        m_d3dSamplerDesc.AddressU = gAddressModeTable[addressId];
-        m_d3dSamplerDesc.AddressV = gAddressModeTable[addressId];
-        m_d3dSamplerDesc.AddressW = gAddressModeTable[addressId];
+    void DX11SamplerStateData::SetAddress(SamplerAddress address) {
+        m_d3dSamplerDesc.AddressU = gAddressModeTable[INDEX_OF(address)];
+        m_d3dSamplerDesc.AddressV = gAddressModeTable[INDEX_OF(address)];
+        m_d3dSamplerDesc.AddressW = gAddressModeTable[INDEX_OF(address)];
     }
 
-    void DX11SamplerState::SetFilter(SamplerFilter filter) {
-        UInt32 filterId = static_cast<UInt32>(filter);
-        m_d3dSamplerDesc.Filter = gFilterTable[filterId];
+    void DX11SamplerStateData::SetFilter(SamplerFilter filter) {
+        m_d3dSamplerDesc.Filter = gFilterTable[INDEX_OF(filter)];
     }
 
-    ComPtr<ID3D11SamplerState> DX11SamplerState::GetD3D11SamplerState(ComPtr<ID3D11Device> d3dDevice) {
-        ComPtr<ID3D11SamplerState> d3dSamplerState;
+    const D3D11_SAMPLER_DESC& DX11SamplerStateData::GetD3D11Desc() const {
+        return m_d3dSamplerDesc;
+    }
+
+    DX11SamplerState::DX11SamplerState(const IStateData* data, const IContext* context) {
+        Initialize(data, context);
+    }
+
+    void DX11SamplerState::Initialize(const IStateData* data, const IContext* context) {
+        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
+        const DX11SamplerStateData* dxData = dynamic_cast<const DX11SamplerStateData*>(data);
 
         HRESULT hr = 0;
-        if (FAILED(hr = d3dDevice->CreateSamplerState(&m_d3dSamplerDesc, &d3dSamplerState))) {
-            throw EngineException("ID3D11Device::CreateSamplerState() failed");
+        if (FAILED(hr = d3dDevice->CreateSamplerState(&dxData->GetD3D11Desc(), &m_state))) {
+            throw EngineException("[DX11SamplerState] ID3D11Device::CreateSampler() failed");
         }
+    }
 
-        return d3dSamplerState;
+    ComPtr<ID3D11SamplerState> DX11SamplerState::GetD3D11SamplerState() const {
+        return m_state;
     }
 }

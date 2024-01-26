@@ -33,28 +33,35 @@ namespace Engine {
 	};
 
 	enum class CullMode {
-		CM_NONE		= 0,
-		CM_FRONT	= 1,
-		CM_BACK		= 2
+		C_NONE	= 0,
+		C_FRONT	= 1,
+		C_BACK	= 2
 	};
 
+	class IContext;
+
+	class IStateData {
+	public:
+		virtual ~IStateData() = default;
+		virtual void Reset() = 0;
+	};
 
 	class IStateResourceData {
 	public:
 		virtual ~IStateResourceData() = default;
-		virtual void Reset() = 0;
+		virtual void Initialize(const IStateData* data, const IContext* context) = 0;
 	};
 
-	class AbstractSamplerState : public IStateResourceData {
+	class ISamplerStateData : public IStateData {
 	public:
-		virtual ~AbstractSamplerState() = default;
+		virtual ~ISamplerStateData() = default;
 		virtual void SetAddress(SamplerAddress address) = 0;
 		virtual void SetFilter(SamplerFilter filter) = 0;
 	};
 
-	class AbstractDepthStencilState : public IStateResourceData {
+	class IDepthStencilStateData : public IStateData {
 	public:
-		virtual ~AbstractDepthStencilState() = default;
+		virtual ~IDepthStencilStateData() = default;
 
 		virtual void SetDepthTestComparisonFunction(ComparisonFunction func) = 0;
 		virtual void SetStencilTestComparisonBackFunction(ComparisonFunction func) = 0;
@@ -68,9 +75,9 @@ namespace Engine {
 		virtual void SetDepthWriteEnable(bool enable) = 0;
 	};
 
-	class AbstaractRasterizerState : public IStateResourceData {
+	class IRasterizerStateData : public IStateData {
 	public:
-		virtual ~AbstaractRasterizerState() = default;
+		virtual ~IRasterizerStateData() = default;
 
 		virtual void SetCullMode(CullMode mode) = 0;
 		virtual void SetDepthClipEnable(bool enable) = 0;

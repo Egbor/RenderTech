@@ -9,12 +9,12 @@ namespace Engine {
         D3D11_CULL_BACK
     };
 
-    DX11RasterizerState::DX11RasterizerState()
+    DX11RasterizerStateData::DX11RasterizerStateData()
         : m_d3dRasterizerDesc() {
         Reset();
     }
 
-    void DX11RasterizerState::Reset() {
+    void DX11RasterizerStateData::Reset() {
         m_d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
         m_d3dRasterizerDesc.CullMode = D3D11_CULL_BACK;
         m_d3dRasterizerDesc.FrontCounterClockwise = FALSE;
@@ -27,21 +27,33 @@ namespace Engine {
         m_d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
     }
 
-    void  DX11RasterizerState::SetCullMode(CullMode mode) {
+    void  DX11RasterizerStateData::SetCullMode(CullMode mode) {
         m_d3dRasterizerDesc.CullMode = gCullModeTable[INDEX_OF(mode)];
     }
 
-    void DX11RasterizerState::SetDepthClipEnable(bool enable) {
+    void DX11RasterizerStateData::SetDepthClipEnable(bool enable) {
         m_d3dRasterizerDesc.DepthClipEnable = enable;
     }
 
-    ComPtr<ID3D11RasterizerState> DX11RasterizerState::GetD3D11RasterizerState(ComPtr<ID3D11Device> d3dDevice) {
-        ComPtr<ID3D11RasterizerState> d3dRasterizerState;
+    const D3D11_RASTERIZER_DESC& DX11RasterizerStateData::GetDesc() const {
+        return m_d3dRasterizerDesc;
+    }
+
+    DX11RasterizerState::DX11RasterizerState(const IStateData* data, const IContext* context) {
+        Initialize(data, context);
+    }
+
+    void DX11RasterizerState::Initialize(const IStateData* data, const IContext* context) {
+        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
+        const DX11RasterizerStateData* dxData = dynamic_cast<const DX11RasterizerStateData*>(data);
 
         HRESULT hr = 0;
-        if (FAILED(hr = d3dDevice->CreateRasterizerState(&m_d3dRasterizerDesc, &d3dRasterizerState))) {
-            throw new EngineException("[DX11RasterizerState] ID3D11Device::CreateRasterizerState() failed");
+        if (FAILED(hr = d3dDevice->CreateRasterizerState(&dxData->GetDesc(), &m_state))) {
+            throw EngineException("[DX11RasterizerState] ID3D11Device::CreateRasterizerState() failed");
         }
-        return d3dRasterizerState;
+    }
+
+    ComPtr<ID3D11RasterizerState> DX11RasterizerState::GetD3D11RasterizerState() const {
+        return m_state;
     }
 }

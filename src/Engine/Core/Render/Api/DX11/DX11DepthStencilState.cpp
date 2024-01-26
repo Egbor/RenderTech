@@ -25,48 +25,48 @@ namespace Engine {
         D3D11_STENCIL_OP_DECR,
     };
 
-    DX11DepthStencilState::DX11DepthStencilState()
+    DX11DepthStencilStateData::DX11DepthStencilStateData()
         : m_d3dDepthStencilDesc(){
         Reset();
     }
 
-    void DX11DepthStencilState::SetDepthTestComparisonFunction(ComparisonFunction func) {
+    void DX11DepthStencilStateData::SetDepthTestComparisonFunction(ComparisonFunction func) {
         m_d3dDepthStencilDesc.DepthFunc = gComarisonFuncTable[INDEX_OF(func)];
     }
 
-    void DX11DepthStencilState::SetStencilTestComparisonBackFunction(ComparisonFunction func) {
+    void DX11DepthStencilStateData::SetStencilTestComparisonBackFunction(ComparisonFunction func) {
         m_d3dDepthStencilDesc.BackFace.StencilFunc = gComarisonFuncTable[INDEX_OF(func)];
     }
 
-    void DX11DepthStencilState::SetStencilTestComparisonFrontFunction(ComparisonFunction func) {
+    void DX11DepthStencilStateData::SetStencilTestComparisonFrontFunction(ComparisonFunction func) {
         m_d3dDepthStencilDesc.FrontFace.StencilFunc = gComarisonFuncTable[INDEX_OF(func)];
     }
 
-    void DX11DepthStencilState::SetStencilTestBackOperation(StencilConditions conditions) {
+    void DX11DepthStencilStateData::SetStencilTestBackOperation(StencilConditions conditions) {
         m_d3dDepthStencilDesc.BackFace.StencilFailOp = gStencilOpTable[INDEX_OF(conditions.opStencilFail)];
         m_d3dDepthStencilDesc.BackFace.StencilDepthFailOp = gStencilOpTable[INDEX_OF(conditions.opStencilDepthFail)];
         m_d3dDepthStencilDesc.BackFace.StencilPassOp = gStencilOpTable[INDEX_OF(conditions.opStencilPass)];
     }
 
-    void DX11DepthStencilState::SetStencilTestFrontOperation(StencilConditions conditions) {
+    void DX11DepthStencilStateData::SetStencilTestFrontOperation(StencilConditions conditions) {
         m_d3dDepthStencilDesc.FrontFace.StencilFailOp = gStencilOpTable[INDEX_OF(conditions.opStencilFail)];
         m_d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = gStencilOpTable[INDEX_OF(conditions.opStencilDepthFail)];
         m_d3dDepthStencilDesc.FrontFace.StencilPassOp = gStencilOpTable[INDEX_OF(conditions.opStencilPass)];
     }
 
-    void DX11DepthStencilState::SetDepthTestEnable(bool enable) {
+    void DX11DepthStencilStateData::SetDepthTestEnable(bool enable) {
         m_d3dDepthStencilDesc.DepthEnable = enable;
     }
 
-    void DX11DepthStencilState::SetStencilTestEnable(bool enable) {
+    void DX11DepthStencilStateData::SetStencilTestEnable(bool enable) {
         m_d3dDepthStencilDesc.StencilEnable = enable;
     }
 
-    void DX11DepthStencilState::SetDepthWriteEnable(bool enable) {
+    void DX11DepthStencilStateData::SetDepthWriteEnable(bool enable) {
         m_d3dDepthStencilDesc.DepthWriteMask = enable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
     }
 
-    void DX11DepthStencilState::Reset() {
+    void DX11DepthStencilStateData::Reset() {
         m_d3dDepthStencilDesc.DepthEnable = TRUE;
         m_d3dDepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
         m_d3dDepthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
@@ -83,13 +83,25 @@ namespace Engine {
         m_d3dDepthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
     }
 
-    ComPtr<ID3D11DepthStencilState> DX11DepthStencilState::GetD3D11DepthStencilState(ComPtr<ID3D11Device> d3dDevice) {
-        ComPtr<ID3D11DepthStencilState> d3dDepthStencilState;
+    const D3D11_DEPTH_STENCIL_DESC& DX11DepthStencilStateData::GetD3D11Desc() const {
+        return m_d3dDepthStencilDesc;
+    }
+
+    DX11DepthStencilState::DX11DepthStencilState(const IStateData* data, const IContext* context) {
+        Initialize(data, context);
+    }
+
+    void DX11DepthStencilState::Initialize(const IStateData* data, const IContext* context) {
+        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
+        const DX11DepthStencilStateData* dxData = dynamic_cast<const DX11DepthStencilStateData*>(data);
 
         HRESULT hr = 0;
-        if (FAILED(hr = d3dDevice->CreateDepthStencilState(&m_d3dDepthStencilDesc, &d3dDepthStencilState))) {
+        if (FAILED(hr = d3dDevice->CreateDepthStencilState(&dxData->GetD3D11Desc(), &m_state))) {
             throw EngineException("[DX11DepthStencilState] ID3D11Device::CreateDepthStencilState() failed");
         }
-        return d3dDepthStencilState;
+    }
+
+    ComPtr<ID3D11DepthStencilState> DX11DepthStencilState::GetD3D11DepthStencilState() const {
+        return m_state;
     }
 }
