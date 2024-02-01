@@ -86,7 +86,7 @@ namespace Engine {
 #define FIELD_AS_TEXT(field) #field
 #define IS_POWER_OF_TWO(x) (x && (!(x&(x-1))))
 
-#define INDEX_OF(value) static_cast<Int32>(value)
+#define INDEX_OF(value) static_cast<UInt32>(value)
 
 }
 

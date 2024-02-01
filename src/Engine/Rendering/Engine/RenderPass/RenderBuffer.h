@@ -2,11 +2,15 @@
 #define RENDER_BUFFER_H
 
 #include "Engine/Core/Core.h"
+#include "Engine/Core/Utils/Enum.h"
 
 namespace Engine {
-#define RBS_SLOT1 0x01
-#define RBS_SLOT2 0x02
-#define RBS_SLOT_ALL 0xFF
+	enum class BatchSlot : UInt32 {
+		BS_SLOT_1 = 0x01,
+		BS_SLOT_2 = 0x02,
+		BS_SLOT_3 = 0x04,
+		BS_SLOT_ALL = 0xFF
+	};
 
 	template<class TResourceData>
 	struct ResourceWrapper {
@@ -48,6 +52,42 @@ namespace Engine {
 		bool m_isNative;
 	};
 
+	template<class TResourceData>
+	struct ResourceSlot {
+		ResourceSlot(Int32 batchIds, TResourceData* resource) 
+			: m_batchIds(batchIds), m_resource(resource) {
+
+		}
+
+		virtual ~ResourceSlot() {
+			DELETE_OBJECT(m_resource);
+		}
+
+		TResourceData* GetResource() const {
+			return m_resource;
+		}
+
+		bool IsAssociatedWith(BatchSlot slot) const {
+			return !!(m_slots & slot);
+		}
+
+	private:
+		TResourceData* m_resource;
+		EnumFlags<BatchSlot> m_batchIds;
+	};
+
+	class IBindableResourceShaderStageBatch {
+	public:
+		virtual ~IBindableResourceShaderStageBatch() = default;
+		virtual void Bind(BatchSlot batchId, IRenderStage* stage) = 0;
+	};
+
+	class IBindableResourceStandaloneStageBatch {
+	private:
+		virtual ~IBindableResourceStandaloneStageBatch() = default;
+		virtual void Bind(BatchSlot batchId, IRenderPipeline* pipeline) = 0;
+	};
+
 	class GBuffer {
 	public:
 		GBuffer();
@@ -79,16 +119,16 @@ namespace Engine {
 		Array<ResourceWrapper<IBufferResourceData>> m_buffers;
 	};
 
-	class Samplers {
+	class Samplers : public IBindableResourceShaderStageBatch {
 	public:
 		Samplers();
 		virtual ~Samplers() = default;
 
-		Int32 InitNewResource(Int32 slot);
-		const Array<AbstractSamplerState*> GetResources(Int32 slot) const;
+		void Bind(BatchSlot batchId, IRenderStage* stage) override;
+		void InitNewResource(EnumFlags<BatchSlot> batchIds);
 
 	private:
-		Array<ResourceWrapper<AbstractSamplerState>> m_states;
+		Array<ResourceSlot<ISamplerStateData>> m_batch;
 	};
 }
 

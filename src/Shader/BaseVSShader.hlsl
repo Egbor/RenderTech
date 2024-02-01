@@ -1,4 +1,4 @@
-#include "Shader/EngineCommon.hlsli"
+#include "EngineCommon.hlsli"
 
 VertexShaderOutput main(float3 position : POSITION, float3 tangent : TANGENT,
                         float3 binormal : BINORMAL, float3 normal : NORMAL, float2 uv : TEXCOORD0) {

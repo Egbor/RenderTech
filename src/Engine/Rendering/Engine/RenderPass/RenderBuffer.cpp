@@ -1,4 +1,5 @@
 #include "Engine/Rendering/Engine/RenderPass/RenderBuffer.h"
+#include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
 	template<class TResourceData>
@@ -82,18 +83,12 @@ namespace Engine {
 
 	}
 
-	Int32 Samplers::InitNewResource(Int32 slot) {
-		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		return ProcessCommonAttachment(m_states, dynamic_cast<AbstractSamplerState*>(factory->CreateState(StateType::ST_SAMPLER)), slot, true);
+	void Samplers::Bind(BatchSlot batchId, IRenderStage* stage) {
+		const Array<IStateResourceData*> states = ;
+		stage->BindSamplers(states);
 	}
 
-	const Array<AbstractSamplerState*> Samplers::GetResources(Int32 slot) const {
-		Array<AbstractSamplerState*> result;
-		for (Size i = 0; i < m_states.size(); i++) {
-			if (m_states[i].IsAssociatedWith(slot)) {
-				result.push_back(m_states[i].GetResource());
-			}
-		}
-		return result;
+	void Samplers::InitNewResource(EnumFlags<BatchSlot> batchIds) {
+		EnumFlags<BatchSlot> a = BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2;
 	}
 }

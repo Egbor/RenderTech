@@ -21,10 +21,10 @@ namespace Engine {
 		bindCallback(textures);
 	}
 
-	void BindSamplersWithCallback(const Array<AbstractSamplerState*>& resources, ComPtr<ID3D11Device> d3dDevice, std::function<void(Array<ID3D11SamplerState*>&)> bindCallback) {
+	void BindSamplersWithCallback(const Array<IStateResourceData*>& resources, std::function<void(Array<ID3D11SamplerState*>&)> bindCallback) {
 		Array<ComPtr<ID3D11SamplerState>> temp(resources.size());
 		for (Size i = 0; i < temp.size(); i++) {
-			temp[i] = dynamic_cast<DX11SamplerState*>(resources[i])->GetD3D11SamplerState(d3dDevice);
+			temp[i] = dynamic_cast<DX11SamplerState*>(resources[i])->GetD3D11SamplerState();
 		}
 
 		Array<ID3D11SamplerState*> samplers(resources.size());
@@ -63,10 +63,10 @@ namespace Engine {
 		});
 	}
 
-	void DX11StageVS::BindSamplers(const Array<AbstractSamplerState*>& resources) {
+	void DX11StageVS::BindSamplers(const Array<IStateResourceData*>& resources) {
 		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 
-		BindSamplersWithCallback(resources, m_dxContext->GetD3D11Device(), [&](const Array<ID3D11SamplerState*>& resources) {
+		BindSamplersWithCallback(resources, [&](const Array<ID3D11SamplerState*>& resources) {
 			d3dContext->VSSetSamplers(0, static_cast<UINT>(resources.size()), resources.data());
 		});
 	}
@@ -98,10 +98,10 @@ namespace Engine {
 		});
 	}
 
-	void DX11StagePS::BindSamplers(const Array<AbstractSamplerState*>& resources) {
+	void DX11StagePS::BindSamplers(const Array<IStateResourceData*>& resources) {
 		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 
-		BindSamplersWithCallback(resources, m_dxContext->GetD3D11Device(), [&](const Array<ID3D11SamplerState*>& resources) {
+		BindSamplersWithCallback(resources, [&](const Array<ID3D11SamplerState*>& resources) {
 			d3dContext->PSSetSamplers(0, static_cast<UINT>(resources.size()), resources.data());
 		});
 	}

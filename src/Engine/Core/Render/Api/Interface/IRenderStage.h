@@ -12,7 +12,7 @@ namespace Engine {
 		virtual ~IRenderStage() = default;
 		virtual void BindTextures(const Array<ITextureResourceData*>& resources) = 0;
 		virtual void BindBuffers(const Array<IBufferResourceData*>& resources) = 0;
-		virtual void BindSamplers(const Array<AbstractSamplerState*>& resources) = 0;
+		virtual void BindSamplers(const Array<IStateResourceData*>& resources) = 0;
 		virtual void BindShader(IShaderResourceData* resource) = 0;
 	};
 }
