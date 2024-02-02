@@ -3,92 +3,91 @@
 
 namespace Engine {
 	template<class TResourceData>
-	Int32 ProcessCommonAttachment(Array<ResourceWrapper<TResourceData>>& arr, TResourceData* resource, Int32 slot, bool isNative) {
-		arr.push_back(ResourceWrapper<TResourceData>(resource, isNative));
+	Int32 ProcessCommonInit(Array<ResourceSlot<TResourceData>>& arr, TResourceData* resource, EnumFlags<BatchSlot> batchIds) {
+		arr.push_back(ResourceSlot<TResourceData>(batchIds, resource));
 		return static_cast<Int32>(arr.size() - 1);
 	}
 
-	GBuffer::GBuffer() 
-		: m_targets() {
-
-	}
-
-	Int32 GBuffer::InitNewResource(Int32 slot, ITargetResourceData* resource) {
-		return ProcessCommonAttachment(m_targets, resource, slot, false);
-	}
-
-	Int32 GBuffer::InitNewResource(Int32 slot, TextureType type, TextureFormat format, Int32 width, Int32 height) {
-		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		return ProcessCommonAttachment(m_targets, factory->CreateTarget(type, format, width, height), slot, true);
-	}
-
-	void GBuffer::Clear() {
-		for (Size i = 0; i < m_targets.size(); i++) {
-			m_targets[i].GetResource()->Clear(Core::GetInstance()->GetContext());
-		}
-	}
-
-	const Array<ITargetResourceData*> GBuffer::GetTargets() const {
-		Array<ITargetResourceData*> result(m_targets.size());
-		for (Size i = 0; i < result.size(); i++) {
-			result[i] = m_targets[i].GetResource();
-		}
-		return result;
-	}
-
-	const Array<ITextureResourceData*> GBuffer::GetResources(Int32 slot) const {
-		Array<ITextureResourceData*> result;
-		for (Size i = 0; i < m_targets.size(); i++) {
-			if (m_targets[i].IsAssociatedWith(slot)) {
-				result.push_back(m_targets[i].GetResource()->GetTextureResource());
+	template<class TResourceData, class TOutResourceData>
+	const Array<TOutResourceData*> ProcessCommonGet(BatchSlot batchId, const Array<ResourceSlot<TResourceData>>& arr, std::function<TOutResourceData*(TResourceData*)> callback) {
+		Array<TOutResourceData*> result;
+		for (Size i = 0; i < arr.size(); i++) {
+			if (arr[i].IsAssociatedWith(batchId)) {
+				result.push_back(callback(arr[i].GetResource()));
 			}
 		}
 		return result;
 	}
 
-	UBuffer::UBuffer() 
-		: m_buffers() {
+	GBuffer::GBuffer() 
+		: m_batch() {
 
 	}
 
-	Int32 UBuffer::InitNewResource(Int32 slot, Int32 bufferSize) {
+	void GBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
+		const Array<ITextureResourceData*> textures = ProcessCommonGet<ITargetResourceData, ITextureResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource->GetTextureResource(); });
+		stage->BindTextures(textures);
+	}
+
+	void GBuffer::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
+		const Array<ITargetResourceData*> targets = ProcessCommonGet<ITargetResourceData, ITargetResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource; });
+		pipeline->SetTargets(targets);
+	}
+
+	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource) {
+		ProcessCommonInit(m_batch, resource, batchIds);
+	}
+
+	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, TextureType type, TextureFormat format, Int32 width, Int32 height) {
+		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+		ProcessCommonInit(m_batch, factory->CreateTarget(type, format, width, height), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+	}
+
+	void GBuffer::Clear() {
+		for (Size i = 0; i < m_batch.size(); i++) {
+			m_batch[i].GetResource()->Clear(Core::GetInstance()->GetContext());
+		}
+	}
+
+	UBuffer::UBuffer() 
+		: m_batch() {
+
+	}
+
+	void UBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
+		const Array<IBufferResourceData*> buffers = ProcessCommonGet<IBufferResourceData, IBufferResourceData>(batchId, m_batch, [](IBufferResourceData* resource) { return resource; });
+		stage->BindBuffers(buffers);
+	}
+
+	void UBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32* outId) {
 		Array<Int8> dummy(bufferSize);
 
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		return ProcessCommonAttachment(m_buffers, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), dummy.data()), slot, true);
+		*outId = ProcessCommonInit(m_batch, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), dummy.data()), batchIds | BatchSlot::BS_SLOT_DELETABLE);
 	}
 
 	void UBuffer::Update(Int32 id) {
-		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_buffers[id].GetResource());
+		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_batch[id].GetResource());
 		buffer->Update(Core::GetInstance()->GetContext());
 	}
 
 	RawData UBuffer::GetBufferData(Int32 id) const {
-		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_buffers[id].GetResource());
+		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_batch[id].GetResource());
 		return buffer->GetBufferData();
 	}
 
-	const Array<IBufferResourceData*> UBuffer::GetResources(Int32 slot) const {
-		Array<IBufferResourceData*> result;
-		for (Size i = 0; i < m_buffers.size(); i++) {
-			if (m_buffers[i].IsAssociatedWith(slot)) {
-				result.push_back(m_buffers[i].GetResource());
-			}
-		}
-		return result;
-	}
-
 	Samplers::Samplers() 
-		: m_states() {
+		: m_batch() {
 
 	}
 
 	void Samplers::Bind(BatchSlot batchId, IRenderStage* stage) {
-		const Array<IStateResourceData*> states = ;
+		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return resource; });
 		stage->BindSamplers(states);
 	}
 
 	void Samplers::InitNewResource(EnumFlags<BatchSlot> batchIds) {
-		EnumFlags<BatchSlot> a = BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2;
+		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+		ProcessCommonInit(m_batch, factory->CreateState(StateType::ST_SAMPLER), batchIds | BatchSlot::BS_SLOT_DELETABLE);
 	}
 }
