@@ -5,28 +5,12 @@
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
 
 namespace Engine {
-    class DX11SamplerStateData : public ISamplerStateData {
-    private:
-        D3D11_SAMPLER_DESC m_d3dSamplerDesc;
-
-    public:
-        DX11SamplerStateData();
-        virtual ~DX11SamplerStateData() = default;
-
-        void Reset() override;
-
-        void SetAddress(SamplerAddress address) override;
-        void SetFilter(SamplerFilter filter) override;
-
-        const D3D11_SAMPLER_DESC& GetD3D11Desc() const;
-    };
-
     class DX11SamplerState : public IStateResourceData {
     public:
-        DX11SamplerState(const IStateData* data, const IContext* context);
+        DX11SamplerState(const StateData& data, const IContext* context);
         virtual ~DX11SamplerState() = default;
 
-        void Initialize(const IStateData* data, const IContext* context) override;
+        bool Is(StateType type) const override;
 
         ComPtr<ID3D11SamplerState> GetD3D11SamplerState() const;
 

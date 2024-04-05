@@ -1,36 +1,18 @@
 #ifndef ENGINE_COMMON_HLSLI
 #define ENGINE_COMMON_HLSLI
 
-#if defined(ENGINE_MESH_RENDERPASS)
-
-cbuffer VS_ENGINE_CAMERA_BUFFER : register(b0) {
-	float4x4 ViewProjection;
-	float4x4 invWorld;
-	float4x4 World;
+#define CBUFFER_OBJECT(slot)			\
+cbuffer UB_OBJECT : register(slot) {	\
+	float4x4 ViewProjection;			\
+	float4x4 World;						\
 }
 
-#endif
-
-#if defined(ENGINE_LIGHT_RENDERPASS)
-
-cbuffer PS_ENGINE_ACCUMULATION_BUFFER : register(b0) {
-	float4x4 WorldView;
-	float4x4 Projection;
-	float4x4 invProjection;
-	float2 Resolution;
+#define CBUFFER_OBJECT_HELPER(slot)			\
+cbuffer UB_OBJECT_HELPER : register(slot) {	\
+	float4x4 invWorld;						\
+	float4x4 invView;						\
+	float4x4 intProjection;					\
 }
-
-cbuffer PS_ENGINE_LIGHT_BUFFER : register(b1) {
-	float4 LightValue;
-	float4 LightColor;
-}
-
-Texture2D AlbedoTexture : register(t0);
-Texture2D NormalTexture : register(t1);
-Texture2D DepthTexture : register(t2);
-Texture2D OrmTexture : register(t3);
-
-#endif
 
 sampler LinearSampler : register(s0);
 

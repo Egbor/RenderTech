@@ -13,51 +13,24 @@ namespace Engine {
 		BS_SLOT_DELETABLE = 0x100
 	};
 
-	//template<class TResourceData>
-	//struct ResourceWrapper {
-	//public:
-	//	ResourceWrapper(TResourceData* resource, Int32 slot, bool isNative) noexcept
-	//		: m_resource(resource), m_slots(slot), m_isNative(isNative) {
-	//	
-	//	}
-
-	//	ResourceWrapper(ResourceWrapper&& wrapper) noexcept
-	//		: m_resource(std::move(wrapper.m_resource))
-	//		, m_isNative(std::move(wrapper.m_isNative)) {
-	//		wrapper.m_isNative = false;
-	//	}
-
-	//	ResourceWrapper& operator=(ResourceWrapper&& wrapper) noexcept {
-	//		m_resource = std::move(wrapper.m_resource);
-	//		m_isNative = std::move(wrapper.m_isNative);
-	//		return *this;
-	//	}
-
-	//	virtual ~ResourceWrapper() noexcept {
-	//		if (m_isNative) {
-	//			DELETE_OBJECT(m_resource);
-	//		}
-	//	}
-
-	//	TResourceData* GetResource() const {
-	//		return m_resource;
-	//	}
-
-	//	bool IsAssociatedWith(Int32 slot) const {
-	//		return !!(m_slots & slot);
-	//	}
-
-	//private:
-	//	TResourceData* m_resource;
-	//	Int32 m_slots;
-	//	bool m_isNative;
-	//};
-
 	template<class TResourceData>
-	struct ResourceSlot {
-		ResourceSlot(EnumFlags<BatchSlot> batchIds, TResourceData* resource) 
+	class ResourceSlot {
+	public:
+		ResourceSlot(EnumFlags<BatchSlot> batchIds, TResourceData* resource) noexcept
 			: m_batchIds(batchIds), m_resource(resource) {
 
+		}
+
+		ResourceSlot(ResourceSlot&& other) noexcept
+			: m_batchIds(std::move(other.m_batchIds)), m_resource(nullptr) {
+			std::swap(m_resource, other.m_resource);
+		}
+
+		ResourceSlot& operator=(ResourceSlot&& other) noexcept {
+			std::swap(m_batchIds, other.m_batchIds);
+			std::swap(m_resource, other.m_resource);
+
+			return *this;
 		}
 
 		virtual ~ResourceSlot() {
@@ -66,12 +39,15 @@ namespace Engine {
 			}
 		}
 
+		explicit ResourceSlot(const ResourceSlot&) noexcept = delete;
+		ResourceSlot& operator=(const ResourceSlot&) noexcept = delete;
+
 		TResourceData* GetResource() const {
 			return m_resource;
 		}
 
 		bool IsAssociatedWith(BatchSlot slot) const {
-			return !!(m_slots & slot);
+			return static_cast<bool>(m_batchIds & slot);
 		}
 
 	private:
@@ -123,13 +99,14 @@ namespace Engine {
 		Array<ResourceSlot<IBufferResourceData>> m_batch;
 	};
 
-	class Samplers : public IBindableResourceShaderStageBatch {
+	class States : public IBindableResourceStandaloneStageBatch, public IBindableResourceShaderStageBatch {
 	public:
-		Samplers();
-		virtual ~Samplers() = default;
+		States();
+		virtual ~States() = default;
 
 		void Bind(BatchSlot batchId, IRenderStage* stage) override;
-		void InitNewResource(EnumFlags<BatchSlot> batchIds);
+		void Bind(BatchSlot batchId, IRenderPipeline* pipeline) override;
+		void InitNewResource(EnumFlags<BatchSlot> batchIds, StateType type, StateData data);
 
 	private:
 		Array<ResourceSlot<IStateResourceData>> m_batch;

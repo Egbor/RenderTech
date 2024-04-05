@@ -154,7 +154,7 @@ namespace Engine {
     bool DX11Texture2D::IsCubemap() const {
         D3D11_TEXTURE2D_DESC d3dTexture2DDesc;
         m_d3dTexture2D->GetDesc(&d3dTexture2DDesc);
-        return d3dTexture2DDesc.MiscFlags == D3D11_RESOURCE_MISC_TEXTURECUBE;
+        return !!(d3dTexture2DDesc.MiscFlags & D3D11_RESOURCE_MISC_TEXTURECUBE);
     }
 
     ComPtr<ID3D11Texture2D> DX11Texture2D::GetD3D11Texture2D() const {

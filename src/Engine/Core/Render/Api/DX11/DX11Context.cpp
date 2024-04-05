@@ -5,7 +5,12 @@
 #include "Engine/Core/Render/Api/DX11/DX11Shader.h"
 #include "Engine/Core/Render/Api/DX11/DX11Target.h"
 #include "Engine/Core/Render/Api/DX11/DX11Stage.h"
+#include "Engine/Core/Render/Api/DX11/DX11BlendState.h"
+#include "Engine/Core/Render/Api/DX11/DX11DepthStencilState.h"
+#include "Engine/Core/Render/Api/DX11/DX11RasterizerState.h"
 #include "Engine/Core/Render/Api/DX11/DX11SamplerState.h"
+
+#include "Engine/Core/Render/Api/DX11/Interface/IDX11SelfBindable.h"
 
 namespace Engine {
     DX11Context::DX11Context(IWindow* window) {
@@ -17,10 +22,6 @@ namespace Engine {
             D3D_FEATURE_LEVEL_10_1,
             D3D_FEATURE_LEVEL_10_0,
         };
-
-#if defined(DEBUG) || defined(_DEBUG)
-        flag |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
 
         DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
         ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -102,8 +103,8 @@ namespace Engine {
         return dynamic_cast<ISwapChain*>(this);
     }
 
-    IStateResourceData* DX11Context::CreateState(StateType type) {
-        return m_stateFactory.Create(type);
+    IStateResourceData* DX11Context::CreateState(StateType type, StateData data) {
+        return m_stateFactory.Create(type, data);
     }
 
     ITextureResourceData* DX11Context::CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
@@ -149,6 +150,13 @@ namespace Engine {
         }
 
         m_d3dContext->OMSetRenderTargets(static_cast<UINT>(rendertargets.size()), rendertargets.data(), depthstencil);
+    }
+
+    void DX11Context::SetStates(const Array<IStateResourceData*>& states) {
+        for (Size i = 0; i < states.size(); i++) {
+            IDX11SelfBindable* state = dynamic_cast<IDX11SelfBindable*>(states[i]);
+            state->Bind(m_d3dContext);
+        }
     }
 
     void DX11Context::GetViewport(Viewport& viewport) {
@@ -197,9 +205,14 @@ namespace Engine {
     }
 
     void DX11Context::RegisterStateFactory() {
-        m_stateFactory.Register(StateType::ST_SAMPLER, [&]() {
-            return new DX11SamplerState();
-        });
+        m_stateFactory.Register(StateType::ST_BLEND, [&](StateData& data) {
+            return new DX11BlendState(data, this); });
+        m_stateFactory.Register(StateType::ST_DEPTH_STENCIL, [&](StateData& data) {
+            return new DX11DepthStencilState(data, this); });
+        m_stateFactory.Register(StateType::ST_RASTERIZER, [&](StateData& data) {
+            return new DX11RasterizerState(data, this); });
+        m_stateFactory.Register(StateType::ST_SAMPLER, [&](StateData& data) {
+            return new DX11SamplerState(data, this); });
     }
 
     void DX11Context::RegisterTextureFactory() {

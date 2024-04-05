@@ -2,6 +2,7 @@
 #define IRENDER_PIPELINE_H
 
 #include "Engine/Core/Render/Api/Interface/IRenderStage.h"
+#include "Engine/Core/Render/Api/Interface/ITargetResource.h"
 
 namespace Engine {
 	class IRenderPipeline {
@@ -11,6 +12,7 @@ namespace Engine {
 
 		virtual void SetViewport(Int32 width, Int32 height) = 0;
 		virtual void SetTargets(const Array<ITargetResourceData*>& targets) = 0;
+		virtual void SetStates(const Array<IStateResourceData*>& states) = 0;
 
 		virtual void GetViewport(Viewport& viewport) = 0;
 		virtual IRenderStage* GetStage(RenderStage stage) = 0;

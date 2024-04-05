@@ -11,7 +11,7 @@ namespace Engine {
 	class IRenderResourceFactory {
 	public:
 		virtual ~IRenderResourceFactory() = default;
-		virtual IStateResourceData* CreateState(StateType type) = 0;
+		virtual IStateResourceData* CreateState(StateType type, StateData data) = 0;
 		virtual ITextureResourceData* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) = 0;
 		virtual ITargetResourceData* CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) = 0;
 		virtual IBufferResourceData* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) = 0;

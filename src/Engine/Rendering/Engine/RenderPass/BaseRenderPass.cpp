@@ -20,17 +20,17 @@ namespace Engine {
 		Int32 height = GetRenderHeight();
 
 		// GBuffer initialization
-		GetGBuffer().InitNewResource(RBS_SLOT1,/*TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height*/ output);
-		GetGBuffer().InitNewResource(RBS_SLOT1, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
-		GetGBuffer().InitNewResource(RBS_SLOT1, TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
-		GetGBuffer().InitNewResource(RBS_SLOT1, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+		GetGBuffer().InitNewResource(BatchSlot::BS_SLOT_1,/*TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height*/ output);
+		GetGBuffer().InitNewResource(BatchSlot::BS_SLOT_1, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
+		GetGBuffer().InitNewResource(BatchSlot::BS_SLOT_1, TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
+		GetGBuffer().InitNewResource(BatchSlot::BS_SLOT_1, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
 
 		// Samplers initializtion
-		GetSamplers().InitNewResource(RBS_SLOT1);
+		GetStates().InitNewResource(BatchSlot::BS_SLOT_1, StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
 
 		// Constant buffers initialization
-		m_bufferObjectId = GetUBuffer().InitNewResource(RBS_SLOT1, sizeof(UB_Object));
-		m_bufferObjectHelperId = GetUBuffer().InitNewResource(RBS_SLOT1, sizeof(UB_ObjectHelper));
+		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_1, sizeof(UB_Object), &m_bufferObjectId);
+		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_1, sizeof(UB_ObjectHelper), &m_bufferObjectHelperId);
 
 		// Default shaders initialization
 		m_vertexShader = LoadShader("assets/shaders/BaseVSShader.cso", ShaderType::ST_VERTEX);
@@ -40,10 +40,10 @@ namespace Engine {
 		IRenderStage* vsStage = pipeline->GetStage(RenderStage::RS_VERTEX);
 		IRenderStage* psStage = pipeline->GetStage(RenderStage::RS_PIXEL);
 
-		psStage->BindSamplers(GetSamplers().GetResources(RBS_SLOT1));
-		vsStage->BindBuffers(GetUBuffer().GetResources(RBS_SLOT1));
+		GetStates().Bind(BatchSlot::BS_SLOT_1, psStage);
+		GetUBuffer().Bind(BatchSlot::BS_SLOT_1, vsStage);
+		GetGBuffer().Bind(BatchSlot::BS_SLOT_1, pipeline);
 		vsStage->BindShader(m_vertexShader);
-		pipeline->SetTargets(GetGBuffer().GetTargets());
 
 		GetGBuffer().Clear();
 

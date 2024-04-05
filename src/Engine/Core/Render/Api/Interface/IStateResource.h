@@ -26,12 +26,6 @@ namespace Engine {
 		SO_DECR		= 7
 	};
 
-	struct StencilConditions {
-		StencilOperation opStencilFail;
-		StencilOperation opStencilDepthFail;
-		StencilOperation opStencilPass;
-	};
-
 	enum class CullMode {
 		C_NONE	= 0,
 		C_FRONT	= 1,
@@ -66,60 +60,115 @@ namespace Engine {
 		BO_MAX			= 4
 	};
 
-	class IContext;
-
-	class IStateData {
-	public:
-		virtual ~IStateData() = default;
-		virtual void Reset() = 0;
+	struct StencilConditions {
+		StencilOperation opStencilFail;
+		StencilOperation opStencilDepthFail;
+		StencilOperation opStencilPass;
 	};
+
+	struct SamplerState {
+		SamplerAddress address;
+		SamplerFilter filter;
+	};
+
+	struct DepthStencilOperations {
+		ComparisonFunction stencilComparisonFunction;
+		StencilConditions stencilConditions;
+	};
+
+	struct DepthStencilState {
+		ComparisonFunction depthComparisonFunction;
+		DepthStencilOperations backFace;
+		DepthStencilOperations frontFace;
+		bool depthTestEnable;
+		bool depthWriteEnable;
+		bool stencilTestEnable;
+	};
+
+	struct RasterizerState {
+		CullMode culling;
+		bool depthClipEnable;
+	};
+
+	struct RenderOutputState {
+		Blend blendSrc;
+		Blend blendDst;
+		BlendOperation blendOperation;
+		bool blendEnable;
+	};
+
+	struct BlendState {
+		RenderOutputState targets[8];
+	};
+
+	union StateData {
+		BlendState sdBlend;
+		DepthStencilState sdDepthStencil;
+		RasterizerState sdRasterizer;
+		SamplerState sdSampler;
+	};
+
+	template<class State>
+	constexpr StateData InitDefaultStateData() noexcept;
+
+	template<>
+	constexpr StateData InitDefaultStateData<SamplerState>() noexcept {
+		StateData data {};
+
+		data.sdSampler.address = SamplerAddress::SA_WRAP;
+		data.sdSampler.filter = SamplerFilter::SF_LINEAR;
+
+		return data;
+	}
+
+	template<>
+	constexpr StateData InitDefaultStateData<DepthStencilState>() noexcept {
+		StateData data{};
+
+		data.sdDepthStencil.depthTestEnable = true;
+		data.sdDepthStencil.depthWriteEnable = true;
+		data.sdDepthStencil.stencilTestEnable = false;
+		data.sdDepthStencil.depthComparisonFunction = ComparisonFunction::CF_LESS;
+
+		data.sdDepthStencil.backFace.stencilComparisonFunction = ComparisonFunction::CF_ALWAYS;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilDepthFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilPass = StencilOperation::SO_KEEP;
+
+		data.sdDepthStencil.frontFace.stencilComparisonFunction = ComparisonFunction::CF_ALWAYS;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilDepthFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilPass = StencilOperation::SO_KEEP;
+
+		return data;
+	}
+
+	template<>
+	constexpr StateData InitDefaultStateData<RasterizerState>() noexcept {
+		StateData data {};
+
+		data.sdRasterizer.culling = CullMode::C_BACK;
+		data.sdRasterizer.depthClipEnable = true;
+
+		return data;
+	}
+
+	template<>
+	constexpr StateData InitDefaultStateData<BlendState>() noexcept {
+		StateData data {};
+
+		data.sdBlend.targets[0].blendEnable = false;
+		data.sdBlend.targets[0].blendSrc = Blend::B_ONE;
+		data.sdBlend.targets[0].blendDst = Blend::B_ZERO;
+		data.sdBlend.targets[0].blendOperation = BlendOperation::BO_ADD;
+
+		return data;
+	}
 
 	class IStateResourceData {
 	public:
 		virtual ~IStateResourceData() = default;
-		virtual void Initialize(const IStateData* data, const IContext* context) = 0;
-	};
-
-	class ISamplerStateData : public IStateData {
-	public:
-		virtual ~ISamplerStateData() = default;
-		virtual void SetAddress(SamplerAddress address) = 0;
-		virtual void SetFilter(SamplerFilter filter) = 0;
-	};
-
-	class IDepthStencilStateData : public IStateData {
-	public:
-		virtual ~IDepthStencilStateData() = default;
-
-		virtual void SetDepthTestComparisonFunction(ComparisonFunction func) = 0;
-		virtual void SetStencilTestComparisonBackFunction(ComparisonFunction func) = 0;
-		virtual void SetStencilTestComparisonFrontFunction(ComparisonFunction func) = 0;
-
-		virtual void SetStencilTestBackOperation(StencilConditions conditions) = 0;
-		virtual void SetStencilTestFrontOperation(StencilConditions conditions) = 0;
-
-		virtual void SetDepthTestEnable(bool enable) = 0;
-		virtual void SetStencilTestEnable(bool enable) = 0;
-		virtual void SetDepthWriteEnable(bool enable) = 0;
-	};
-
-	class IRasterizerStateData : public IStateData {
-	public:
-		virtual ~IRasterizerStateData() = default;
-
-		virtual void SetCullMode(CullMode mode) = 0;
-		virtual void SetDepthClipEnable(bool enable) = 0;
-	};
-
-	class IBlendStateData : public IStateData {
-	public:
-		virtual ~IBlendStateData() = default;
-
-		virtual void SetSourceFactor(RenderOutput target, Blend factor) = 0;
-		virtual void SetDestinationFactor(RenderOutput target, Blend factor) = 0;
-		virtual void SetOperation(RenderOutput target, BlendOperation operation) = 0;
-
-		virtual void SetEnable(RenderOutput target, bool enable) = 0;
+		virtual bool Is(StateType type) const = 0;
 	};
 }
 

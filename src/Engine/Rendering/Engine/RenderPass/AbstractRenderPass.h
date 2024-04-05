@@ -38,7 +38,7 @@ namespace Engine {
 
 		GBuffer& GetGBuffer();
 		UBuffer& GetUBuffer();
-		Samplers& GetSamplers();
+		States& GetStates();
 
 	protected:
 		static IShaderResourceData* LoadShader(const String& filename, ShaderType type);
@@ -46,7 +46,7 @@ namespace Engine {
 	private:
 		GBuffer m_gbuffer;
 		UBuffer m_ubuffer;
-		Samplers m_samplers;
+		States m_states;
 	};
 }
 

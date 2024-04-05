@@ -43,12 +43,12 @@ namespace Engine {
 	}
 
 	void LightRenderPass::Initialize(ITargetResourceData* output) {
-		GetGBuffer().InitNewResource(RBS_SLOT1, output);
+		GetGBuffer().InitNewResource(BatchSlot::BS_SLOT_1, output);
 
-		m_bufferObjectId = GetUBuffer().InitNewResource(RBS_SLOT1 | RBS_SLOT2, sizeof(UB_Object));
-		m_bufferObjectHelperId = GetUBuffer().InitNewResource(RBS_SLOT2, sizeof(UB_ObjectHelper));
-		m_bufferSystemId = GetUBuffer().InitNewResource(RBS_SLOT2, sizeof(UB_System));
-		m_bufferLightId = GetUBuffer().InitNewResource(RBS_SLOT2, sizeof(UB_Light));
+		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2, sizeof(UB_Object), &m_bufferObjectId);
+		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_2, sizeof(UB_ObjectHelper), &m_bufferObjectHelperId);
+		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_2, sizeof(UB_System), &m_bufferSystemId);
+		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_2, sizeof(UB_Light), &m_bufferLightId);
 
 		m_vertexShader = LoadShader("assets/shaders/LightVSShader.cso", ShaderType::ST_VERTEX);
 		m_pixelShader = LoadShader("assets/shaders/LightPSShader.cso", ShaderType::ST_PIXEL);
@@ -60,10 +60,9 @@ namespace Engine {
 
 		vsStage->BindShader(m_vertexShader);
 		psStage->BindShader(m_pixelShader);
-		vsStage->BindBuffers(GetUBuffer().GetResources(RBS_SLOT1));
-		psStage->BindBuffers(GetUBuffer().GetResources(RBS_SLOT2));
-		psStage->BindTextures(prev->GetGBuffer().GetResources(RBS_SLOT_ALL));
-		pipeline->SetTargets(GetGBuffer().GetTargets());
+		GetUBuffer().Bind(BatchSlot::BS_SLOT_1, vsStage);
+		GetUBuffer().Bind(BatchSlot::BS_SLOT_2, psStage);
+		GetGBuffer().Bind(BatchSlot::BS_SLOT_1, pipeline);
 
 		GetGBuffer().Clear();
 

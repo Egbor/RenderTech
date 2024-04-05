@@ -13,7 +13,10 @@ namespace Engine {
 		Array<TOutResourceData*> result;
 		for (Size i = 0; i < arr.size(); i++) {
 			if (arr[i].IsAssociatedWith(batchId)) {
-				result.push_back(callback(arr[i].GetResource()));
+				TOutResourceData* resource = callback(arr[i].GetResource());
+				if (resource != nullptr) {
+					result.push_back(resource);
+				}
 			}
 		}
 		return result;
@@ -76,18 +79,23 @@ namespace Engine {
 		return buffer->GetBufferData();
 	}
 
-	Samplers::Samplers() 
+	States::States() 
 		: m_batch() {
 
 	}
 
-	void Samplers::Bind(BatchSlot batchId, IRenderStage* stage) {
-		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return resource; });
+	void States::Bind(BatchSlot batchId, IRenderStage* stage) {
+		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
 		stage->BindSamplers(states);
 	}
 
-	void Samplers::InitNewResource(EnumFlags<BatchSlot> batchIds) {
+	void States::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
+		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return !resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
+		pipeline->SetStates(states);
+	}
+
+	void States::InitNewResource(EnumFlags<BatchSlot> batchIds, StateType type, StateData data) {
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		ProcessCommonInit(m_batch, factory->CreateState(StateType::ST_SAMPLER), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+		ProcessCommonInit(m_batch, factory->CreateState(type, data), batchIds | BatchSlot::BS_SLOT_DELETABLE);
 	}
 }

@@ -22,8 +22,8 @@ namespace Engine {
 		return m_ubuffer;
 	}
 
-	Samplers& AbstractRenderPass::GetSamplers() {
-		return m_samplers;
+	States& AbstractRenderPass::GetStates() {
+		return m_states;
 	}
 
 	IShaderResourceData* AbstractRenderPass::LoadShader(const String& filename, ShaderType type) {

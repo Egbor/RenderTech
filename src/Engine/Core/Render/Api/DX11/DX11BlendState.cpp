@@ -30,56 +30,42 @@ namespace Engine {
         D3D11_BLEND_OP_MAX
     };
 
-    DX11BlendStateData::DX11BlendStateData()
-        : m_d3dBlendDesc() {
-        Reset();
+    constexpr D3D11_BLEND_DESC GenerateD3D11BlendDesc(const BlendState& data) {
+        D3D11_BLEND_DESC d3dBlendDesc {};
+        d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+        d3dBlendDesc.IndependentBlendEnable = FALSE;
+
+        for (Int32 i = 0; i < ARRAYSIZE(data.targets); i++) {
+            d3dBlendDesc.RenderTarget[i].BlendEnable = data.targets[i].blendEnable;
+            d3dBlendDesc.RenderTarget[i].SrcBlend = gBlendTable[INDEX_OF(data.targets[i].blendSrc)];
+            d3dBlendDesc.RenderTarget[i].DestBlend = gBlendTable[INDEX_OF(data.targets[i].blendDst)];
+            d3dBlendDesc.RenderTarget[i].BlendOp = gBlendOpTable[INDEX_OF(data.targets[i].blendOperation)];
+            d3dBlendDesc.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
+            d3dBlendDesc.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
+            d3dBlendDesc.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+            d3dBlendDesc.RenderTarget[i].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        }
+
+        return d3dBlendDesc;
     }
 
-    void DX11BlendStateData::Reset() {
-        m_d3dBlendDesc.AlphaToCoverageEnable = FALSE;
-        m_d3dBlendDesc.IndependentBlendEnable = FALSE;
-        m_d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
-        m_d3dBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-        m_d3dBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-        m_d3dBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-        m_d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-        m_d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-        m_d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-        m_d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-    }
-
-    void DX11BlendStateData::SetSourceFactor(RenderOutput target, Blend factor) {
-        m_d3dBlendDesc.RenderTarget[INDEX_OF(target)].SrcBlend = gBlendTable[INDEX_OF(factor)];
-    }
-
-    void DX11BlendStateData::SetDestinationFactor(RenderOutput target, Blend factor) {
-        m_d3dBlendDesc.RenderTarget[INDEX_OF(target)].DestBlend = gBlendTable[INDEX_OF(factor)];
-    }
-
-    void DX11BlendStateData::SetOperation(RenderOutput target, BlendOperation operation) {
-        m_d3dBlendDesc.RenderTarget[INDEX_OF(target)].BlendOp = gBlendOpTable[INDEX_OF(operation)];
-    }
-
-    void DX11BlendStateData::SetEnable(RenderOutput target, bool enable) {
-        m_d3dBlendDesc.RenderTarget[INDEX_OF(target)].BlendEnable = enable;
-    }
-
-    const D3D11_BLEND_DESC& DX11BlendStateData::GetD3D11Desc() const {
-        return m_d3dBlendDesc;
-    }
-
-    DX11BlendState::DX11BlendState(const IStateData* data, const IContext* context) {
-        Initialize(data, context);
-    }
-
-    void DX11BlendState::Initialize(const IStateData* data, const IContext* context) {
+    DX11BlendState::DX11BlendState(const StateData& data, const IContext* context) 
+        : m_blendFactor{ 1.0f, 1.0f, 1.0f, 1.0f }, m_sampleMask(0xFFFFFFFF) {
         ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
-        const DX11BlendStateData* dxData = dynamic_cast<const DX11BlendStateData*>(data);
+        const D3D11_BLEND_DESC dxData = GenerateD3D11BlendDesc(data.sdBlend);
 
         HRESULT hr = 0;
-        if (FAILED(hr = d3dDevice->CreateBlendState(&dxData->GetD3D11Desc(), &m_state))) {
+        if (FAILED(hr = d3dDevice->CreateBlendState(&dxData, &m_state))) {
             throw new EngineException("[DX11BlendState] ID3D11Device::CreateBlendState() failed");
         }
+    }
+
+    void DX11BlendState::Bind(ComPtr<ID3D11DeviceContext> d3dContext) {
+        d3dContext->OMSetBlendState(m_state.Get(), m_blendFactor, m_sampleMask);
+    }
+
+    bool DX11BlendState::Is(StateType type) const {
+        return type == StateType::ST_BLEND;
     }
 
     ComPtr<ID3D11BlendState> DX11BlendState::GetD3D11BlendState() const {

@@ -30,7 +30,7 @@ namespace Engine {
         IRenderPipeline* QueryPipeline() override;
         ISwapChain* QuerySwapChain() override;
 
-        IStateResourceData* CreateState(StateType type) override;
+        IStateResourceData* CreateState(StateType type, StateData data) override;
         ITextureResourceData* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) override;
         ITargetResourceData* CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) override;
         IBufferResourceData* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) override;
@@ -38,6 +38,7 @@ namespace Engine {
 
         void SetViewport(Int32 width, Int32 height) override;
         void SetTargets(const Array<ITargetResourceData*>& targets) override;
+        void SetStates(const Array<IStateResourceData*>& states) override;
 
         void GetViewport(Viewport& viewport) override;
         IRenderStage* GetStage(RenderStage stage) override;
@@ -53,7 +54,7 @@ namespace Engine {
         void RegisterBufferFactory();
         void RegisterShaderFactory();
 
-        Factory<StateType, IStateResourceData> m_stateFactory;
+        Factory<StateType, IStateResourceData, StateData> m_stateFactory;
         Factory<TextureType, ITextureResourceData, ComPtr<ID3D11Device>, TextureFormat, Int32, Int32, Array<Int8*>> m_staticTextureFactory;
         Factory<TextureType, ITargetResourceData, ComPtr<ID3D11Device>, TextureFormat, Int32, Int32> m_renderTargetFactory;
         Factory<BufferType, IBufferResourceData, ComPtr<ID3D11Device>, Int32, Int32, const void*> m_bufferFactory;
