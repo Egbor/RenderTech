@@ -30,7 +30,7 @@ namespace Engine {
 		bool Is(RenderPassType type) const override;
 
 		RenderLight& ReserveLightInQueue(LightType type);
-		void SetViewProjection(Matrix4x4 view, Matrix4x4 proj);
+		void SetCamera(Matrix4x4 view, Matrix4x4 proj, Vector3 eyePosition);
 
 	private:
 		IShaderResourceData* m_vertexShader;
@@ -38,7 +38,7 @@ namespace Engine {
 
 		Int32 m_bufferObjectId;
 		Int32 m_bufferObjectHelperId;
-		Int32 m_bufferSystemId;
+		Int32 m_bufferCameraId;
 		Int32 m_bufferLightId;
 
 		LightQueue m_lights;

@@ -84,6 +84,7 @@ namespace Engine {
 #define DELETE_ARRAY_OF_OBJECTS(arr) for (auto obj : (arr)) { DELETE_OBJECT(obj); }
 
 #define FIELD_AS_TEXT(field) #field
+#define AS_TEXT(x) #x
 #define IS_POWER_OF_TWO(x) (x && (!(x&(x-1))))
 
 #define INDEX_OF(value) static_cast<UInt32>(value)

@@ -7,7 +7,7 @@ namespace Engine {
 	};
 
 	BaseRenderPass::BaseRenderPass()
-		: m_vertexShader(nullptr) {
+		: m_vertexShader(nullptr), m_bufferObjectId(), m_bufferObjectHelperId() {
 
 	}
 

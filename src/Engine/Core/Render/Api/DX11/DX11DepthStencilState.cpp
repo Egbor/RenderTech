@@ -46,7 +46,7 @@ namespace Engine {
     }
 
     DX11DepthStencilState::DX11DepthStencilState(const StateData& data, const IContext* context) 
-        : m_stencilRef(0) {
+        : m_stencilRef(data.sdDepthStencil.stencilRef) {
         ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
         const D3D11_DEPTH_STENCIL_DESC dxData = GenerateD3D11DepthStencilDesc(data.sdDepthStencil);
 

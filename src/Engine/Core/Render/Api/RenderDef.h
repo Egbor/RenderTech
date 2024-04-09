@@ -216,14 +216,15 @@ namespace Engine {
         Matrix4x4 invProjection;
     };
 
-    struct DYNAMIC_BUFFER UB_System {
+    struct DYNAMIC_BUFFER UB_Camera {
+        Vector4 EyePosition;
         Vector2 Resolution;
     };
 
     struct DYNAMIC_BUFFER UB_Light {
         Vector4 Color;
         Vector4 Value;
-        Vector4 Brightness;
+        Float Brightness;
     };
 }
 

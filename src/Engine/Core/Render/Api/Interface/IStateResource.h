@@ -83,6 +83,7 @@ namespace Engine {
 		bool depthTestEnable;
 		bool depthWriteEnable;
 		bool stencilTestEnable;
+		Int32 stencilRef;
 	};
 
 	struct RasterizerState {

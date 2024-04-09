@@ -1,4 +1,4 @@
-#include "Engine/Rendering/Engine/RenderPass/RenderBuffer.h"
+#include "Engine/Rendering/Engine/RenderBatcher.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
@@ -29,12 +29,16 @@ namespace Engine {
 
 	void GBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
 		const Array<ITextureResourceData*> textures = ProcessCommonGet<ITargetResourceData, ITextureResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource->GetTextureResource(); });
-		stage->BindTextures(textures);
+		if (textures.size() > 0) {
+			stage->BindTextures(textures);
+		}
 	}
 
 	void GBuffer::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
 		const Array<ITargetResourceData*> targets = ProcessCommonGet<ITargetResourceData, ITargetResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource; });
-		pipeline->SetTargets(targets);
+		if (targets.size() > 0) {
+			pipeline->SetTargets(targets);
+		}
 	}
 
 	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource) {
@@ -59,7 +63,9 @@ namespace Engine {
 
 	void UBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
 		const Array<IBufferResourceData*> buffers = ProcessCommonGet<IBufferResourceData, IBufferResourceData>(batchId, m_batch, [](IBufferResourceData* resource) { return resource; });
-		stage->BindBuffers(buffers);
+		if (buffers.size() > 0) {
+			stage->BindBuffers(buffers);
+		}
 	}
 
 	void UBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32* outId) {
@@ -86,12 +92,16 @@ namespace Engine {
 
 	void States::Bind(BatchSlot batchId, IRenderStage* stage) {
 		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
-		stage->BindSamplers(states);
+		if (states.size() > 0) {
+			stage->BindSamplers(states);
+		}
 	}
 
 	void States::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
 		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return !resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
-		pipeline->SetStates(states);
+		if (states.size() > 0) {
+			pipeline->SetStates(states);
+		}
 	}
 
 	void States::InitNewResource(EnumFlags<BatchSlot> batchIds, StateType type, StateData data) {

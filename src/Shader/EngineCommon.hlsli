@@ -11,7 +11,20 @@ cbuffer UB_OBJECT : register(slot) {	\
 cbuffer UB_OBJECT_HELPER : register(slot) {	\
 	float4x4 invWorld;						\
 	float4x4 invView;						\
-	float4x4 intProjection;					\
+	float4x4 invProjection;					\
+}
+
+#define CBUFFER_CAMERA(slot)			\
+cbuffer UB_SYSTEM : register(slot) {	\
+	float4 EyePosition;					\
+	float2 Resolution;					\
+}
+
+#define CBUFFER_LIGHT(slot)			\
+cbuffer UB_LIGHT : register(slot) {	\
+	float4 Color;					\
+	float4 Value;					\
+	float4 Brightness;				\
 }
 
 sampler LinearSampler : register(s0);

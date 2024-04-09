@@ -46,7 +46,7 @@ namespace Engine {
             baseRenderPass->SetCamera(CreateViewMatrix(this), CreateProjectionMatrix(this, pass->GetRenderWidth(), pass->GetRenderHeight()));
         } else if(pass->Is(RenderPassType::RP_LIGHT)) {
             LightRenderPass* lightRenderPass = dynamic_cast<LightRenderPass*>(pass);
-            lightRenderPass->SetViewProjection(CreateViewMatrix(this), CreateProjectionMatrix(this, pass->GetRenderWidth(), pass->GetRenderHeight()));
+            lightRenderPass->SetCamera(CreateViewMatrix(this), CreateProjectionMatrix(this, pass->GetRenderWidth(), pass->GetRenderHeight()), GetWorldPosition());
         }
     }
 }

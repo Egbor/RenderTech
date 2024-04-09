@@ -32,8 +32,80 @@ namespace Engine {
 		return m_queue.back();
 	}
 
+	constexpr StateData GenerateFrontDepthStencilState() noexcept {
+		StateData data = InitDefaultStateData<DepthStencilState>();
+		data.sdDepthStencil.stencilRef = 0;
+		data.sdDepthStencil.depthWriteEnable = false;
+		data.sdDepthStencil.depthTestEnable = true;
+		data.sdDepthStencil.stencilTestEnable = true;
+		data.sdDepthStencil.depthComparisonFunction = ComparisonFunction::CF_GREATER;
+		data.sdDepthStencil.frontFace.stencilComparisonFunction = ComparisonFunction::CF_ALWAYS;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilDepthFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilPass = StencilOperation::SO_DECR_SAT;
+		data.sdDepthStencil.backFace.stencilComparisonFunction = ComparisonFunction::CF_ALWAYS;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilDepthFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilPass = StencilOperation::SO_KEEP;
+	
+		return data;
+	}
+
+	constexpr StateData GenerateBackDepthStencilState() noexcept {
+		StateData data = InitDefaultStateData<DepthStencilState>();
+		data.sdDepthStencil.stencilRef = 1;
+		data.sdDepthStencil.depthWriteEnable = false;
+		data.sdDepthStencil.depthTestEnable = true;
+		data.sdDepthStencil.stencilTestEnable = true;
+		data.sdDepthStencil.depthComparisonFunction = ComparisonFunction::CF_GREATER_EQUAL;
+		data.sdDepthStencil.backFace.stencilComparisonFunction = ComparisonFunction::CF_EQUAL;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilDepthFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.backFace.stencilConditions.opStencilPass = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.frontFace.stencilComparisonFunction = ComparisonFunction::CF_ALWAYS;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilDepthFail = StencilOperation::SO_KEEP;
+		data.sdDepthStencil.frontFace.stencilConditions.opStencilPass = StencilOperation::SO_KEEP;
+
+		return data;
+	}
+
+	constexpr StateData GenerateFronRasterizerState() noexcept {
+		StateData data = InitDefaultStateData<RasterizerState>();
+		data.sdRasterizer.culling = CullMode::C_BACK;
+		data.sdRasterizer.depthClipEnable = true;
+
+		return data;
+	}
+
+	constexpr StateData GenerateBackRasterizerState() noexcept {
+		StateData data = InitDefaultStateData<RasterizerState>();
+		data.sdRasterizer.culling = CullMode::C_FRONT;
+		data.sdRasterizer.depthClipEnable = false;
+
+		return data;
+	}
+
+	constexpr StateData GenerateFrontBlendState() noexcept {
+		StateData data = InitDefaultStateData<BlendState>();
+		data.sdBlend.targets[0].blendEnable = false;
+
+		return data;
+	}
+
+	constexpr StateData GenerateBackBlendState() noexcept {
+		StateData data = InitDefaultStateData<BlendState>();
+		data.sdBlend.targets[0].blendEnable = true;
+		data.sdBlend.targets[0].blendSrc = Blend::B_ONE;
+		data.sdBlend.targets[0].blendDst = Blend::B_ONE;
+		data.sdBlend.targets[0].blendOperation = BlendOperation::BO_ADD;
+
+		return data;
+	}
+
 	LightRenderPass::LightRenderPass() 
-		: m_vertexShader(nullptr), m_pixelShader(nullptr) {
+		: m_vertexShader(nullptr), m_pixelShader(nullptr), 
+		m_bufferObjectId(), m_bufferObjectHelperId(), m_bufferCameraId(), m_bufferLightId() {
 
 	}
 
@@ -45,9 +117,17 @@ namespace Engine {
 	void LightRenderPass::Initialize(ITargetResourceData* output) {
 		GetGBuffer().InitNewResource(BatchSlot::BS_SLOT_1, output);
 
+		GetStates().InitNewResource(BatchSlot::BS_SLOT_1, StateType::ST_DEPTH_STENCIL, GenerateFrontDepthStencilState());
+		GetStates().InitNewResource(BatchSlot::BS_SLOT_1, StateType::ST_RASTERIZER, GenerateFronRasterizerState());
+		GetStates().InitNewResource(BatchSlot::BS_SLOT_1, StateType::ST_BLEND, GenerateFrontBlendState());
+
+		GetStates().InitNewResource(BatchSlot::BS_SLOT_2, StateType::ST_DEPTH_STENCIL, GenerateBackDepthStencilState());
+		GetStates().InitNewResource(BatchSlot::BS_SLOT_2, StateType::ST_RASTERIZER, GenerateBackRasterizerState());
+		GetStates().InitNewResource(BatchSlot::BS_SLOT_2, StateType::ST_BLEND, GenerateBackBlendState());
+
 		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2, sizeof(UB_Object), &m_bufferObjectId);
 		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_2, sizeof(UB_ObjectHelper), &m_bufferObjectHelperId);
-		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_2, sizeof(UB_System), &m_bufferSystemId);
+		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_2, sizeof(UB_Camera), &m_bufferCameraId);
 		GetUBuffer().InitNewResource(BatchSlot::BS_SLOT_2, sizeof(UB_Light), &m_bufferLightId);
 
 		m_vertexShader = LoadShader("assets/shaders/LightVSShader.cso", ShaderType::ST_VERTEX);
@@ -79,12 +159,16 @@ namespace Engine {
 		return m_lights.Append(type);
 	}
 
-	void LightRenderPass::SetViewProjection(Matrix4x4 view, Matrix4x4 proj) {
+	void LightRenderPass::SetCamera(Matrix4x4 view, Matrix4x4 proj, Vector3 eyePosition) {
 		UB_Object* ubObject = GetUBuffer().GetBufferData(m_bufferObjectId).As<UB_Object>();
 		UB_ObjectHelper* ubObjectHelper = GetUBuffer().GetBufferData(m_bufferObjectHelperId).As<UB_ObjectHelper>();
+		UB_Camera* ubCamera = GetUBuffer().GetBufferData(m_bufferCameraId).As<UB_Camera>();
 
 		ubObject->ViewProjection = (view * proj).Transpose();
 		ubObjectHelper->invProjection = proj.Inverse().Transpose();
 		ubObjectHelper->invView = view.Inverse().Transpose();
+
+		ubCamera->Resolution = Vector2(GetRenderWidth(), GetRenderHeight());
+		ubCamera->EyePosition = Vector4(eyePosition.x, eyePosition.y, eyePosition.z, 1.0f);
 	}
 }

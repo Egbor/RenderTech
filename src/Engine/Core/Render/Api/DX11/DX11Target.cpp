@@ -59,7 +59,7 @@ namespace Engine {
     }
 
     DX11DepthStencil::DX11DepthStencil(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float depth, UInt32 stencil) 
-        : m_data(texture), m_clearDepth(depth), m_clearStencil(stencil), m_clearFlags(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL ), m_viewId(0) {
+        : m_data(texture), m_clearDepth(depth), m_clearStencil(stencil), m_clearFlags(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL), m_viewId(0) {
         D3D11_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
         ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
         d3dDepthStencilViewDesc.Format = GetD3D11Format(AdjustTextureFormatForTarget(texture->GetFormat()));
