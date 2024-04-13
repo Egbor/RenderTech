@@ -14,6 +14,16 @@ namespace Engine {
 
 		virtual ITextureResourceData* GetTextureResource() const = 0;
 	};
+
+	class IDepthStencilResourceData : public ITargetResourceData {
+	public:
+		virtual ~IDepthStencilResourceData() = default;
+
+		virtual void SetStencilClearValue(UInt32 value) = 0;
+
+		virtual void EnableDepthClear(bool enable) = 0;
+		virtual void EnableStencilClear(bool enable) = 0;
+	};
 }
 
 #endif // !ITARGET_RESOURCE_H

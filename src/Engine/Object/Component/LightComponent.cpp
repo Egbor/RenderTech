@@ -25,7 +25,11 @@ namespace Engine {
         return m_brightness;
     }
 
-    UInt64 LightComponent::GetBehaviorID() const {
-        return LightComponent::TypeIdClass();
+    LightType LightComponent::GetLightType() const {
+        return LightType::LT_UNDEFINED;
     }
+
+    //UInt64 LightComponent::GetBehaviorID() const {
+    //    return LightComponent::TypeIdClass();
+    //}
 }

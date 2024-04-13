@@ -7,15 +7,15 @@ namespace Engine {
         : Super(argument), m_register(nullptr), m_behaviorID(0) {
     }
 
-    void EntityComponent::CreateRenderState(AbstractRenderPass* pass) {
+    //void EntityComponent::CreateRenderState(AbstractRenderPass* pass) {
 
-    }
+    //}
 
-    HandlerPtr& EntityComponent::GetHandler() {
-        return m_register;
-    }
+    //HandlerPtr& EntityComponent::GetHandler() {
+    //    return m_register;
+    //}
 
-    UInt64 EntityComponent::GetBehaviorID() const {
-        return EntityComponent::TypeIdClass();
-    }
+    //UInt64 EntityComponent::GetBehaviorID() const {
+    //    return EntityComponent::TypeIdClass();
+    //}
 }

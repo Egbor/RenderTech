@@ -15,7 +15,9 @@ namespace Engine {
         void SetRadius(Float radius);
         Float GetRadius() const;
 
-        void CreateRenderState(AbstractRenderPass* pass) override;
+        LightType GetLightType() const override;
+
+        //void CreateRenderState(AbstractRenderPass* pass) override;
 
     private:
         Float m_radius;

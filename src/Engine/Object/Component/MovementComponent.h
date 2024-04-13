@@ -3,6 +3,9 @@
 
 #include "Engine/Object/Component/EntityComponent.h"
 
+#include "Engine/Math/Vector.h"
+#include "Engine/Math/Rotator.h"
+
 namespace Engine {
 	class Actor;
 	class CameraComponent;

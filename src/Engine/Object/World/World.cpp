@@ -5,10 +5,11 @@ namespace Engine {
 
     World::World(const ObjectArgument& argument)
         : Super(argument) {
+        m_scene = new Scene();
     }
 
     World::~World() {
-        DELETE_ARRAY_OF_OBJECTS(m_entities);
+        DELETE_OBJECT(m_scene);
     }
 
     Entity* World::SpawnEntity(IClass* entityClass, const Vector3& location, const Rotator& rotation) {
@@ -17,33 +18,24 @@ namespace Engine {
         entity->SetEntityLocation(location);
         entity->SetEntityRotation(rotation);
 
-        m_entities.push_back(entity);
+        m_scene->InsertEntity(entity);
 
         return entity;
     }
 
     void World::DestroyEntity(Entity* entity) {
-        ListIterator<Entity*> it = std::find_if(m_entities.begin(), m_entities.end(), [&](Entity* obj){ return entity == obj; });
-        if (it != m_entities.end()) {
-            m_entities.erase(it);
-        }
-    }
-
-    void World::ForEachEntity(EventBase<Entity*>& callback) {
-        for (Entity* entity : m_entities) {
-            callback.Invoke(entity);
-        }
+        m_scene->RemoveEntity(entity);
     }
 
     void World::Start() {
-        for (Entity* entity : m_entities) {
-            entity->OnStart();
-        }
+        m_scene->DoTraversal([&](Entity* entity) { entity->OnStart(); });
     }
 
     void World::Update(Float deltaTime) {
-        for (Entity* entity : m_entities) {
-            entity->OnUpdate(deltaTime);
-        }
+        m_scene->DoTraversal([&](Entity* entity) { entity->OnUpdate(deltaTime); });
+    }
+
+    Scene* World::GetScene() const {
+        return m_scene;
     }
 }

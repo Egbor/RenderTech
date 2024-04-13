@@ -1,27 +1,31 @@
 #include "Engine/Object/Component/CameraComponent.h"
-#include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
-#include "Engine/Rendering/Engine/RenderPass/LightRenderPass.h"
+//#include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
+//#include "Engine/Rendering/Engine/RenderPass/LightRenderPass.h"
 
 namespace Engine {
     GENERATE_INSTANTIATION(CameraComponent)
 
-    Matrix4x4 CreateViewMatrix(CameraComponent* component) {
-        Vector3 eyePosition = component->GetWorldPosition();
-        Vector3 focusPosition = component->GetForward() + eyePosition;
-        Vector3 upDirection = component->GetUp();
+    //Matrix4x4 CreateViewMatrix(CameraComponent* component) {
+    //    Vector3 eyePosition = component->GetWorldPosition();
+    //    Vector3 focusPosition = component->GetForward() + eyePosition;
+    //    Vector3 upDirection = component->GetUp();
 
-        return Matrix4x4::CreateMatrixLookAt(eyePosition, focusPosition, upDirection);
-    }
+    //    return Matrix4x4::CreateMatrixLookAt(eyePosition, focusPosition, upDirection);
+    //}
 
-    Matrix4x4 CreateProjectionMatrix(CameraComponent* component, Float resolutionWidth, Float resolutionHeight) {
-        Float aspectRatio = resolutionWidth / resolutionHeight;
+    //Matrix4x4 CreateProjectionMatrix(CameraComponent* component, Float resolutionWidth, Float resolutionHeight) {
+    //    Float aspectRatio = resolutionWidth / resolutionHeight;
 
-        return Matrix4x4::CreateMatrixPerspective(component->GetFOV(), aspectRatio, component->GetNearZ(), component->GetFarZ());
-    }
+    //    return Matrix4x4::CreateMatrixPerspective(component->GetFOV(), aspectRatio, component->GetNearZ(), component->GetFarZ());
+    //}
+
+    CameraComponent* CameraComponent::mainCamera = nullptr;
 
     CameraComponent::CameraComponent(const ObjectArgument& argument)
         : Super(argument), m_fov(defaultFOV), m_far(defaultFar), m_near(defaultNear) {
-
+        if (CameraComponent::mainCamera == nullptr) {
+            CameraComponent::mainCamera = this;
+        }
     }
 
     Float CameraComponent::GetFOV() const {
@@ -36,17 +40,21 @@ namespace Engine {
         return m_near;
     }
 
-    UInt64 CameraComponent::GetBehaviorID() const {
-        return CameraComponent::TypeIdClass();
+    CameraComponent* CameraComponent::MainCamera() {
+        return CameraComponent::mainCamera;
     }
 
-    void CameraComponent::CreateRenderState(AbstractRenderPass* pass) {        
-        if (pass->Is(RenderPassType::RP_BASE)) {
-            BaseRenderPass* baseRenderPass = dynamic_cast<BaseRenderPass*>(pass);
-            baseRenderPass->SetCamera(CreateViewMatrix(this), CreateProjectionMatrix(this, pass->GetRenderWidth(), pass->GetRenderHeight()));
-        } else if(pass->Is(RenderPassType::RP_LIGHT)) {
-            LightRenderPass* lightRenderPass = dynamic_cast<LightRenderPass*>(pass);
-            lightRenderPass->SetCamera(CreateViewMatrix(this), CreateProjectionMatrix(this, pass->GetRenderWidth(), pass->GetRenderHeight()), GetWorldPosition());
-        }
-    }
+    //UInt64 CameraComponent::GetBehaviorID() const {
+    //    return CameraComponent::TypeIdClass();
+    //}
+
+    //void CameraComponent::CreateRenderState(AbstractRenderPass* pass) {        
+    //    if (pass->Is(RenderPassType::RP_BASE)) {
+    //        BaseRenderPass* baseRenderPass = dynamic_cast<BaseRenderPass*>(pass);
+    //        baseRenderPass->SetCamera(CreateViewMatrix(this), CreateProjectionMatrix(this, pass->GetRenderWidth(), pass->GetRenderHeight()));
+    //    } else if(pass->Is(RenderPassType::RP_LIGHT)) {
+    //        LightRenderPass* lightRenderPass = dynamic_cast<LightRenderPass*>(pass);
+    //        lightRenderPass->SetCamera(CreateViewMatrix(this), CreateProjectionMatrix(this, pass->GetRenderWidth(), pass->GetRenderHeight()), GetWorldPosition());
+    //    }
+    //}
 }

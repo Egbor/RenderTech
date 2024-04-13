@@ -9,6 +9,7 @@ namespace Engine {
 		BS_SLOT_1 = 0x01,
 		BS_SLOT_2 = 0x02,
 		BS_SLOT_3 = 0x04,
+		BS_SLOT_4 = 0x08,
 		BS_SLOT_ALL = 0xFF,
 		BS_SLOT_DELETABLE = 0x100
 	};
@@ -41,6 +42,10 @@ namespace Engine {
 
 		explicit ResourceSlot(const ResourceSlot&) noexcept = delete;
 		ResourceSlot& operator=(const ResourceSlot&) noexcept = delete;
+
+		TResourceData* operator->() const {
+			return m_resource;
+		}
 
 		TResourceData* GetResource() const {
 			return m_resource;
@@ -78,7 +83,7 @@ namespace Engine {
 		void InitNewResource(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource);
 		void InitNewResource(EnumFlags<BatchSlot> batchIdx, TextureType type, TextureFormat format, Int32 width, Int32 height);
 
-		void Clear();
+		void Clear(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue);
 
 	private:
 		Array<ResourceSlot<ITargetResourceData>> m_batch;

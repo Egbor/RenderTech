@@ -4,6 +4,8 @@
 #include "Engine/Object/Object.h"
 #include "Engine/Object/Entity/Entity.h"
 
+#include "Engine/Rendering/Engine/Scene/Scene.h"
+
 #include "Engine/Core/Utils/Event.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
@@ -13,7 +15,7 @@ namespace Engine {
         GENERATE_BODY(World, Object)
 
     private:
-        List<Entity*> m_entities;
+        Scene* m_scene;
 
     public:
         World(const ObjectArgument& argument);
@@ -25,7 +27,9 @@ namespace Engine {
         void Start();
         void Update(Float deltaTime);
 
-        void ForEachEntity(EventBase<Entity*>& callback);
+        Scene* GetScene() const;
+
+        //void ForEachEntity(EventBase<Entity*>& callback);
     };
 }
 

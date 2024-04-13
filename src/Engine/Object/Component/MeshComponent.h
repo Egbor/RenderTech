@@ -21,10 +21,10 @@ namespace Engine {
         void SetMesh(Mesh* mesh);
         Mesh* GetMesh() const;
 
-    protected:
-        virtual UInt64 GetBehaviorID() const override;
+    //protected:
+    //    virtual UInt64 GetBehaviorID() const override;
 
-        void CreateRenderState(AbstractRenderPass* pass) override;
+    //    void CreateRenderState(AbstractRenderPass* pass) override;
 
     private:
         Int32 m_meshResourceId;

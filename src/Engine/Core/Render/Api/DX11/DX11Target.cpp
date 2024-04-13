@@ -111,6 +111,10 @@ namespace Engine {
         return m_d3dViews[0];
     }
 
+    void DX11DepthStencil::SetStencilClearValue(UInt32 value) {
+        m_clearStencil = value;
+    }
+
     void DX11DepthStencil::EnableDepthClear(bool enable) {
         m_clearFlags = enable ? m_clearFlags | D3D11_CLEAR_DEPTH : m_clearFlags & ~D3D11_CLEAR_DEPTH;
     }

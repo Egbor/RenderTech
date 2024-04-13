@@ -25,15 +25,20 @@ namespace Engine {
         Float GetFarZ() const;
         Float GetNearZ() const;
 
-    protected:
-        virtual UInt64 GetBehaviorID() const override;
+    //protected:
+    //    virtual UInt64 GetBehaviorID() const override;
 
-        void CreateRenderState(AbstractRenderPass* pass) override;
+    //    void CreateRenderState(AbstractRenderPass* pass) override;
 
     private:
         static constexpr Float defaultFOV = 60.0f * RADIAN_COEFFICIENT;
         static constexpr Float defaultFar = 1000.0f;
         static constexpr Float defaultNear = 0.1f;
+
+        static CameraComponent* mainCamera;
+
+    public:
+        static CameraComponent* MainCamera();
     };
 }
 

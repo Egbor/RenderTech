@@ -24,7 +24,7 @@ cbuffer UB_SYSTEM : register(slot) {	\
 cbuffer UB_LIGHT : register(slot) {	\
 	float4 Color;					\
 	float4 Value;					\
-	float4 Brightness;				\
+	float Brightness;				\
 }
 
 sampler LinearSampler : register(s0);

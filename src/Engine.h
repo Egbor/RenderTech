@@ -4,7 +4,7 @@
 #include "EngineThread.h"
 #include "Engine/EngineDef.h"
 
-#include "Engine/Rendering/Engine/RenderPass/RenderPassContext.h"
+#include "Engine/Rendering/Engine/HighRenderContext.h"
 #include "Engine/Core/System/Time/Time.h"
 #include "Engine/Object/World/World.h"
 
@@ -22,12 +22,10 @@ namespace Engine {
         void GameThreadEntry();
         void RenderThreadEntry();
 
-        void InvokeEntitiesRenderUpdate(Entity* entity);
-
         Time* m_time;
         World* m_world;
-        RenderPassContext* m_passContext;
 
+        HighRenderContext* m_context;
         EngineThreadPool* m_threadpool;
     };
 }

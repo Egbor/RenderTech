@@ -25,7 +25,7 @@ namespace Engine {
         UInt32 m_viewId;
     };
 
-    class DX11DepthStencil : public ITargetResourceData {
+    class DX11DepthStencil : public IDepthStencilResourceData {
     public:
         DX11DepthStencil(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float depth, UInt32 stencil);
         virtual ~DX11DepthStencil();
@@ -33,8 +33,10 @@ namespace Engine {
         bool IsDepth() const override;
         void Clear(IContext* context) override;
 
-        void EnableDepthClear(bool enable);
-        void EnableStencilClear(bool enable);
+        void SetStencilClearValue(UInt32 value) override;
+
+        void EnableDepthClear(bool enable) override;
+        void EnableStencilClear(bool enable) override;
 
         ITextureResourceData* GetTextureResource() const override;
 

@@ -26,8 +26,10 @@ namespace Engine {
         Vector4 GetColor() const;
         Float GetBrightness() const;
 
-    protected:
-        virtual UInt64 GetBehaviorID() const override;
+        virtual LightType GetLightType() const;
+
+    //protected:
+    //    virtual UInt64 GetBehaviorID() const override;
     };
 }
 

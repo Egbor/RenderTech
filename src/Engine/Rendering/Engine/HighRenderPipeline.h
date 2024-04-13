@@ -8,18 +8,23 @@ namespace Engine {
 	class HighRenderPipeline {
 	private:
 		IRenderPipeline* m_apiPipeline;
+		ISwapChain* m_apiSwapChain;
 
 		GBuffer m_gbuffer;
-		UBuffer m_ubiffer;
+		UBuffer m_ubuffer;
 		States m_states;
 
+		Map<String, Int32> m_ubuffersIds;
+
 	public:
-		HighRenderPipeline(IRenderPipeline* apiPipeline);
+		HighRenderPipeline(ISwapChain* apiSwapChain, IRenderPipeline* apiPipeline);
 		virtual ~HighRenderPipeline() = default;
 
 		void DrawIndexedPremitive(IBufferResourceData* vertex, IBufferResourceData* index);
+		void DrawIndexedWaveframe(IBufferResourceData* vertex, IBufferResourceData* index);
+		void SwapBuffers();
 
-		void ClearGBuffer(BatchSlot batchId);
+		void ClearGBuffer(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue = 0);
 
 		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource);
 		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIdx, TextureType type, TextureFormat format, Int32 width, Int32 height);
@@ -33,12 +38,12 @@ namespace Engine {
 		void BindStates(BatchSlot batchId);
 
 		void BindShader(RenderStage stage, IShaderResourceData* resource);
-		void BindTexture(RenderStage stage, const Array<ITextureResourceData*> resources);
+		void BindTexture(RenderStage stage, const Array<ITextureResourceData*>& resources);
 
 		void UpdateUBuffer(const String& bufferTag, std::function<void(RawData&)> updateCallback);
 
-		Float GetRenderSpaceWidth() const;
-		Float GetRenderSpaceHeight() const;
+		Int32 GetRenderSpaceWidth() const;
+		Int32 GetRenderSpaceHeight() const;
 	};
 }
 

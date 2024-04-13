@@ -11,9 +11,9 @@ namespace Engine {
 
     private:
         PointLightComponent* m_lightComponent1;
-        PointLightComponent* m_lightComponent2;
-        PointLightComponent* m_lightComponent3;
-        PointLightComponent* m_lightComponent4;
+        //PointLightComponent* m_lightComponent2;
+        //PointLightComponent* m_lightComponent3;
+        //PointLightComponent* m_lightComponent4;
 
     public:
         LightObject(const ObjectArgument& argument);

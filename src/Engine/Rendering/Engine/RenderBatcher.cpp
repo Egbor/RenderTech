@@ -50,9 +50,17 @@ namespace Engine {
 		ProcessCommonInit(m_batch, factory->CreateTarget(type, format, width, height), batchIds | BatchSlot::BS_SLOT_DELETABLE);
 	}
 
-	void GBuffer::Clear() {
+	void GBuffer::Clear(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue) {
 		for (Size i = 0; i < m_batch.size(); i++) {
-			m_batch[i].GetResource()->Clear(Core::GetInstance()->GetContext());
+			if (m_batch[i].IsAssociatedWith(batchId)) {
+				if (m_batch[i]->IsDepth()) {
+					IDepthStencilResourceData* resource = dynamic_cast<IDepthStencilResourceData*>(m_batch[i].GetResource());
+					resource->SetStencilClearValue(stencilClearValue);
+					resource->EnableDepthClear(enableDepthClear);
+					resource->EnableStencilClear(enableStencilClear);
+				}
+				m_batch[i]->Clear(Core::GetInstance()->GetContext());
+			}
 		}
 	}
 

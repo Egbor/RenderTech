@@ -37,6 +37,7 @@ namespace Engine {
 	private:
 		IShaderResourceData* m_vertexShader;
 		IShaderResourceData* m_pixelShader;
+		IShaderResourceData* m_pixelDebugShader;
 
 	public:
 		HighRenderCommandLightPass(IRenderResourceFactory* factory);

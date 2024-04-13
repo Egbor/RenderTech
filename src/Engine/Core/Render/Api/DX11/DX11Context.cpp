@@ -204,6 +204,17 @@ namespace Engine {
         m_d3dContext->DrawIndexed(indexBuffer->GetNumElements(), 0, 0);
     }
 
+    void DX11Context::DrawWaveframe(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) {
+        DX11Buffer* vertex = dynamic_cast<DX11Buffer*>(vertexBuffer);
+        DX11Buffer* index = dynamic_cast<DX11Buffer*>(indexBuffer);
+
+        m_d3dContext->IASetVertexBuffers(0, 1, vertex->GetD3D11Buffer().GetAddressOf(), vertex->GetStrides(), vertex->GetOffset());
+        m_d3dContext->IASetIndexBuffer(index->GetD3D11Buffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+
+        m_d3dContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+        m_d3dContext->DrawIndexed(indexBuffer->GetNumElements(), 0, 0);
+    }
+
     void DX11Context::RegisterStateFactory() {
         m_stateFactory.Register(StateType::ST_BLEND, [&](StateData& data) {
             return new DX11BlendState(data, this); });

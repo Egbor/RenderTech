@@ -1,7 +1,7 @@
 #include "Engine.h"
 
-#include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
-#include "Engine/Rendering/Engine/RenderPass/LightRenderPass.h"
+//#include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
+//#include "Engine/Rendering/Engine/RenderPass/LightRenderPass.h"
 
 #include "Engine/Core/System/Platform/Common/Input.h"
 
@@ -12,9 +12,10 @@ namespace Engine {
 		m_time = new Time();
 		m_world = ClassType<World>::CreateObject(ObjectArgument::Dummy());
 
-		m_passContext = new RenderPassContext(context->QueryPipeline(), window->GetWidth(), window->GetHeight());
-		m_passContext->Append(new BaseRenderPass(), context->QuerySwapChain());
-		//m_passContext->Append(new LightRenderPass(), context->QuerySwapChain());
+		m_context = new HighRenderContext(context->QuerySwapChain(), context->QueryPipeline());
+		m_context->ExtendCommandList(new HighRenderCommandPrePass());
+		m_context->ExtendCommandList(new HighRenderCommandBasePass(context->QueryResourceFactory()));
+		m_context->ExtendCommandList(new HighRenderCommandLightPass(context->QueryResourceFactory()));
 
 		m_threadpool = new EngineThreadPool(Delegate<EngineClass>::Allocate(this, &EngineClass::SyncEntry), 2);
 		m_threadpool->Append(Delegate<EngineClass>::Allocate(this, &EngineClass::GameThreadEntry));
@@ -23,7 +24,7 @@ namespace Engine {
 
 	EngineClass::~EngineClass() {
 		DELETE_OBJECT(m_threadpool);
-		DELETE_OBJECT(m_passContext);
+		DELETE_OBJECT(m_context);
 		DELETE_OBJECT(m_world);
 		DELETE_OBJECT(m_time);
 	}
@@ -44,9 +45,6 @@ namespace Engine {
 	}
 
 	void EngineClass::SyncEntry() {
-		static EventBase<Entity*>& delegateRenderUpdate = Delegate<EngineClass, Entity*>::Allocate(this, &EngineClass::InvokeEntitiesRenderUpdate);
-
-		m_world->ForEachEntity(delegateRenderUpdate);
 		m_time->Tick();
 	}
 
@@ -58,12 +56,6 @@ namespace Engine {
 	}
 
 	void EngineClass::RenderThreadEntry() {
-		m_passContext->Render(Core::GetInstance()->GetContext());
-	}
-
-	void EngineClass::InvokeEntitiesRenderUpdate(Entity* entity) {
-		Array<SceneComponent*> components;
-		entity->GetRootComponent()->GetChildrenComponents(components);
-		m_passContext->Process(components);
+		m_context->DrawScene(m_world->GetScene());
 	}
 }

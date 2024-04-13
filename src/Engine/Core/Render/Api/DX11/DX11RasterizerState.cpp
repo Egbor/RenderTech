@@ -11,8 +11,16 @@ namespace Engine {
 
     constexpr D3D11_RASTERIZER_DESC GenerateD3D11RasterizerDesc(const RasterizerState& data) {
         D3D11_RASTERIZER_DESC d3dRasterizerDesc {};
+        d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
         d3dRasterizerDesc.CullMode = gCullModeTable[INDEX_OF(data.culling)];
+        d3dRasterizerDesc.FrontCounterClockwise = false;
+        d3dRasterizerDesc.DepthBias = 0;
+        d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+        d3dRasterizerDesc.DepthBiasClamp = 0.0f;
         d3dRasterizerDesc.DepthClipEnable = data.depthClipEnable;
+        d3dRasterizerDesc.ScissorEnable = false;
+        d3dRasterizerDesc.MultisampleEnable = false;
+        d3dRasterizerDesc.AntialiasedLineEnable = false;
 
         return d3dRasterizerDesc;
     }

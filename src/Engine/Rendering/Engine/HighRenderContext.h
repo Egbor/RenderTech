@@ -12,8 +12,10 @@ namespace Engine {
 		Array<IHighRenderCommand*> m_commands;
 
 	public:
-		HighRenderContext(ITargetResourceData* output, IRenderPipeline* pipeline);
-		virtual ~HighRenderContext() = default;
+		HighRenderContext(ISwapChain* swapchain, IRenderPipeline* pipeline);
+		virtual ~HighRenderContext();
+
+		void ExtendCommandList(IHighRenderCommand* command);
 
 		void DrawScene(Scene* scene);
 	};

@@ -74,9 +74,13 @@ namespace Engine {
 	void DX11StageVS::BindShader(IShaderResourceData* resource) {
 		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 
-		DX11VertexShader* shader = dynamic_cast<DX11VertexShader*>(resource);
-		d3dContext->IASetInputLayout(shader->GetD3D11Layout().Get());
-		d3dContext->VSSetShader(shader->GetD3D11Shader().Get(), nullptr, 0);				
+		if (resource != nullptr) {
+			DX11VertexShader* shader = dynamic_cast<DX11VertexShader*>(resource);
+			d3dContext->IASetInputLayout(shader->GetD3D11Layout().Get());
+			d3dContext->VSSetShader(shader->GetD3D11Shader().Get(), nullptr, 0);
+		} else {
+			d3dContext->VSSetShader(nullptr, nullptr, 0);
+		}
 	}
 
 	DX11StagePS::DX11StagePS(DX11Context* dxContext)
@@ -109,7 +113,11 @@ namespace Engine {
 	void DX11StagePS::BindShader(IShaderResourceData* resource) {
 		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 
-		DX11PixelShader* shader = dynamic_cast<DX11PixelShader*>(resource);
-		d3dContext->PSSetShader(shader->GetD3D11Shader().Get(), nullptr, 0);
+		if (resource != nullptr) {
+			DX11PixelShader* shader = dynamic_cast<DX11PixelShader*>(resource);
+			d3dContext->PSSetShader(shader->GetD3D11Shader().Get(), nullptr, 0);
+		} else {
+			d3dContext->PSSetShader(nullptr, nullptr, 0);
+		}
 	}
 }

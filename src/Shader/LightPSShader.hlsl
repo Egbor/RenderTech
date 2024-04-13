@@ -6,10 +6,10 @@ CBUFFER_OBJECT_HELPER(b1)
 CBUFFER_CAMERA(b2)
 CBUFFER_LIGHT(b3)
 
-Texture2D DepthTexture : register(t0);
-Texture2D AlbedoTexture : register(t1);
-Texture2D NormalTexture : register(t2);
-Texture2D OrmTexture : register(t3);
+Texture2D AlbedoTexture : register(t0);
+Texture2D NormalTexture : register(t1);
+Texture2D OrmTexture : register(t2);
+Texture2D DepthTexture : register(t3);
 
 float4 main(float4 position : SV_POSITION) : SV_TARGET0 {
 	float2 texCoord = position.xy;
@@ -25,7 +25,7 @@ float4 main(float4 position : SV_POSITION) : SV_TARGET0 {
 	
 	float4 L = mul(Value, World) - texWorldPosition;
 	float4 V = eyePosition - texWorldPosition;
-	float4 color = Color / length(L);
+    float4 color = Color * Brightness;
 
 	L = normalize(L);
 	V = normalize(V);

@@ -58,7 +58,7 @@ namespace Engine {
         if (m_parent == nullptr) {
             return this->m_position;
         }
-        return m_parent->GetWorldPosition() + GetWorldRotation().RotateVector(this->m_position);
+        return m_parent->GetWorldPosition() + this->m_position; //GetWorldRotation().RotateVector(this->m_position);
     }
 
     Rotator SceneComponent::GetWorldRotation() const {

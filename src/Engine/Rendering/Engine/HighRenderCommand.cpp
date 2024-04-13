@@ -1,5 +1,6 @@
 #include "Engine/Rendering/Engine/HighRenderCommand.h"
 #include "Engine/Core/System/Resource/Resource.h"
+#include "Engine/Core/System/Exception/EngineException.h"
 
 #include "Engine/Object/Component/MeshComponent.h"
 #include "Engine/Object/Component/LightComponent.h"
@@ -22,6 +23,23 @@ namespace Engine {
 	IShaderResourceData* LoadShader(IRenderResourceFactory* factory, const String& filename, ShaderType type) {
 		const Array<Int8> code = Resource::Load<const Array<Int8>>(filename);
 		return factory->CreateShader(type, code.size(), code.data());
+	}
+
+	Mesh* LoadLightVolume(LightType type) {
+		switch (type) {
+		case LightType::LT_POINT:
+			static Mesh* pointLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
+			return pointLight;
+		case LightType::LT_SPOT:
+			static Mesh* spotLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
+			return spotLight;
+		case LightType::LT_DIRECTIONAL:
+			static Mesh* directionalLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
+			return directionalLight;
+		default:
+			break;
+		}
+		throw EngineException("[Global] LoadLightVolume() failed. The selected light is not supported");
 	}
 
 	void UpdatePrePassUBCamera(RawData& data, CameraComponent* component, Float viewportWidth, Float viewportHeight) {
@@ -86,7 +104,7 @@ namespace Engine {
 		pipeline->BindGBuffer(BatchSlot::BS_SLOT_1);
 		pipeline->BindStates(BatchSlot::BS_SLOT_1);
 
-		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_1);
+		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_1, true, true);
 
 		scene->DoTraversal(ClassOf<MeshComponent>::value, [&](SceneComponent* component) { DrawSingleMesh(pipeline, component); });
 	}
@@ -109,9 +127,10 @@ namespace Engine {
 	}
 
 	HighRenderCommandLightPass::HighRenderCommandLightPass(IRenderResourceFactory* factory) 
-		: m_vertexShader(nullptr), m_pixelShader(nullptr) {
+		: m_vertexShader(nullptr), m_pixelShader(nullptr), m_pixelDebugShader(nullptr) {
 		m_vertexShader = LoadShader(factory, "assets/shaders/LightVSShader.cso", ShaderType::ST_VERTEX);
 		m_pixelShader = LoadShader(factory, "assets/shaders/LightPSShader.cso", ShaderType::ST_PIXEL);
+		m_pixelDebugShader = LoadShader(factory, "assets/shaders/LightPSDebugShader.cso", ShaderType::ST_PIXEL);
 	}
 
 	HighRenderCommandLightPass::~HighRenderCommandLightPass() {
@@ -120,11 +139,13 @@ namespace Engine {
 	}
 
 	void HighRenderCommandLightPass::Execute(HighRenderPipeline* pipeline, Scene* scene) {
+		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_3, false, false);
 		scene->DoTraversal(ClassOf<LightComponent>::value, [&](SceneComponent* component) { DrawSingleLight(pipeline, component); });
 	}
 
 	void HighRenderCommandLightPass::DrawSingleLight(HighRenderPipeline* pipeline, SceneComponent* component) {
 		LightComponent* light = component->As<LightComponent>();
+		MeshElement* lightVolume = LoadLightVolume(light->GetLightType())->GetMeshElement(0);
 
 		pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UpdateBasePassUBObject(data, light); });
 		pipeline->UpdateUBuffer(AS_TEXT(UB_ObjectHelper), [&](RawData& data) { UpdateBasePassUBObjectHelper(data, light); });
@@ -137,7 +158,8 @@ namespace Engine {
 		pipeline->BindUBuffer(BatchSlot::BS_SLOT_2, RenderStage::RS_VERTEX);
 		pipeline->BindStates(BatchSlot::BS_SLOT_2);
 
-		pipeline->DrawIndexedPremitive();
+		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_2, false, true, 1);
+		pipeline->DrawIndexedPremitive(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
 
 		// Back light calculation
 		pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShader);
@@ -146,6 +168,10 @@ namespace Engine {
 		pipeline->BindUBuffer(BatchSlot::BS_SLOT_3, RenderStage::RS_PIXEL);
 		pipeline->BindStates(BatchSlot::BS_SLOT_3);
 
-		pipeline->DrawIndexedPremitive();
+		pipeline->DrawIndexedPremitive(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
+
+		//pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelDebugShader);
+		//pipeline->BindStates(BatchSlot::BS_SLOT_4);
+		//pipeline->DrawIndexedWaveframe(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
 	}
 }

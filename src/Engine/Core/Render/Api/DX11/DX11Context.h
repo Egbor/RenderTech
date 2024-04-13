@@ -47,6 +47,7 @@ namespace Engine {
 
         void Swap() override;
         void Draw(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) override;
+        void DrawWaveframe(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) override;
 
     private:
         void RegisterStateFactory();

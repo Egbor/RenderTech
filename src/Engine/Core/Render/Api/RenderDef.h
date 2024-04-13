@@ -132,9 +132,11 @@ namespace Engine {
     };
 
     enum class LightType {
-        LT_POINT        = 0,
-        LT_SPOT         = 1,
-        LT_DIRECTIONAL  = 2
+        LT_POINT = 0,
+        LT_SPOT,
+        LT_DIRECTIONAL,
+        LT_NUM,
+        LT_UNDEFINED
     };
 
     enum class TextureFormat {

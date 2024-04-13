@@ -4,6 +4,7 @@
 #include "Engine/Object/Component/EntityComponent.h"
 
 #include "Engine/Core/System/Platform/Common/Input.h"
+#include "Engine/Core/Core.h"
 #include "Engine/Core/Utils/Event.h"
 
 namespace Engine {
