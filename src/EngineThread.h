@@ -51,6 +51,8 @@ namespace Engine {
 		}
 
 		Int32 ReserveSyncSlot() {
+			std::unique_lock lock(m_mutex);
+
 			m_syncSlots.push_back({});
 			return m_syncSlots.size() - 1;
 		}
