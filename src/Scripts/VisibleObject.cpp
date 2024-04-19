@@ -13,13 +13,13 @@ namespace Engine {
         m_meshComponent = ClassType<MeshComponent>::CreateObject(ObjectArgument::Dummy());
         m_meshComponent->AttachToComponent(GetRootComponent());
 
-        Mesh* mesh = Resource::Load<Mesh*>("assets/models/SM_Gameboy.fbx");
-        Material* material = Resource::Load<Material*>("assets/materials/SM_Gameboy.xml");
+        Mesh* mesh = Resource::Load<Mesh*>("assets/models/Cyberpunk_Robot.obj");
+        Material* material = Resource::Load<Material*>("assets/materials/Cyberpunk_Robot.xml");
         mesh->SetMaterial(0, material);
 
         m_meshComponent->SetMesh(mesh);
 
-        SetEntityScale(Vector3(0.0009f, 0.0009f, 0.0009f));
+        SetEntityScale(Vector3(0.005f, 0.005f, 0.005f));
     }
 
     VisibleObject::~VisibleObject() {
@@ -27,6 +27,6 @@ namespace Engine {
     }
 
     void VisibleObject::OnUpdate(Float deltaTime) {
-        AddEntityRotation(Rotator(0.0f, -60.0f * deltaTime, 0.0f));
+        // AddEntityRotation(Rotator(0.0f, -60.0f * deltaTime, 0.0f));
     }
 }

@@ -54,8 +54,10 @@ namespace Engine {
         return m_data;
     }
 
-    ComPtr<ID3D11RenderTargetView> DX11RenderTarget::GetD3D11RenderTargetView() const {
-        return m_d3dViews[0];
+    ComPtr<ID3D11RenderTargetView> DX11RenderTarget::GetD3D11RenderTargetView() {
+        const ComPtr<ID3D11RenderTargetView>& d3dTarget = m_d3dViews[m_viewId];
+        m_viewId = (m_viewId + 1) % m_d3dViews.size();
+        return d3dTarget;
     }
 
     DX11DepthStencil::DX11DepthStencil(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float depth, UInt32 stencil) 
@@ -107,8 +109,10 @@ namespace Engine {
         return m_data;
     }
 
-    ComPtr<ID3D11DepthStencilView> DX11DepthStencil::GetD3D11DepthStencilView() const {
-        return m_d3dViews[0];
+    ComPtr<ID3D11DepthStencilView> DX11DepthStencil::GetD3D11DepthStencilView() {
+        const ComPtr<ID3D11DepthStencilView>& d3dTarget = m_d3dViews[m_viewId];
+        m_viewId = (m_viewId + 1) % m_d3dViews.size();
+        return d3dTarget;
     }
 
     void DX11DepthStencil::SetStencilClearValue(UInt32 value) {

@@ -17,8 +17,8 @@ namespace Engine {
         m_lightComponent4->AttachToComponent(GetRootComponent());*/
 
         m_lightComponent1->SetColor(Vector4(1.0f, 1.0f/*0.443f*/, 1.0f/*0.808f*/, 1.0f));
-        m_lightComponent1->SetBrightness(10.0f);
-        m_lightComponent1->SetLocalScale(Vector3(5.0f, 5.0f, 5.0f));
+        m_lightComponent1->SetBrightness(470.0f);
+        m_lightComponent1->SetLocalScale(Vector3(10.0f, 10.0f, 10.0f));
         //m_lightComponent2->SetColor(Vector4(1.0f/*0.004f*/, 1.0f/*0.804f*/, 1.0f/*0.996f*/, 1.0f));
         //m_lightComponent3->SetColor(Vector4(1.0f/*0.02f*/, 1.0f, 1.0f/*0.631f*/, 1.0f));
         //m_lightComponent4->SetColor(Vector4(1.0f/*0.725f*/, 1.0f/*0.404f*/, 1.0f, 1.0f));

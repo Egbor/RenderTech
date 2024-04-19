@@ -132,4 +132,14 @@ namespace Engine {
 
         return texture;
     }
+
+    template<>
+    TextureCube* Resource::Load(const String& filename) {
+        return nullptr;
+    }
+
+    template<>
+    void Resource::Save(TextureCube* resource, const String& filename) {
+
+    }
 }

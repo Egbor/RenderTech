@@ -7,9 +7,10 @@ namespace Engine {
 
     }
 
-    Vector2::Vector2(float x, float y) : XMFLOAT2(x, y) {
+    //constexpr Vector2::Vector2(float x, float y) noexcept 
+    //    : XMFLOAT2(x, y) {
 
-    }
+    //}
 
     Vector3 Vector3::forword = Vector3(0.0f, 0.0f, 1.0f);
     Vector3 Vector3::right = Vector3(1.0f, 0.0f, 0.0f);
@@ -20,7 +21,8 @@ namespace Engine {
 
     }
 
-    Vector3::Vector3(float x, float y, float z) : XMFLOAT3(x, y, z) {
+    constexpr Vector3::Vector3(float x, float y, float z) noexcept 
+        : XMFLOAT3(x, y, z) {
 
     }
 
@@ -169,7 +171,8 @@ namespace Engine {
 
     }
 
-    Vector4::Vector4(float x, float y, float z, float w) : XMFLOAT4(x, y, z, w) {
+    constexpr Vector4::Vector4(float x, float y, float z, float w) noexcept
+        : XMFLOAT4(x, y, z, w) {
 
     }
 

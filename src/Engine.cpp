@@ -12,10 +12,11 @@ namespace Engine {
 		m_time = new Time();
 		m_world = ClassType<World>::CreateObject(ObjectArgument::Dummy());
 
-		m_context = new HighRenderContext(context->QuerySwapChain(), context->QueryPipeline());
-		m_context->ExtendCommandList(new HighRenderCommandPrePass());
-		m_context->ExtendCommandList(new HighRenderCommandBasePass(context->QueryResourceFactory()));
-		m_context->ExtendCommandList(new HighRenderCommandLightPass(context->QueryResourceFactory()));
+		m_context = new HRC_Base(context);
+		m_context->DrawInit();
+		//m_context->ExtendCommandList(new HighRenderCommandPrePass());
+		//m_context->ExtendCommandList(new HighRenderCommandBasePass(context->QueryResourceFactory()));
+		//m_context->ExtendCommandList(new HighRenderCommandLightPass(context->QueryResourceFactory()));
 
 		m_threadpool = new EngineThreadPool(Delegate<EngineClass>::Allocate(this, &EngineClass::SyncEntry), 2);
 		m_threadpool->Append(Delegate<EngineClass>::Allocate(this, &EngineClass::GameThreadEntry));

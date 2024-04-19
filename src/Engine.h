@@ -25,7 +25,7 @@ namespace Engine {
         Time* m_time;
         World* m_world;
 
-        HighRenderContext* m_context;
+        AbstractHighRenderContext* m_context;
         EngineThreadPool* m_threadpool;
     };
 }

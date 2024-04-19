@@ -1,14 +1,16 @@
-#ifndef HIGH_RENDER_PIPELINE_H
-#define HIGH_RENDER_PIPELINE_H
+#ifndef VIRTUAL_RENDER_PIPELINE_H
+#define VIRTUAL_RENDER_PIPELINE_H
 
 #include "Engine/Core/Render/Api/Interface/IRenderPipeline.h"
 #include "Engine/Rendering/Engine/RenderBatcher.h"
 
 namespace Engine {
-	class HighRenderPipeline {
+	class VirtualRenderPipeline {
 	private:
 		IRenderPipeline* m_apiPipeline;
 		ISwapChain* m_apiSwapChain;
+
+		Viewport m_viewport;
 
 		GBuffer m_gbuffer;
 		UBuffer m_ubuffer;
@@ -17,8 +19,8 @@ namespace Engine {
 		Map<String, Int32> m_ubuffersIds;
 
 	public:
-		HighRenderPipeline(ISwapChain* apiSwapChain, IRenderPipeline* apiPipeline);
-		virtual ~HighRenderPipeline() = default;
+		VirtualRenderPipeline(ISwapChain* apiSwapChain, IRenderPipeline* apiPipeline);
+		virtual ~VirtualRenderPipeline() = default;
 
 		void DrawIndexedPremitive(IBufferResourceData* vertex, IBufferResourceData* index);
 		void DrawIndexedWaveframe(IBufferResourceData* vertex, IBufferResourceData* index);
@@ -26,6 +28,7 @@ namespace Engine {
 
 		void ClearGBuffer(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue = 0);
 
+		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds);
 		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource);
 		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIdx, TextureType type, TextureFormat format, Int32 width, Int32 height);
 		void InitResourceForUBuffer(EnumFlags<BatchSlot> batchIds, const String& bufferTag, Int32 bufferSize);
@@ -44,7 +47,10 @@ namespace Engine {
 
 		Int32 GetRenderSpaceWidth() const;
 		Int32 GetRenderSpaceHeight() const;
+
+	private:
+		inline void AdjustViewport();
 	};
 }
 
-#endif // !HIGH_RENDER_PIPELINE_H
+#endif // !VIRTUAL_RENDER_PIPELINE_H

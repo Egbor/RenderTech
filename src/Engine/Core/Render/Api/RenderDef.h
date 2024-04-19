@@ -5,11 +5,11 @@
 #include "Engine/Math/Matrix.h"
 
 namespace Engine {
-#define RENDER_OUTPUT_COUNT 9
-#define RENDER_BUFFER_COUNT 2
-#define RENDER_STAGE_COUNT 2
-#define RENDER_VIEWPORT_COUNT 2
-#define RENDER_TEXTURE_COUNT 8
+//#define RENDER_OUTPUT_COUNT 9
+//#define RENDER_BUFFER_COUNT 2
+//#define RENDER_STAGE_COUNT 2
+//#define RENDER_VIEWPORT_COUNT 2
+//#define RENDER_TEXTURE_COUNT 8
 
     enum class RenderOutput {
         RO_TARGET0  = 0,
@@ -73,35 +73,66 @@ namespace Engine {
     };
 
     struct Viewport {
-        Float width;
-        Float height;
+    public:
+        Viewport() = default;
+
+        Viewport(const Viewport&) = default;
+        Viewport& operator=(const Viewport&) = default;
+
+        Viewport(Viewport&&) = default;
+        Viewport& operator=(Viewport&&) = default;
+
+        constexpr Viewport(Int32 width, Int32 height) noexcept 
+            : resolution(width, height) {
+
+        }
+
+        Int32 GetWidth() const {
+            return static_cast<Int32>(resolution.x);
+        }
+
+        Int32 GetHeight() const {
+            return static_cast<Int32>(resolution.y);
+        }
+
+        constexpr bool operator==(const Viewport& other) noexcept {
+            return (static_cast<Int32>(resolution.x) == static_cast<Int32>(other.resolution.x)) 
+                && (static_cast<Int32>(resolution.y) == static_cast<Int32>(other.resolution.y));
+        }
+
+        constexpr bool operator!=(const Viewport& other) noexcept {
+            return !(this->operator==(other));
+        }
+
+    private:
+        Vector2 resolution;
     };
 
-#define tagREALTIME_BUFFER_BINDER           "BufferBinder"
-#define tagREALTIME_SHADER_BINDER           "ShaderBinder"
-#define tagREALTIME_TARGET_BINDER           "TargetBinder"
-#define tagREALTIME_TEXTURE_BINDER          "TextureBinder"
-#define tagREALTIME_VIEWPORT_BINDER         "ViewportBinder"
-#define tagREALTIME_DYNAMIC_BUFFER_BINDER   "DynamicBufferBinder"
-
-#define tagREALTIME_RASTERIZER_STATE    "RasterizerState"
-#define tagREALTIME_SAMPLER_STATE       "SamplerState"
-#define tagREALTIME_DEPTHSTENCIL_STATE  "DepthStencilState"
-#define tagREALTIME_BLEND_STATE         "BlendState"
-
-    static constexpr const char* tagTexture = "Texture";
-    static constexpr const char* tagCubeTexture = "CubeTexture";
-    static constexpr const char* tagTargetTexture = "TargetTexture";
-    static constexpr const char* tagCubeMapTargetTexture = "CubeMapTargetTexture";
-    static constexpr const char* tagDepthStencilTargetTexture = "DepthStencilTargetTexture";
-
-#define tagREALTIME_BUFFER_VERTEX           "VertexBuffer"
-#define tagREALTIME_BUFFER_INDEX            "IndexBuffer"
-#define tagREALTIME_BUFFER_VS_CONST_BUFFER  "VsConstBuffer"
-#define tagREALTIME_BUFFER_PS_CONST_BUFFER  "PsConstBuffer"
-
-#define tagREALTIME_SHADER_VERTEX       "VertexShader"
-#define tagREALTIME_SHADER_FRAGMENT      "FragmentShader"
+//#define tagREALTIME_BUFFER_BINDER           "BufferBinder"
+//#define tagREALTIME_SHADER_BINDER           "ShaderBinder"
+//#define tagREALTIME_TARGET_BINDER           "TargetBinder"
+//#define tagREALTIME_TEXTURE_BINDER          "TextureBinder"
+//#define tagREALTIME_VIEWPORT_BINDER         "ViewportBinder"
+//#define tagREALTIME_DYNAMIC_BUFFER_BINDER   "DynamicBufferBinder"
+//
+//#define tagREALTIME_RASTERIZER_STATE    "RasterizerState"
+//#define tagREALTIME_SAMPLER_STATE       "SamplerState"
+//#define tagREALTIME_DEPTHSTENCIL_STATE  "DepthStencilState"
+//#define tagREALTIME_BLEND_STATE         "BlendState"
+//
+//    static constexpr const char* tagTexture = "Texture";
+//    static constexpr const char* tagCubeTexture = "CubeTexture";
+//    static constexpr const char* tagTargetTexture = "TargetTexture";
+//    static constexpr const char* tagCubeMapTargetTexture = "CubeMapTargetTexture";
+//    static constexpr const char* tagDepthStencilTargetTexture = "DepthStencilTargetTexture";
+//
+//#define tagREALTIME_BUFFER_VERTEX           "VertexBuffer"
+//#define tagREALTIME_BUFFER_INDEX            "IndexBuffer"
+//#define tagREALTIME_BUFFER_VS_CONST_BUFFER  "VsConstBuffer"
+//#define tagREALTIME_BUFFER_PS_CONST_BUFFER  "PsConstBuffer"
+//
+//#define tagREALTIME_SHADER_VERTEX       "VertexShader"
+//#define tagREALTIME_SHADER_FRAGMENT      "FragmentShader"
 
     enum class TextureSlot {
         TS_ALBEDO       = 0,

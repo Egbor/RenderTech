@@ -8,6 +8,9 @@ namespace Engine {
 	public:
 		template<class TResourceClass>
 		static TResourceClass Load(const String& filename);
+		
+		template<class TResourceClass>
+		static void Save(TResourceClass resource, const String& filename);
 	};
 }
 

@@ -38,7 +38,23 @@ namespace Engine {
         dxgiSwapChainDesc.SampleDesc.Quality = 0;
         dxgiSwapChainDesc.Windowed = TRUE;
 
-        if (FAILED(hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, flag, features, ARRAYSIZE(features), D3D11_SDK_VERSION, &dxgiSwapChainDesc,
+        ComPtr<IDXGIFactory> dxgiFactory;
+
+        if (FAILED(hr = CreateDXGIFactory(__uuidof(IDXGIFactory), &dxgiFactory))) {
+            throw EngineException("[DX11Context] CreateDXGIFactory() failed");
+        }
+
+        ComPtr<IDXGIAdapter> dxgiAdapter;
+        for (UINT i = 0; !FAILED(hr = dxgiFactory->EnumAdapters(i, &dxgiAdapter)); i++) {
+            DXGI_ADAPTER_DESC dxgiAdapterDesc;
+            dxgiAdapter->GetDesc(&dxgiAdapterDesc);
+
+            if ((dxgiAdapterDesc.VendorId == 0x10DE) || (dxgiAdapterDesc.VendorId == 0x1002)) {
+                break;
+            }
+        }
+
+        if (FAILED(hr = D3D11CreateDeviceAndSwapChain(dxgiAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, NULL, flag, features, ARRAYSIZE(features), D3D11_SDK_VERSION, &dxgiSwapChainDesc,
             &m_dxgiSwapChain, &m_d3dDevice, &m_d3dCurrentFeatureLevel, &m_d3dContext))) {
             throw EngineException("[DX11Context] D3D11CreateDevice() failed");
         }
@@ -164,9 +180,7 @@ namespace Engine {
         UINT d3dViewportNum = 1;
 
         m_d3dContext->RSGetViewports(&d3dViewportNum, &d3dViewport);
-
-        viewport.width = d3dViewport.Width;
-        viewport.height = d3dViewport.Height;
+        viewport = Viewport(static_cast<Int32>(d3dViewport.Width), static_cast<Int32>(d3dViewport.Height));
     }
 
     IRenderStage* DX11Context::GetStage(RenderStage stage) {

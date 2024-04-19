@@ -15,7 +15,7 @@ namespace Engine {
 
         ITextureResourceData* GetTextureResource() const override;
 
-        ComPtr<ID3D11RenderTargetView> GetD3D11RenderTargetView() const;
+        ComPtr<ID3D11RenderTargetView> GetD3D11RenderTargetView();
 
     private:
         Array<ComPtr<ID3D11RenderTargetView>> m_d3dViews;
@@ -40,7 +40,7 @@ namespace Engine {
 
         ITextureResourceData* GetTextureResource() const override;
 
-        ComPtr<ID3D11DepthStencilView> GetD3D11DepthStencilView() const;
+        ComPtr<ID3D11DepthStencilView> GetD3D11DepthStencilView();
 
     private:
         Array<ComPtr<ID3D11DepthStencilView>> m_d3dViews;

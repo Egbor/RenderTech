@@ -80,7 +80,7 @@ namespace Engine {
 		}
 	}
 
-	void HighRenderCommandPrePass::Execute(HighRenderPipeline* pipeline, Scene* scene) {
+	void HighRenderCommandPrePass::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
 		Matrix4x4 view = CreateViewMatrix(scene->GetCamera());
 		Matrix4x4 proj = CreateProjectionMatrix(scene->GetCamera(), pipeline->GetRenderSpaceWidth(), pipeline->GetRenderSpaceHeight());
 
@@ -98,7 +98,7 @@ namespace Engine {
 		DELETE_OBJECT(m_vertexShader);
 	}
 
-	void HighRenderCommandBasePass::Execute(HighRenderPipeline* pipeline, Scene* scene) {
+	void HighRenderCommandBasePass::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
 		pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
 		pipeline->BindUBuffer(BatchSlot::BS_SLOT_1, RenderStage::RS_VERTEX);
 		pipeline->BindGBuffer(BatchSlot::BS_SLOT_1);
@@ -109,7 +109,7 @@ namespace Engine {
 		scene->DoTraversal(ClassOf<MeshComponent>::value, [&](SceneComponent* component) { DrawSingleMesh(pipeline, component); });
 	}
 
-	void HighRenderCommandBasePass::DrawSingleMesh(HighRenderPipeline* pipeline, SceneComponent* component) {
+	void HighRenderCommandBasePass::DrawSingleMesh(VirtualRenderPipeline* pipeline, SceneComponent* component) {
 		Mesh* mesh = component->As<MeshComponent>()->GetMesh();
 		
 		pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UpdateBasePassUBObject(data, component); });
@@ -127,10 +127,9 @@ namespace Engine {
 	}
 
 	HighRenderCommandLightPass::HighRenderCommandLightPass(IRenderResourceFactory* factory) 
-		: m_vertexShader(nullptr), m_pixelShader(nullptr), m_pixelDebugShader(nullptr) {
+		: m_vertexShader(nullptr), m_pixelShader(nullptr) {
 		m_vertexShader = LoadShader(factory, "assets/shaders/LightVSShader.cso", ShaderType::ST_VERTEX);
 		m_pixelShader = LoadShader(factory, "assets/shaders/LightPSShader.cso", ShaderType::ST_PIXEL);
-		m_pixelDebugShader = LoadShader(factory, "assets/shaders/LightPSDebugShader.cso", ShaderType::ST_PIXEL);
 	}
 
 	HighRenderCommandLightPass::~HighRenderCommandLightPass() {
@@ -138,12 +137,12 @@ namespace Engine {
 		DELETE_OBJECT(m_pixelShader);
 	}
 
-	void HighRenderCommandLightPass::Execute(HighRenderPipeline* pipeline, Scene* scene) {
+	void HighRenderCommandLightPass::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
 		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_3, false, false);
 		scene->DoTraversal(ClassOf<LightComponent>::value, [&](SceneComponent* component) { DrawSingleLight(pipeline, component); });
 	}
 
-	void HighRenderCommandLightPass::DrawSingleLight(HighRenderPipeline* pipeline, SceneComponent* component) {
+	void HighRenderCommandLightPass::DrawSingleLight(VirtualRenderPipeline* pipeline, SceneComponent* component) {
 		LightComponent* light = component->As<LightComponent>();
 		MeshElement* lightVolume = LoadLightVolume(light->GetLightType())->GetMeshElement(0);
 
@@ -169,9 +168,33 @@ namespace Engine {
 		pipeline->BindStates(BatchSlot::BS_SLOT_3);
 
 		pipeline->DrawIndexedPremitive(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
+	}
 
-		//pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelDebugShader);
-		//pipeline->BindStates(BatchSlot::BS_SLOT_4);
-		//pipeline->DrawIndexedWaveframe(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
+	HighRenderCommandBakeHDRIToIBL::HighRenderCommandBakeHDRIToIBL(IRenderResourceFactory* factory) 
+		: m_vertexShader(nullptr), m_pixelShader(nullptr), m_mat4x4ViewProjection(6) {
+		Matrix4x4 proj = Matrix4x4::CreateMatrixOrthographic(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
+		m_mat4x4ViewProjection[0] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::right, Vector3::up) * proj).Transpose();
+		m_mat4x4ViewProjection[1] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::right, Vector3::up) * proj).Transpose();
+		m_mat4x4ViewProjection[2] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::up, Vector3::forword) * proj).Transpose();
+		m_mat4x4ViewProjection[3] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::up, -Vector3::forword) * proj).Transpose();
+		m_mat4x4ViewProjection[4] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::forword, Vector3::up) * proj).Transpose();
+		m_mat4x4ViewProjection[5] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::forword, Vector3::up) * proj).Transpose();
+
+		m_vertexShader = LoadShader(factory, "assets/shaders/HDRIToCubeMapVSShader.cso", ShaderType::ST_VERTEX);
+		m_pixelShader = LoadShader(factory, "assets/shaders/HDRIToCubeMapPSShader.cso", ShaderType::ST_PIXEL);
+	}
+
+	HighRenderCommandBakeHDRIToIBL::~HighRenderCommandBakeHDRIToIBL() {
+		DELETE_OBJECT(m_vertexShader);
+		DELETE_OBJECT(m_pixelShader);
+	}
+
+	void HighRenderCommandBakeHDRIToIBL::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
+		for (Int32 i = 0; i < m_mat4x4ViewProjection.size(); i++) {
+			pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
+			pipeline->BindGBuffer(BatchSlot::BS_SLOT_1);
+			pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
+			pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShader);
+		}
 	}
 }

@@ -16,9 +16,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Engine::EngineClass* engine = new Engine::EngineClass(window, context);
 	Engine::World* world = engine->GetWorld();
 
-	world->SpawnEntity(Engine::ClassOf<Engine::Spectator>::value, Engine::Vector3(0.0f, 0.0f, -1.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
+	world->SpawnEntity(Engine::ClassOf<Engine::Spectator>::value, Engine::Vector3(0.0f, 0.0f, -5.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
 	world->SpawnEntity(Engine::ClassOf<Engine::VisibleObject>::value, Engine::Vector3(0.0f, 0.0f, 0.0f), Engine::Rotator(0.0f, 45.0f, 0.0f));
-	world->SpawnEntity(Engine::ClassOf<Engine::LightObject>::value, Engine::Vector3(0.0f, 0.0f, -1.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
+	world->SpawnEntity(Engine::ClassOf<Engine::LightObject>::value, Engine::Vector3(0.0f, 0.0f, -8.0f), Engine::Rotator(0.0f, 0.0f, 0.0f));
 
 	window->Show();
 	engine->Run();

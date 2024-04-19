@@ -6,8 +6,9 @@
 namespace Engine {
     struct Vector2 : public DirectX::XMFLOAT2 {
         Vector2();
-        Vector2(float x, float y);
         Vector2(const Vector2&) = default;
+
+        constexpr Vector2(float x, float y) noexcept : XMFLOAT2(x, y) {}
 
         Vector2 Normalize();
         float Dot(const Vector2& vector);
@@ -29,8 +30,9 @@ namespace Engine {
     STRUCTTYPE(Vector3)
     struct Vector3 : public DirectX::XMFLOAT3 {
         Vector3();
-        Vector3(float x, float y, float z);
         Vector3(const Vector3&) = default;
+
+        constexpr Vector3(float x, float y, float z) noexcept;
 
         Vector3 Normalize();
         Vector3 Cross(const Vector3& vector);
@@ -67,8 +69,9 @@ namespace Engine {
     STRUCTTYPE(Vector4)
     struct Vector4 : public DirectX::XMFLOAT4 {
         Vector4();
-        Vector4(float x, float y, float z, float w);
         Vector4(const Vector4&) = default;
+
+        constexpr Vector4(float x, float y, float z, float w) noexcept;
 
         Vector4 operator+(const Vector4& vector);
         Vector4 operator-(const Vector4& vector);
