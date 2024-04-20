@@ -5,12 +5,6 @@
 #include "Engine/Math/Matrix.h"
 
 namespace Engine {
-//#define RENDER_OUTPUT_COUNT 9
-//#define RENDER_BUFFER_COUNT 2
-//#define RENDER_STAGE_COUNT 2
-//#define RENDER_VIEWPORT_COUNT 2
-//#define RENDER_TEXTURE_COUNT 8
-
     enum class RenderOutput {
         RO_TARGET0  = 0,
         RO_TARGET1  = 1,
@@ -107,32 +101,6 @@ namespace Engine {
     private:
         Vector2 resolution;
     };
-
-//#define tagREALTIME_BUFFER_BINDER           "BufferBinder"
-//#define tagREALTIME_SHADER_BINDER           "ShaderBinder"
-//#define tagREALTIME_TARGET_BINDER           "TargetBinder"
-//#define tagREALTIME_TEXTURE_BINDER          "TextureBinder"
-//#define tagREALTIME_VIEWPORT_BINDER         "ViewportBinder"
-//#define tagREALTIME_DYNAMIC_BUFFER_BINDER   "DynamicBufferBinder"
-//
-//#define tagREALTIME_RASTERIZER_STATE    "RasterizerState"
-//#define tagREALTIME_SAMPLER_STATE       "SamplerState"
-//#define tagREALTIME_DEPTHSTENCIL_STATE  "DepthStencilState"
-//#define tagREALTIME_BLEND_STATE         "BlendState"
-//
-//    static constexpr const char* tagTexture = "Texture";
-//    static constexpr const char* tagCubeTexture = "CubeTexture";
-//    static constexpr const char* tagTargetTexture = "TargetTexture";
-//    static constexpr const char* tagCubeMapTargetTexture = "CubeMapTargetTexture";
-//    static constexpr const char* tagDepthStencilTargetTexture = "DepthStencilTargetTexture";
-//
-//#define tagREALTIME_BUFFER_VERTEX           "VertexBuffer"
-//#define tagREALTIME_BUFFER_INDEX            "IndexBuffer"
-//#define tagREALTIME_BUFFER_VS_CONST_BUFFER  "VsConstBuffer"
-//#define tagREALTIME_BUFFER_PS_CONST_BUFFER  "PsConstBuffer"
-//
-//#define tagREALTIME_SHADER_VERTEX       "VertexShader"
-//#define tagREALTIME_SHADER_FRAGMENT      "FragmentShader"
 
     enum class TextureSlot {
         TS_ALBEDO       = 0,

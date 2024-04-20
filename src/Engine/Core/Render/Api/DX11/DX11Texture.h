@@ -45,6 +45,7 @@ namespace Engine {
         Int32 GetHeight() const override;
 
         bool IsCubemap() const override;
+        void ReadByCPUAccess(Int8* dstBuffer, Int32 srcSubresource, Size maxSize) const override;
 
         ComPtr<ID3D11Texture2D> GetD3D11Texture2D() const;
         ComPtr<ID3D11ShaderResourceView> GetD3D11ShaderResourceView(ComPtr<ID3D11Device> d3dDevice);

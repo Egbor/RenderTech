@@ -41,13 +41,13 @@ namespace Engine {
 		}
 	}
 
-	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource) {
-		ProcessCommonInit(m_batch, resource, batchIds);
+	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, ITargetResourceData* resource) {
+		outId = ProcessCommonInit(m_batch, resource, batchIds);
 	}
 
-	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, TextureType type, TextureFormat format, Int32 width, Int32 height) {
+	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, TextureType type, TextureFormat format, Int32 width, Int32 height) {
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		ProcessCommonInit(m_batch, factory->CreateTarget(type, format, width, height), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+		outId = ProcessCommonInit(m_batch, factory->CreateTarget(type, format, width, height), batchIds | BatchSlot::BS_SLOT_DELETABLE);
 	}
 
 	void GBuffer::Clear(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue) {
@@ -64,6 +64,10 @@ namespace Engine {
 		}
 	}
 
+	ITextureResourceData* GBuffer::GetTargetData(Int32 id) const {
+		return m_batch[id]->GetTextureResource();
+	}
+
 	UBuffer::UBuffer() 
 		: m_batch() {
 
@@ -76,11 +80,11 @@ namespace Engine {
 		}
 	}
 
-	void UBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32* outId) {
+	void UBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32& outId) {
 		Array<Int8> dummy(bufferSize);
 
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		*outId = ProcessCommonInit(m_batch, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), dummy.data()), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+		outId = ProcessCommonInit(m_batch, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), dummy.data()), batchIds | BatchSlot::BS_SLOT_DELETABLE);
 	}
 
 	void UBuffer::Update(Int32 id) {

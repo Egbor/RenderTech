@@ -48,16 +48,29 @@ namespace Engine {
 		void DrawSingleLight(VirtualRenderPipeline* pipeline, SceneComponent* component);
 	};
 
-	class HighRenderCommandBakeHDRIToIBL : public IHighRenderCommand {
+	class HighRenderCommandBakeHDRIToEnvironment : public IHighRenderCommand {
 	private:
 		IShaderResourceData* m_vertexShader;
 		IShaderResourceData* m_pixelShader;
+		ITextureResourceData* m_equirectangularTexture;
 
 		Array<Matrix4x4> m_mat4x4ViewProjection;
 
 	public:
-		HighRenderCommandBakeHDRIToIBL(IRenderResourceFactory* factory);
-		virtual ~HighRenderCommandBakeHDRIToIBL();
+		HighRenderCommandBakeHDRIToEnvironment(IRenderResourceFactory* factory, ITextureResourceData* equirectangularTexture);
+		virtual ~HighRenderCommandBakeHDRIToEnvironment();
+
+		void Execute(VirtualRenderPipeline* pipeline, Scene* scene) override;
+	};
+
+	class HighRenderCommandBakeEnvironmentToIrradiance : public IHighRenderCommand {
+	private:
+		IShaderResourceData* m_vertexShader;
+		IShaderResourceData* m_pixelShader;
+
+	public:
+		HighRenderCommandBakeEnvironmentToIrradiance(IRenderResourceFactory* factory);
+		virtual ~HighRenderCommandBakeEnvironmentToIrradiance();
 
 		void Execute(VirtualRenderPipeline* pipeline, Scene* scene) override;
 	};

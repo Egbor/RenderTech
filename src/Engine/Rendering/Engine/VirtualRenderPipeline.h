@@ -16,7 +16,7 @@ namespace Engine {
 		UBuffer m_ubuffer;
 		States m_states;
 
-		Map<String, Int32> m_ubuffersIds;
+		Map<String, Int32> m_resourceIds;
 
 	public:
 		VirtualRenderPipeline(ISwapChain* apiSwapChain, IRenderPipeline* apiPipeline);
@@ -26,12 +26,14 @@ namespace Engine {
 		void DrawIndexedWaveframe(IBufferResourceData* vertex, IBufferResourceData* index);
 		void SwapBuffers();
 
+		void SetViewport(Int32 width, Int32 height);
+
 		void ClearGBuffer(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue = 0);
 
-		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds);
-		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource);
-		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIdx, TextureType type, TextureFormat format, Int32 width, Int32 height);
-		void InitResourceForUBuffer(EnumFlags<BatchSlot> batchIds, const String& bufferTag, Int32 bufferSize);
+		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, const String& tag);
+		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, const String& tag, ITargetResourceData* resource);
+		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIdx, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height);
+		void InitResourceForUBuffer(EnumFlags<BatchSlot> batchIds, const String& tag, Int32 bufferSize);
 		void InitResourceForStates(EnumFlags<BatchSlot> batchIds, StateType type, StateData data);
 
 		void BindGBuffer(BatchSlot batchId);
@@ -47,6 +49,8 @@ namespace Engine {
 
 		Int32 GetRenderSpaceWidth() const;
 		Int32 GetRenderSpaceHeight() const;
+
+		ITextureResourceData* GetTargetDataFromGBuffer(const String& tag) const;
 
 	private:
 		inline void AdjustViewport();

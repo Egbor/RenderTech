@@ -80,10 +80,11 @@ namespace Engine {
 		void Bind(BatchSlot batchId, IRenderStage* stage) override;
 		void Bind(BatchSlot batchId, IRenderPipeline* pipeline) override;
 
-		void InitNewResource(EnumFlags<BatchSlot> batchIds, ITargetResourceData* resource);
-		void InitNewResource(EnumFlags<BatchSlot> batchIdx, TextureType type, TextureFormat format, Int32 width, Int32 height);
+		void InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, ITargetResourceData* resource);
+		void InitNewResource(EnumFlags<BatchSlot> batchIdx, Int32& outId, TextureType type, TextureFormat format, Int32 width, Int32 height);
 
 		void Clear(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue);
+		ITextureResourceData* GetTargetData(Int32 id) const;
 
 	private:
 		Array<ResourceSlot<ITargetResourceData>> m_batch;
@@ -95,7 +96,7 @@ namespace Engine {
 		virtual ~UBuffer() = default;
 
 		void Bind(BatchSlot batchId, IRenderStage* stage) override;
-		void InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32* outId);
+		void InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32& outId);
 		void Update(Int32 id);
 
 		RawData GetBufferData(Int32 id) const;

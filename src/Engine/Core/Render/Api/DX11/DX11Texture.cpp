@@ -157,6 +157,35 @@ namespace Engine {
         return !!(d3dTexture2DDesc.MiscFlags & D3D11_RESOURCE_MISC_TEXTURECUBE);
     }
 
+    void DX11Texture2D::ReadByCPUAccess(Int8* dstBuffer, Int32 srcSubresource, Size maxSize) const {
+        ComPtr<ID3D11Device> d3dDevice;
+        ComPtr<ID3D11DeviceContext> d3dContext;
+        ComPtr<ID3D11Texture2D> d3dCPUAccessableTexture;
+
+        m_d3dTexture2D->GetDevice(&d3dDevice);
+        d3dDevice->GetImmediateContext(&d3dContext);
+
+        D3D11_MAPPED_SUBRESOURCE d3dMappedResources;
+        D3D11_TEXTURE2D_DESC d3dCPUAccessableTextureDesc;
+
+        d3dCPUAccessableTextureDesc.Width = static_cast<UINT>(GetWidth());
+        d3dCPUAccessableTextureDesc.Height = static_cast<UINT>(GetHeight());
+        d3dCPUAccessableTextureDesc.Format = GetD3D11Format(GetFormat());
+        d3dCPUAccessableTextureDesc.MipLevels = 1;
+        d3dCPUAccessableTextureDesc.ArraySize = 1;
+        d3dCPUAccessableTextureDesc.SampleDesc.Count = 1;
+        d3dCPUAccessableTextureDesc.SampleDesc.Quality = 0;
+        d3dCPUAccessableTextureDesc.Usage = D3D11_USAGE_STAGING;
+        d3dCPUAccessableTextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        d3dCPUAccessableTextureDesc.BindFlags = 0;
+        d3dCPUAccessableTextureDesc.MiscFlags = 0;
+
+        d3dDevice->CreateTexture2D(&d3dCPUAccessableTextureDesc, nullptr, &d3dCPUAccessableTexture);
+        d3dContext->CopySubresourceRegion(d3dCPUAccessableTexture.Get(), 0, 0, 0, 0, m_d3dTexture2D.Get(), srcSubresource, nullptr);
+        d3dContext->Map(d3dCPUAccessableTexture.Get(), 0, D3D11_MAP_READ, 0, &d3dMappedResources);
+        memcpy_s(dstBuffer, maxSize, d3dMappedResources.pData, GetHeight() * d3dMappedResources.RowPitch);
+    }
+
     ComPtr<ID3D11Texture2D> DX11Texture2D::GetD3D11Texture2D() const {
         return m_d3dTexture2D;
     }

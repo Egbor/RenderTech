@@ -42,6 +42,11 @@ namespace Engine {
 		throw EngineException("[Global] LoadLightVolume() failed. The selected light is not supported");
 	}
 
+	Mesh* LoadCubeVolume() {
+		static Mesh* screen = Resource::Load<Mesh*>("assets/models/Cube.fbx");
+		return screen;
+	}
+
 	void UpdatePrePassUBCamera(RawData& data, CameraComponent* component, Float viewportWidth, Float viewportHeight) {
 		UB_Camera* buffer = data.As<UB_Camera>();
 		buffer->EyePosition = Vector4(component->GetWorldPosition().x, component->GetWorldPosition().y, component->GetWorldPosition().z, 1.0f);
@@ -170,31 +175,40 @@ namespace Engine {
 		pipeline->DrawIndexedPremitive(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
 	}
 
-	HighRenderCommandBakeHDRIToIBL::HighRenderCommandBakeHDRIToIBL(IRenderResourceFactory* factory) 
-		: m_vertexShader(nullptr), m_pixelShader(nullptr), m_mat4x4ViewProjection(6) {
+	HighRenderCommandBakeHDRIToEnvironment::HighRenderCommandBakeHDRIToEnvironment(IRenderResourceFactory* factory, ITextureResourceData* equirectangularTexture)
+		: m_vertexShader(nullptr), m_pixelShader(nullptr), m_equirectangularTexture(equirectangularTexture), m_mat4x4ViewProjection(6) {
 		Matrix4x4 proj = Matrix4x4::CreateMatrixOrthographic(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-		m_mat4x4ViewProjection[0] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::right, Vector3::up) * proj).Transpose();
-		m_mat4x4ViewProjection[1] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::right, Vector3::up) * proj).Transpose();
-		m_mat4x4ViewProjection[2] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::up, Vector3::forword) * proj).Transpose();
-		m_mat4x4ViewProjection[3] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::up, -Vector3::forword) * proj).Transpose();
-		m_mat4x4ViewProjection[4] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::forword, Vector3::up) * proj).Transpose();
-		m_mat4x4ViewProjection[5] = (Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::forword, Vector3::up) * proj).Transpose();
+
+		m_mat4x4ViewProjection[0] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::right, Vector3::up) * proj;
+		m_mat4x4ViewProjection[1] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::right, Vector3::up) * proj;
+		m_mat4x4ViewProjection[2] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::up, Vector3::forword) * proj;
+		m_mat4x4ViewProjection[3] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::up, -Vector3::forword) * proj;
+		m_mat4x4ViewProjection[4] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::forword, Vector3::up) * proj;
+		m_mat4x4ViewProjection[5] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::forword, Vector3::up) * proj;
 
 		m_vertexShader = LoadShader(factory, "assets/shaders/HDRIToCubeMapVSShader.cso", ShaderType::ST_VERTEX);
 		m_pixelShader = LoadShader(factory, "assets/shaders/HDRIToCubeMapPSShader.cso", ShaderType::ST_PIXEL);
 	}
 
-	HighRenderCommandBakeHDRIToIBL::~HighRenderCommandBakeHDRIToIBL() {
+	HighRenderCommandBakeHDRIToEnvironment::~HighRenderCommandBakeHDRIToEnvironment() {
 		DELETE_OBJECT(m_vertexShader);
 		DELETE_OBJECT(m_pixelShader);
 	}
 
-	void HighRenderCommandBakeHDRIToIBL::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
+	void HighRenderCommandBakeHDRIToEnvironment::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
+		MeshElement* clipspaceVolume = LoadCubeVolume()->GetMeshElement(0);
+
+		pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
+		pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShader);
+		pipeline->BindTexture(RenderStage::RS_PIXEL, { m_equirectangularTexture });
+
+		pipeline->BindUBuffer(BatchSlot::BS_SLOT_1, RenderStage::RS_VERTEX);
+		pipeline->BindStates(BatchSlot::BS_SLOT_1);
+
 		for (Int32 i = 0; i < m_mat4x4ViewProjection.size(); i++) {
-			pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
 			pipeline->BindGBuffer(BatchSlot::BS_SLOT_1);
-			pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
-			pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShader);
+			pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
+			pipeline->DrawIndexedPremitive(clipspaceVolume->GetVertexBuffer(), clipspaceVolume->GetIndexBuffer());
 		}
 	}
 }

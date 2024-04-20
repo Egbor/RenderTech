@@ -1,4 +1,7 @@
 #include "Engine/Rendering/Engine/HighRenderContext.h"
+#include "Engine/Core/System/Resource/Resource.h"
+
+#include <Windows.h>
 
 namespace Engine {
 	constexpr StateData GenerateFrontDepthStencilState() noexcept {
@@ -89,7 +92,7 @@ namespace Engine {
 		for (Int32 i = 0; i < m_commands.size(); i++) {
 			m_commands[i]->Execute(m_pipeline, scene);
 		}
-		m_pipeline->SwapBuffers();
+		this->OnPostDraw();
 	}
 
 	VirtualRenderPipeline* AbstractHighRenderContext::GetPipeline() const {
@@ -107,11 +110,11 @@ namespace Engine {
 		Int32 width = GetPipeline()->GetRenderSpaceWidth();
 		Int32 height = GetPipeline()->GetRenderSpaceHeight();
 
-		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height);
-		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
-		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
-		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2 | BatchSlot::BS_SLOT_3, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
-		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_3);
+		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, "Albedo", TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height);
+		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, "Normal", TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
+		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, "ORM", TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
+		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2 | BatchSlot::BS_SLOT_3, "Depth", TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_3, "Output");
 
 		GetPipeline()->InitResourceForStates(BatchSlot::BS_SLOT_1, StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
 		GetPipeline()->InitResourceForStates(BatchSlot::BS_SLOT_1, StateType::ST_DEPTH_STENCIL, InitDefaultStateData<DepthStencilState>());
@@ -130,12 +133,38 @@ namespace Engine {
 		GetPipeline()->InitResourceForUBuffer(BatchSlot::BS_SLOT_3, AS_TEXT(UB_Light), sizeof(UB_Light));
 	}
 
-	HRC_IBLBacker::HRC_IBLBacker(IContext* context, Int32 outputWidth, Int32 outputHeight) 
-		: AbstractHighRenderContext(context), m_IBLCubeMapOutputWidth(outputWidth), m_IBLCubeMapOutputHeight(outputHeight) {
-		ExtendCommandList(new HighRenderCommandBakeHDRIToIBL(context->QueryResourceFactory()));
+	void HRC_Base::OnPostDraw() {
+		GetPipeline()->SwapBuffers();
+	}
+
+	HRC_IBLBacker::HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight) 
+		: AbstractHighRenderContext(context), m_IBLCubeMapOutputWidth(outputWidth), m_IBLCubeMapOutputHeight(outputHeight)
+		, m_texture2D(nullptr) {
+		m_texture2D = Resource::Load<Texture2D*>(filename);
+
+		ExtendCommandList(new HighRenderCommandBakeHDRIToEnvironment(context->QueryResourceFactory(), m_texture2D->GetNativeResource()));
+		ExtendCommandList(new HighRenderCommandBakeEnvironmentToIrradiance(context->QueryResourceFactory()));
+	}
+
+	HRC_IBLBacker::~HRC_IBLBacker() {
+		DELETE_OBJECT(m_texture2D);
 	}
 
 	void HRC_IBLBacker::DrawInit() {
-		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, TextureType::TT_CUBE, TextureFormat::TF_B8G8R8A8_BMP, m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
+		GetPipeline()->SetViewport(m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
+
+		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_1, "EvironmentCubemap", TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
+		GetPipeline()->InitResourceForGBuffer(BatchSlot::BS_SLOT_2, "IrradianceCubemap", TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
+
+		GetPipeline()->InitResourceForUBuffer(BatchSlot::BS_SLOT_1, AS_TEXT(UB_Object), sizeof(UB_Object));
+		GetPipeline()->InitResourceForStates(BatchSlot::BS_SLOT_1, StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
+		GetPipeline()->InitResourceForStates(BatchSlot::BS_SLOT_1, StateType::ST_RASTERIZER, GenerateBackRasterizerState());
+	}
+
+	void HRC_IBLBacker::OnPostDraw() {
+		//if (Resource::Save<ITextureResourceData*>(GetPipeline()->GetTargetDataFromGBuffer("EvironmentCubemap"), "assets/textures/skybox/afternoon.exr") != ResourceStatus::RS_OK) {
+		//	OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for evironment cubmap");
+		//}
+		GetPipeline()->SwapBuffers();
 	}
 }

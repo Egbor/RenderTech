@@ -5,6 +5,8 @@
 #include "Engine/Object/Class/Texture.h"
 
 #include <FreeImage.h>
+#include <filesystem>
+#include <sstream>
 
 namespace Engine {
     TextureFormat ToFormat(FIBITMAP* dib) {
@@ -134,12 +136,34 @@ namespace Engine {
     }
 
     template<>
-    TextureCube* Resource::Load(const String& filename) {
-        return nullptr;
-    }
+    ResourceStatus Resource::Save(ITextureResourceData* resource, const String& filename) {
+        ResourceStatus status = ResourceStatus::RS_OK;
 
-    template<>
-    void Resource::Save(TextureCube* resource, const String& filename) {
+        const Int32 countOfSubresources = resource->IsCubemap() ? 6 : 1;
+        const std::filesystem::path filepath(filename);
 
+        FIBITMAP* dib = FreeImage_AllocateT(ToFreeImageFormat(resource->GetFormat()), resource->GetWidth(), resource->GetHeight());
+        for (Int32 i = 0; i < countOfSubresources; i++) {
+            Int8* bits = (Int8*)FreeImage_GetBits(dib);
+            Size bitsSize = GetFreeImageByteWidth(dib);
+
+            resource->ReadByCPUAccess(bits, i, bitsSize);
+
+            FREE_IMAGE_FORMAT fif = FreeImage_GetFIFFromFilename(filepath.filename().string().c_str());
+            if ((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif)) {
+                std::filesystem::path outFilepath(filepath);
+                std::stringstream ss;
+
+                ss << filepath.stem().string() << i + 1 << filepath.extension().string();
+                outFilepath.replace_filename(ss.str());
+
+                FreeImage_Save(GetFreeImageFormat(dib), dib, outFilepath.string().c_str());
+            } else {
+                status = ResourceStatus::RS_FAILED;
+            }
+        }
+        FreeImage_Unload(dib);
+
+        return status;
     }
 }

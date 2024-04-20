@@ -12,6 +12,7 @@ namespace Engine {
 		virtual TextureFormat GetFormat() const = 0;
 
 		virtual bool IsCubemap() const = 0;
+		virtual void ReadByCPUAccess(Int8* dstBuffer, Int32 srcSubresource, Size maxSize) const = 0;
 	};
 }
 
