@@ -3,7 +3,17 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    DX11RenderTarget::DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float* color)
+    inline void CopyD3D11Texture(ComPtr<ID3D11Texture2D> d3dSrcTexture, ComPtr<ID3D11Texture2D> d3dDstTexture) {
+        ComPtr<ID3D11Device> d3dDevice;
+        ComPtr<ID3D11DeviceContext> d3dContext;
+
+        d3dSrcTexture->GetDevice(&d3dDevice);
+        d3dDevice->GetImmediateContext(&d3dContext);
+
+        d3dContext->CopyResource(d3dDstTexture.Get(), d3dSrcTexture.Get());
+    }
+
+    DX11RenderTarget::DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, const Float* color)
         : m_data(texture), m_viewId(0) {
         memcpy_s(m_clearColor, sizeof(m_clearColor), color, sizeof(m_clearColor));
 
@@ -43,6 +53,14 @@ namespace Engine {
 
     bool DX11RenderTarget::IsDepth() const {
         return false;
+    }
+
+    void DX11RenderTarget::Copy(ITargetResourceData* dstTarget) const {
+        if (dstTarget->IsDepth()) {
+            throw EngineException("[DX11DepthStencil] ITargetResourceData::IsDepth() is true");
+        }
+
+        CopyD3D11Texture(m_data->GetD3D11Texture2D(), dynamic_cast<DX11RenderTarget*>(dstTarget)->m_data->GetD3D11Texture2D());
     }
 
     void DX11RenderTarget::Clear(IContext* context) {
@@ -98,6 +116,14 @@ namespace Engine {
 
     bool DX11DepthStencil::IsDepth() const {
         return true;
+    }
+
+    void DX11DepthStencil::Copy(ITargetResourceData* dstTarget) const {
+        if (!dstTarget->IsDepth()) {
+            throw EngineException("[DX11DepthStencil] ITargetResourceData::IsDepth() is false");
+        }
+
+        CopyD3D11Texture(m_data->GetD3D11Texture2D(), dynamic_cast<DX11DepthStencil*>(dstTarget)->m_data->GetD3D11Texture2D());
     }
 
     void DX11DepthStencil::Clear(IContext* context) {

@@ -7,10 +7,11 @@
 namespace Engine {
     class DX11RenderTarget : public ITargetResourceData {
     public:
-        DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float* color);
+        DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, const Float* color);
         virtual ~DX11RenderTarget();
 
         bool IsDepth() const override;
+        void Copy(ITargetResourceData* dstTarget) const override;
         void Clear(IContext* context) override;
 
         ITextureResourceData* GetTextureResource() const override;
@@ -31,6 +32,7 @@ namespace Engine {
         virtual ~DX11DepthStencil();
 
         bool IsDepth() const override;
+        void Copy(ITargetResourceData* dstTarget) const override;
         void Clear(IContext* context) override;
 
         void SetStencilClearValue(UInt32 value) override;

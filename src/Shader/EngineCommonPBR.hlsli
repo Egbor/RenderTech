@@ -60,8 +60,6 @@ float3 FindOutgoingPBRLight(float3 normal, float3 view, float3 light, float3 hal
 	float3 BRDF = Kd * lambert + cookTorrance;
 	float3 outgoingLight = BRDF * lightColor * cosL;
 
-	//float3 ambiant = float3(0.03f, 0.03f, 0.03f) * albedoColor * ormColor.r;
-
 	return outgoingLight;
 }
 

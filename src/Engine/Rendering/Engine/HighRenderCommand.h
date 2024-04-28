@@ -48,31 +48,36 @@ namespace Engine {
 		void DrawSingleLight(VirtualRenderPipeline* pipeline, SceneComponent* component);
 	};
 
-	class HighRenderCommandBakeHDRIToEnvironment : public IHighRenderCommand {
+	class HighRenderCommandSkybox : public IHighRenderCommand {
 	private:
 		IShaderResourceData* m_vertexShader;
 		IShaderResourceData* m_pixelShader;
+
+	public:
+		HighRenderCommandSkybox(IRenderResourceFactory* factory);
+		virtual ~HighRenderCommandSkybox();
+
+		void Execute(VirtualRenderPipeline* pipeline, Scene* scene) override;
+	};
+
+	class HighRenderCommandBakeHDRIToEnvironmentCubemap : public IHighRenderCommand {
+	private:
+		IShaderResourceData* m_vertexShader;
+		IShaderResourceData* m_pixelShaderEnvironment;
+		IShaderResourceData* m_pixelShaderIrradiance;
 		ITextureResourceData* m_equirectangularTexture;
 
 		Array<Matrix4x4> m_mat4x4ViewProjection;
 
 	public:
-		HighRenderCommandBakeHDRIToEnvironment(IRenderResourceFactory* factory, ITextureResourceData* equirectangularTexture);
-		virtual ~HighRenderCommandBakeHDRIToEnvironment();
+		HighRenderCommandBakeHDRIToEnvironmentCubemap(IRenderResourceFactory* factory, ITextureResourceData* equirectangularTexture);
+		virtual ~HighRenderCommandBakeHDRIToEnvironmentCubemap();
 
 		void Execute(VirtualRenderPipeline* pipeline, Scene* scene) override;
-	};
 
-	class HighRenderCommandBakeEnvironmentToIrradiance : public IHighRenderCommand {
 	private:
-		IShaderResourceData* m_vertexShader;
-		IShaderResourceData* m_pixelShader;
-
-	public:
-		HighRenderCommandBakeEnvironmentToIrradiance(IRenderResourceFactory* factory);
-		virtual ~HighRenderCommandBakeEnvironmentToIrradiance();
-
-		void Execute(VirtualRenderPipeline* pipeline, Scene* scene) override;
+		void BakeEnvironmentCubemap(VirtualRenderPipeline* pipeline, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer);
+		void BakeIrradianceCubemap(VirtualRenderPipeline* pipeline, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer);
 	};
 }
 

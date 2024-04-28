@@ -3,7 +3,7 @@
 namespace Engine {
 	Scene::Scene() 
 		: m_entities() {
-
+		m_skybox = ClassType<Skybox>::CreateObject(ObjectArgument::Dummy());
 	}
 
 	void Scene::InsertEntity(Entity* entity) {
@@ -38,5 +38,9 @@ namespace Engine {
 
 	CameraComponent* Scene::GetCamera() const {
 		return CameraComponent::MainCamera();
+	}
+
+	Skybox* Scene::GetSkybox() const {
+		return m_skybox;
 	}
 }

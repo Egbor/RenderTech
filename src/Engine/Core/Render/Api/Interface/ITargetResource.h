@@ -10,6 +10,7 @@ namespace Engine {
 	public:
 		virtual ~ITargetResourceData() = default;
 		virtual bool IsDepth() const = 0;
+		virtual void Copy(ITargetResourceData* dstTarget) const = 0;
 		virtual void Clear(IContext* context) = 0;
 
 		virtual ITextureResourceData* GetTextureResource() const = 0;

@@ -51,6 +51,7 @@ namespace Engine {
 		Int32 GetRenderSpaceHeight() const;
 
 		ITextureResourceData* GetTargetDataFromGBuffer(const String& tag) const;
+		ITargetResourceData* GetTargetFromGBuffer(const String& tag) const;
 
 	private:
 		inline void AdjustViewport();

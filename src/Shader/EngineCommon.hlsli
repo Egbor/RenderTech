@@ -29,6 +29,11 @@ cbuffer UB_LIGHT : register(slot) {	\
 
 sampler LinearSampler : register(s0);
 
+struct SkyboxVSOutput {
+    float3 wsPosition : POSITION;
+    float4 Position : SV_Position;
+};
+
 struct VertexShaderOutput {
 	float2 TexCoord : TEXCOORD1;
 	float3 wsTangent : TANGENT;

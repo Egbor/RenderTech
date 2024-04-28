@@ -36,9 +36,7 @@ namespace Engine {
 
 	void GBuffer::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
 		const Array<ITargetResourceData*> targets = ProcessCommonGet<ITargetResourceData, ITargetResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource; });
-		if (targets.size() > 0) {
-			pipeline->SetTargets(targets);
-		}
+		pipeline->SetTargets(targets);
 	}
 
 	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, ITargetResourceData* resource) {
@@ -66,6 +64,10 @@ namespace Engine {
 
 	ITextureResourceData* GBuffer::GetTargetData(Int32 id) const {
 		return m_batch[id]->GetTextureResource();
+	}
+
+	ITargetResourceData* GBuffer::GetTarget(Int32 id) const {
+		return m_batch[id].GetResource();
 	}
 
 	UBuffer::UBuffer() 

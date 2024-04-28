@@ -17,6 +17,10 @@ namespace Engine {
         HRESULT hr = 0;
         Int32 flag = 0;
 
+#if defined(DEBUG) || defined(_DEBUG)
+        flag |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
         const D3D_FEATURE_LEVEL features[] = {
             D3D_FEATURE_LEVEL_11_0,
             D3D_FEATURE_LEVEL_10_1,

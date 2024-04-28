@@ -112,7 +112,7 @@ namespace Engine {
         return dib;
     }
 
-    void UnloadFreeImageResources(const Array<FIBITMAP*> dibs) {
+    void UnloadFreeImageResources(const Array<FIBITMAP*>& dibs) {
         for (FIBITMAP* dib : dibs) {
             FreeImage_Unload(dib);
         }
@@ -131,6 +131,32 @@ namespace Engine {
         texture->Create(width, height, ToFormat(dib), data);
 
         FreeImage_Unload(dib);
+
+        return texture;
+    }
+
+    template<>
+    TextureCube* Resource::Load(const String& filename) {
+        std::filesystem::path filepath(filename);
+
+        Array<FIBITMAP*> dibs;
+        Array<Int8*> data;
+
+        for (Int32 i = 0; i < 6; i++) {
+            std::filesystem::path tempFilepath(filepath);
+            tempFilepath.replace_filename(filepath.stem().string() + std::to_string(i + 1) + filepath.extension().string());
+
+            dibs.push_back(LoadFreeImageResource(tempFilepath.string()));
+            data.push_back(reinterpret_cast<Int8*>(FreeImage_GetBits(dibs[dibs.size() - 1])));
+        }
+
+        Int32 width = static_cast<Int32>(FreeImage_GetWidth(dibs[0]));
+        Int32 height = static_cast<Int32>(FreeImage_GetHeight(dibs[0]));
+
+        TextureCube* texture = ClassType<TextureCube>::CreateObject(ObjectArgument::Dummy());
+        texture->Create(width, height, ToFormat(dibs[0]), data);
+
+        UnloadFreeImageResources(dibs);
 
         return texture;
     }

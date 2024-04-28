@@ -5,10 +5,12 @@
 #include "Engine/Object/Component/CameraComponent.h"
 
 #include "Engine/Object/Entity/Entity.h"
+#include "Engine/Object/Class/Skybox.h"
 
 namespace Engine {
 	class Scene {
 	private:
+		Skybox* m_skybox;
 		Array<Entity*> m_entities;
 
 	public:
@@ -21,6 +23,7 @@ namespace Engine {
 		void DoTraversal(IClass* traversalClass, std::function<void(SceneComponent*)> callback);
 
 		CameraComponent* GetCamera() const;
+		Skybox* GetSkybox() const;
 	};
 }
 

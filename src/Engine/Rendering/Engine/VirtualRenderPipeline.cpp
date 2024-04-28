@@ -53,6 +53,7 @@ namespace Engine {
 	}
 
 	void VirtualRenderPipeline::BindGBuffer(BatchSlot batchId, RenderStage stage) {
+		m_gbuffer.Bind(BatchSlot::BS_SLOT_NULL, m_apiPipeline);
 		m_gbuffer.Bind(batchId, m_apiPipeline->GetStage(stage));
 	}
 
@@ -94,6 +95,10 @@ namespace Engine {
 
 	ITextureResourceData* VirtualRenderPipeline::GetTargetDataFromGBuffer(const String& tag) const {
 		return m_gbuffer.GetTargetData(m_resourceIds.at(tag));
+	}
+
+	ITargetResourceData* VirtualRenderPipeline::GetTargetFromGBuffer(const String& tag) const {
+		return m_gbuffer.GetTarget(m_resourceIds.at(tag));
 	}
 
 	inline void VirtualRenderPipeline::AdjustViewport() {
