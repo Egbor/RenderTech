@@ -34,8 +34,8 @@ float4 main(float4 position : SV_POSITION) : SV_TARGET0 {
 	float3 N = normalize(normal);
 
 	float3 outgoingLight = FindOutgoingPBRLight(N, V, L, H, color, sRGBToLinear(albedo.rgb), orm.rgb);	
-    outgoingLight = ACESFitted(outgoingLight);
-	outgoingLight = LinearTosRGB(outgoingLight);
+    //outgoingLight = ACESFitted(outgoingLight);
+	//outgoingLight = LinearTosRGB(outgoingLight);
 
 	return float4(outgoingLight, 1.0f);
 }

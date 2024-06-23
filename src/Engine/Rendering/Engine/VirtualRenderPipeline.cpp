@@ -1,112 +1,189 @@
 #include "Engine/Rendering/Engine/VirtualRenderPipeline.h"
 
 namespace Engine {
-	VirtualRenderPipeline::VirtualRenderPipeline(ISwapChain* apiSwapChain, IRenderPipeline* apiPipeline)
-		: m_viewport(apiSwapChain->GetWidth(), apiSwapChain->GetHeight()), m_apiSwapChain(apiSwapChain), m_apiPipeline(apiPipeline)
-		, m_gbuffer(), m_ubuffer(), m_states() {
+	VirtualRenderPipeline::VirtualRenderPipeline(IContext* apiContext)
+		: m_apiContext(apiContext), m_localGBuffer(), m_localStates()
+		, m_localStages(static_cast<Int32>(RenderStage::RS_NUM)) {
+		ISwapChain* swapchain = apiContext->QuerySwapChain();
+		m_localViewport = Viewport(swapchain->GetWidth(), swapchain->GetHeight());
 	}
 
 	void VirtualRenderPipeline::DrawIndexedPremitive(IBufferResourceData* vertex, IBufferResourceData* index) {
 		AdjustViewport();
-		m_apiPipeline->Draw(vertex, index);
+		SetApiPipeline();
+
+		m_apiContext->QueryPipeline()->Draw(vertex, index);
 	}
 
 	void VirtualRenderPipeline::DrawIndexedWaveframe(IBufferResourceData* vertex, IBufferResourceData* index) {
 		AdjustViewport();
-		m_apiPipeline->DrawWaveframe(vertex, index);
+		SetApiPipeline();
+
+		m_apiContext->QueryPipeline()->DrawWaveframe(vertex, index);
 	}
 
 	void VirtualRenderPipeline::SwapBuffers() {
-		m_apiSwapChain->Swap();
+		m_apiContext->QuerySwapChain()->Swap();
 	}
 
 	void VirtualRenderPipeline::SetViewport(Int32 width, Int32 height) {
-		m_viewport = Viewport(width, height);
+		m_localViewport = Viewport(width, height);
 	}
 
-	void VirtualRenderPipeline::ClearGBuffer(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue) {
-		m_gbuffer.Clear(batchId, enableDepthClear, enableStencilClear, stencilClearValue);
+	void VirtualRenderPipeline::ClearTargets(const RenderResourcesStorage& storage, BatchSlot slot) {
+		storage.HandleResources<ITargetResourceData>(slot, [&](ITargetResourceData* resource) { resource->Clear(m_apiContext); });
 	}
 
-	void VirtualRenderPipeline::InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, const String& tag) {
-		m_gbuffer.InitNewResource(batchIds, m_resourceIds[tag], m_apiSwapChain->GetOutputTarget());
+	void VirtualRenderPipeline::SetDepthStencilCleaningFlags(ITargetResourceData* resource, bool enableDepthCleaning, bool enableStencilCleaning, Int32 stencilValue) {
+		if (resource->IsDepth()) {
+			IDepthStencilResourceData* depthResource = dynamic_cast<IDepthStencilResourceData*>(resource);
+			depthResource->EnableDepthClear(enableDepthCleaning);
+			depthResource->EnableStencilClear(enableStencilCleaning);
+			depthResource->SetStencilClearValue(stencilValue);
+		}
 	}
 
-	void VirtualRenderPipeline::InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, const String& tag, ITargetResourceData* resource) {
-		m_gbuffer.InitNewResource(batchIds, m_resourceIds[tag], resource);
-	}
+	void VirtualRenderPipeline::UpdateBuffer(IBufferResourceData* resource, std::function<void(RawData&)> updater) {
+		IDynamicResourceData* dynamicResource = dynamic_cast<IDynamicResourceData*>(resource);
 
-	void VirtualRenderPipeline::InitResourceForGBuffer(EnumFlags<BatchSlot> batchIdx, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height) {
-		m_gbuffer.InitNewResource(batchIdx, m_resourceIds[tag], type, format, width, height);
-	}
-
-	void VirtualRenderPipeline::InitResourceForUBuffer(EnumFlags<BatchSlot> batchIds, const String& tag, Int32 bufferSize) {
-		m_ubuffer.InitNewResource(batchIds, bufferSize, m_resourceIds[tag]);
-	}
-
-	void VirtualRenderPipeline::InitResourceForStates(EnumFlags<BatchSlot> batchIds, StateType type, StateData data) {
-		m_states.InitNewResource(batchIds, type, data);
-	}
-
-	void VirtualRenderPipeline::BindGBuffer(BatchSlot batchId) {
-		m_gbuffer.Bind(batchId, m_apiPipeline);
-	}
-
-	void VirtualRenderPipeline::BindGBuffer(BatchSlot batchId, RenderStage stage) {
-		m_gbuffer.Bind(BatchSlot::BS_SLOT_NULL, m_apiPipeline);
-		m_gbuffer.Bind(batchId, m_apiPipeline->GetStage(stage));
-	}
-
-	void VirtualRenderPipeline::BindUBuffer(BatchSlot batchId, RenderStage stage) {
-		m_ubuffer.Bind(batchId, m_apiPipeline->GetStage(stage));
-	}
-
-	void VirtualRenderPipeline::BindStates(BatchSlot batchId, RenderStage stage) {
-		m_states.Bind(batchId, m_apiPipeline->GetStage(stage));
-	}
-
-	void VirtualRenderPipeline::BindStates(BatchSlot batchId) {
-		m_states.Bind(batchId, m_apiPipeline);
-	}
-
-	void VirtualRenderPipeline::BindShader(RenderStage stage, IShaderResourceData* resource) {
-		IRenderStage* renderStage = m_apiPipeline->GetStage(stage);
-		renderStage->BindShader(resource);
-	}
-
-	void VirtualRenderPipeline::BindTexture(RenderStage stage, const Array<ITextureResourceData*>& resources) {
-		IRenderStage* renderStage = m_apiPipeline->GetStage(stage);
-		renderStage->BindTextures(resources);
-	}
-
-	void VirtualRenderPipeline::UpdateUBuffer(const String& bufferTag, std::function<void(RawData&)> updateCallback) {
-		Int32 bufferId = m_resourceIds[bufferTag];
-		updateCallback(m_ubuffer.GetBufferData(bufferId));
-		m_ubuffer.Update(bufferId);
+		updater(dynamicResource->GetBufferData());
+		dynamicResource->Update(m_apiContext);
 	}
 
 	Int32 VirtualRenderPipeline::GetRenderSpaceWidth() const {
-		return m_viewport.GetWidth();
+		return m_localViewport.GetWidth();
 	}
 
 	Int32 VirtualRenderPipeline::GetRenderSpaceHeight() const {
-		return m_viewport.GetHeight();
+		return m_localViewport.GetHeight();
 	}
 
-	ITextureResourceData* VirtualRenderPipeline::GetTargetDataFromGBuffer(const String& tag) const {
-		return m_gbuffer.GetTargetData(m_resourceIds.at(tag));
+	ITargetResourceData* VirtualRenderPipeline::GetTarget() const {
+		return m_apiContext->QuerySwapChain()->GetOutputTarget();
 	}
 
-	ITargetResourceData* VirtualRenderPipeline::GetTargetFromGBuffer(const String& tag) const {
-		return m_gbuffer.GetTarget(m_resourceIds.at(tag));
+	template<>
+	void VirtualRenderPipeline::AddResource(RenderStage stage, IBufferResourceData* resource) {
+		Array<IBufferResourceData*>& temp =  m_localStages[static_cast<Int32>(stage)].m_localBuffers;
+		temp.push_back(resource);
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResource(RenderStage stage, ITextureResourceData* resource) {
+		Array<ITextureResourceData*>& temp = m_localStages[static_cast<Int32>(stage)].m_localTextures;
+		temp.push_back(resource);
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResource(RenderStage stage, IStateResourceData* resource) {
+		Array<IStateResourceData*>& temp = m_localStages[static_cast<Int32>(stage)].m_localSamplers;
+		temp.push_back(resource);
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResource(RenderStage stage, IShaderResourceData* resource) {
+		m_localStages[static_cast<Int32>(stage)].m_localShader = resource;
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResource(ITargetResourceData* resource) {
+		m_localGBuffer.push_back(resource);
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResource(IStateResourceData* resource) {
+		m_localStates.push_back(resource);
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<IBufferResourceData>(const RenderResourcesStorage& storage, BatchSlot slot, RenderStage stage) {
+		storage.HandleResources<IBufferResourceData>(slot, [&](IBufferResourceData* resource) { AddResource(stage, resource); });
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<ITextureResourceData>(const RenderResourcesStorage& storage, BatchSlot slot, RenderStage stage) {
+		storage.HandleResources<ITextureResourceData>(slot, [&](ITextureResourceData* resource) { AddResource(stage, resource); });
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<IStateResourceData>(const RenderResourcesStorage& storage, BatchSlot slot, RenderStage stage) {
+		storage.HandleResources<IStateResourceData>(slot, [&](IStateResourceData* resource) { if (resource->Is(StateType::ST_SAMPLER)) { AddResource(stage, resource); } });
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<ITargetResourceData>(const RenderResourcesStorage& storage, BatchSlot slot) {
+		storage.HandleResources<ITargetResourceData>(slot, [&](ITargetResourceData* resource) { AddResource(resource); });
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<IStateResourceData>(const RenderResourcesStorage& storage, BatchSlot slot) {
+		storage.HandleResources<IStateResourceData>(slot, [&](IStateResourceData* resource) { if (!resource->Is(StateType::ST_SAMPLER)) { AddResource(resource); } });
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<IBufferResourceData>(RenderStage stage, const Array<IBufferResourceData*>& resources) {
+		Array<IBufferResourceData*>& localBuffers = m_localStages[static_cast<Int32>(stage)].m_localBuffers;
+		localBuffers.insert(localBuffers.end(), resources.begin(), resources.end());
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<ITextureResourceData>(RenderStage stage, const Array<ITextureResourceData*>& resources) {
+		Array<ITextureResourceData*>& localTextures = m_localStages[static_cast<Int32>(stage)].m_localTextures;
+		localTextures.insert(localTextures.end(), resources.begin(), resources.end());
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<IStateResourceData>(RenderStage stage, const Array<IStateResourceData*>& resources) {
+		Array<IStateResourceData*>& localSamplers = m_localStages[static_cast<Int32>(stage)].m_localSamplers;
+		localSamplers.insert(localSamplers.end(), resources.begin(), resources.end());
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<IStateResourceData>(const Array<IStateResourceData*>& resources) {
+		m_localStates.insert(m_localStates.end(), resources.begin(), resources.end());
+	}
+
+	template<>
+	void VirtualRenderPipeline::AddResources<ITargetResourceData>(const Array<ITargetResourceData*>& resources) {
+		m_localGBuffer.insert(m_localGBuffer.end(), resources.begin(), resources.end());
+	}
+
+	void VirtualRenderPipeline::AddResourcesFromTargetsToTextures(const RenderResourcesStorage& storage, BatchSlot slot, RenderStage stage) {
+		storage.HandleResources<ITargetResourceData>(slot, [&](ITargetResourceData* resource) { AddResource(stage, resource->GetTextureResource()); });
 	}
 
 	inline void VirtualRenderPipeline::AdjustViewport() {
 		Viewport viewport;
-		m_apiPipeline->GetViewport(viewport);
+		m_apiContext->QueryPipeline()->GetViewport(viewport);
 
-		if (viewport != m_viewport) {
-			m_apiPipeline->SetViewport(m_viewport.GetWidth(), m_viewport.GetHeight());
+		if (viewport != m_localViewport) {
+			m_apiContext->QueryPipeline()->SetViewport(m_localViewport.GetWidth(), m_localViewport.GetHeight());
+		}
+	}
+
+	template<typename T>
+	inline constexpr void BindResources(Array<T*>& resources, std::function<void(const Array<T*>&)> callback) {
+		if (resources.size() > 0) {
+			callback(resources);
+			resources.clear();
+		}
+	}
+
+	void VirtualRenderPipeline::SetApiPipeline() {
+		IRenderPipeline* apiPipeline = m_apiContext->QueryPipeline();
+
+		BindResources<ITargetResourceData>(m_localGBuffer, [&](const Array<ITargetResourceData*>& resources) { apiPipeline->SetTargets(resources); });
+		BindResources<IStateResourceData>(m_localStates, [&](const Array<IStateResourceData*>& resources) { apiPipeline->SetStates(resources); });
+
+		for (Int32 i = 0; i < m_localStages.size(); i++) {
+			IRenderStage* stage = apiPipeline->GetStage(static_cast<RenderStage>(i));
+			
+			if (m_localStages[i].m_localShader != nullptr) {
+				BindResources<ITextureResourceData>(m_localStages[i].m_localTextures, [&](const Array<ITextureResourceData*>& resources) { stage->BindTextures(resources); });
+				BindResources<IBufferResourceData>(m_localStages[i].m_localBuffers, [&](const Array<IBufferResourceData*>& resources) { stage->BindBuffers(resources); });
+				BindResources<IStateResourceData>(m_localStages[i].m_localSamplers, [&](const Array<IStateResourceData*>& resources) { stage->BindSamplers(resources); });
+			}
+			stage->BindShader(m_localStages[i].m_localShader);
 		}
 	}
 }

@@ -11,12 +11,14 @@ namespace Engine {
 
 	private:
 		TextureCube* m_envCubemap;
+		TextureCube* m_irrCubemap;
 
 	public:
 		Skybox(const ObjectArgument& arguments);
 		virtual ~Skybox();
 
 		ITextureResourceData* GetNativeResource() const;
+		ITextureResourceData* GetIBLNativeResource() const;
 	};
 }
 

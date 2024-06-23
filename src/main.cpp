@@ -10,7 +10,7 @@
 #include "Scripts/LightObject.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	Engine::IWindow* window = new Engine::Win32Window(hInstance, 800, 600);
+	Engine::IWindow* window = new Engine::Win32Window(hInstance, 1280, 720);
 	Engine::IContext* context = new Engine::DX11Context(window);
 
 	Engine::EngineClass* engine = new Engine::EngineClass(window, context);

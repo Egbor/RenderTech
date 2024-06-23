@@ -20,12 +20,27 @@ namespace Engine {
 		void ExtendCommandList(IHighRenderCommand* command);
 		void DrawScene(Scene* scene);
 
-		virtual void DrawInit() = 0;
+		virtual void DrawInit(IRenderResourceFactory* factory) = 0;
 
 	protected:
 		VirtualRenderPipeline* GetPipeline() const;
+		const RenderResourcesStorage& GetStorage() const;
 
+		virtual void OnPreDraw() = 0;
 		virtual void OnPostDraw() = 0;
+
+		template<class TResourceData>
+		inline TResourceData* GetResourceFromBatchByTag(const String& tag) const {
+			return m_storage.GetResourceFromBatchByTag<TResourceData>(tag);
+		}
+
+		inline void InitResourceForBatchOfStates(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, StateType type, StateData data);
+		inline void InitResourceForBatchOfBuffers(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, Int32 bufferSize);
+		inline void InitResourceForBatchOfTargets(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height);
+		inline void InitResourceForBatchOfTargets(ITargetResourceData* resource, EnumFlags<BatchSlot> slots, const String& tag);
+
+	private:
+		RenderResourcesStorage m_storage;
 	};
 
 	class HRC_Base : public AbstractHighRenderContext {
@@ -33,9 +48,10 @@ namespace Engine {
 		HRC_Base(IContext* context);
 		virtual ~HRC_Base() = default;
 
-		void DrawInit() override;
+		void DrawInit(IRenderResourceFactory* factory) override;
 
 	private:
+		void OnPreDraw() override;
 		void OnPostDraw() override;
 	};
 
@@ -50,9 +66,10 @@ namespace Engine {
 		HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight);
 		virtual ~HRC_IBLBacker();
 
-		void DrawInit() override;
+		void DrawInit(IRenderResourceFactory* factory) override;
 
 	private:
+		void OnPreDraw() override;
 		void OnPostDraw() override;
 	};
 }

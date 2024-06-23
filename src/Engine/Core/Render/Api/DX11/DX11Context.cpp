@@ -78,8 +78,10 @@ namespace Engine {
     }
 
     DX11Context::~DX11Context() {
-        DELETE_OBJECT(m_backTarget);
+        m_d3dContext->ClearState();
         m_d3dContext->Flush();
+
+        DELETE_OBJECT(m_backTarget);
     }
 
     ComPtr<ID3D11Device> DX11Context::GetD3D11Device() const {
@@ -89,15 +91,6 @@ namespace Engine {
     ComPtr<ID3D11DeviceContext> DX11Context::GetD3D11Context() const {
         return m_d3dContext;
     }
-
-//    void DX11Context::DebugReport() {
-//#if defined(DEBUG) || defined(_DEBUG)
-//        ComPtr<IDXGIDebug1> dxgiDebug;
-//        if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_IDXGIDebug1, &dxgiDebug))) {
-//            dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
-//        }
-//#endif
-//    }
 
     Int32 DX11Context::GetWidth() const {
         DXGI_SWAP_CHAIN_DESC desc;

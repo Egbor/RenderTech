@@ -1,25 +1,25 @@
 #ifndef VIRTUAL_RENDER_PIPELINE_H
 #define VIRTUAL_RENDER_PIPELINE_H
 
-#include "Engine/Core/Render/Api/Interface/IRenderPipeline.h"
+#include "Engine/Core/Render/Api/Interface/IContext.h"
 #include "Engine/Rendering/Engine/RenderBatcher.h"
 
+#include <optional>
+
 namespace Engine {
+	struct VirtualRenderStage {
+		Array<ITextureResourceData*> m_localTextures;
+		Array<IBufferResourceData*> m_localBuffers;
+		Array<IStateResourceData*> m_localSamplers;
+		IShaderResourceData* m_localShader;
+	};
+
 	class VirtualRenderPipeline {
 	private:
-		IRenderPipeline* m_apiPipeline;
-		ISwapChain* m_apiSwapChain;
-
-		Viewport m_viewport;
-
-		GBuffer m_gbuffer;
-		UBuffer m_ubuffer;
-		States m_states;
-
-		Map<String, Int32> m_resourceIds;
+		IContext* m_apiContext;
 
 	public:
-		VirtualRenderPipeline(ISwapChain* apiSwapChain, IRenderPipeline* apiPipeline);
+		VirtualRenderPipeline(IContext* apiContext);
 		virtual ~VirtualRenderPipeline() = default;
 
 		void DrawIndexedPremitive(IBufferResourceData* vertex, IBufferResourceData* index);
@@ -28,33 +28,43 @@ namespace Engine {
 
 		void SetViewport(Int32 width, Int32 height);
 
-		void ClearGBuffer(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue = 0);
-
-		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, const String& tag);
-		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIds, const String& tag, ITargetResourceData* resource);
-		void InitResourceForGBuffer(EnumFlags<BatchSlot> batchIdx, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height);
-		void InitResourceForUBuffer(EnumFlags<BatchSlot> batchIds, const String& tag, Int32 bufferSize);
-		void InitResourceForStates(EnumFlags<BatchSlot> batchIds, StateType type, StateData data);
-
-		void BindGBuffer(BatchSlot batchId);
-		void BindGBuffer(BatchSlot batchId, RenderStage stage);
-		void BindUBuffer(BatchSlot batchId, RenderStage stage);
-		void BindStates(BatchSlot batchId, RenderStage stage);
-		void BindStates(BatchSlot batchId);
-
-		void BindShader(RenderStage stage, IShaderResourceData* resource);
-		void BindTexture(RenderStage stage, const Array<ITextureResourceData*>& resources);
-
-		void UpdateUBuffer(const String& bufferTag, std::function<void(RawData&)> updateCallback);
+		void ClearTargets(const RenderResourcesStorage& storage, BatchSlot slot);
+		void SetDepthStencilCleaningFlags(ITargetResourceData* resource, bool enableDepthCleaning, bool enableStencilCleaning, Int32 stencilValue = 0);
+		void UpdateBuffer(IBufferResourceData* resource, std::function<void(RawData&)> updater);
 
 		Int32 GetRenderSpaceWidth() const;
 		Int32 GetRenderSpaceHeight() const;
 
-		ITextureResourceData* GetTargetDataFromGBuffer(const String& tag) const;
-		ITargetResourceData* GetTargetFromGBuffer(const String& tag) const;
+		ITargetResourceData* GetTarget() const;
+
+		template<class TResourceClass>
+		void AddResource(RenderStage stage, TResourceClass* resource);
+
+		template<class TResourceClass>
+		void AddResource(TResourceClass* resource);
+
+		void AddResourcesFromTargetsToTextures(const RenderResourcesStorage& storage, BatchSlot slot, RenderStage stage);
+
+		template<class TResourceClass>
+		void AddResources(const RenderResourcesStorage& storage, BatchSlot slot, RenderStage stage);
+		
+		template<class TResourceClass>
+		void AddResources(const RenderResourcesStorage& storage, BatchSlot slot);
+
+		template<class TResourceClass>
+		void AddResources(RenderStage stage, const Array<TResourceClass*>& resources);
+
+		template<class TResourceClass>
+		void AddResources(const Array<TResourceClass*>& resources);
 
 	private:
 		inline void AdjustViewport();
+		void SetApiPipeline();
+
+		Viewport m_localViewport;
+		Array<ITargetResourceData*> m_localGBuffer;
+		Array<IStateResourceData*> m_localStates;
+		Array<VirtualRenderStage> m_localStages;
 	};
 }
 

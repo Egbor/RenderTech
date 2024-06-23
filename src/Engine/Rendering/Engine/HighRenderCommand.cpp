@@ -47,6 +47,11 @@ namespace Engine {
 		return screen;
 	}
 
+	Mesh* LoadPlaneVolume() {
+		static Mesh* screen = Resource::Load<Mesh*>("assets/models/Plane.fbx");
+		return screen;
+	}
+
 	void UpdatePrePassUBCamera(RawData& data, CameraComponent* component, Float viewportWidth, Float viewportHeight) {
 		UB_Camera* buffer = data.As<UB_Camera>();
 		buffer->EyePosition = Vector4(component->GetWorldPosition().x, component->GetWorldPosition().y, component->GetWorldPosition().z, 1.0f);
@@ -85,13 +90,13 @@ namespace Engine {
 		}
 	}
 
-	void HighRenderCommandPrePass::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
+	void HighRenderCommandPrePass::Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) {
 		Matrix4x4 view = CreateViewMatrix(scene->GetCamera());
 		Matrix4x4 proj = CreateProjectionMatrix(scene->GetCamera(), pipeline->GetRenderSpaceWidth(), pipeline->GetRenderSpaceHeight());
 
-		pipeline->UpdateUBuffer(AS_TEXT(UB_Camera), [&](RawData& data) { UpdatePrePassUBCamera(data, scene->GetCamera(), pipeline->GetRenderSpaceWidth(), pipeline->GetRenderSpaceHeight()); });
-		pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UpdatePrePassUBObject(data, view, proj); });
-		pipeline->UpdateUBuffer(AS_TEXT(UB_ObjectHelper), [&](RawData& data) { UpdatePrePassUBOjectHelper(data, view, proj); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Camera)), [&](RawData& data) { UpdatePrePassUBCamera(data, scene->GetCamera(), pipeline->GetRenderSpaceWidth(), pipeline->GetRenderSpaceHeight()); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) { UpdatePrePassUBObject(data, view, proj); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_ObjectHelper)), [&](RawData& data) { UpdatePrePassUBOjectHelper(data, view, proj); });
 	}
 
 	HighRenderCommandBasePass::HighRenderCommandBasePass(IRenderResourceFactory* factory) {
@@ -102,76 +107,119 @@ namespace Engine {
 		DELETE_OBJECT(m_vertexShader);
 	}
 
-	void HighRenderCommandBasePass::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
-		pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
-		pipeline->BindUBuffer(BatchSlot::BS_SLOT_1, RenderStage::RS_VERTEX);
-		pipeline->BindStates(BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
-		pipeline->BindStates(BatchSlot::BS_SLOT_1);
-		pipeline->BindGBuffer(BatchSlot::BS_SLOT_1);
+	void HighRenderCommandBasePass::Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) {
+		pipeline->AddResource(RenderStage::RS_VERTEX, m_vertexShader);
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_1);
+		pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_1);
 
-		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_1, true, true);
+		pipeline->ClearTargets(storage, BatchSlot::BS_SLOT_1);
 
-		scene->DoTraversal(ClassOf<MeshComponent>::value, [&](SceneComponent* component) { DrawSingleMesh(pipeline, component); });
+		scene->DoTraversal(ClassOf<MeshComponent>::value, [&](SceneComponent* component) { DrawSingleMesh(pipeline, storage, component); });
 	}
 
-	void HighRenderCommandBasePass::DrawSingleMesh(VirtualRenderPipeline* pipeline, SceneComponent* component) {
+	void HighRenderCommandBasePass::DrawSingleMesh(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, SceneComponent* component) {
 		Mesh* mesh = component->As<MeshComponent>()->GetMesh();
 		
-		pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UpdateBasePassUBObject(data, component); });
-		pipeline->UpdateUBuffer(AS_TEXT(UB_ObjectHelper), [&](RawData& data) { UpdateBasePassUBObjectHelper(data, component); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) { UpdateBasePassUBObject(data, component); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_ObjectHelper)), [&](RawData& data) { UpdateBasePassUBObjectHelper(data, component); });
 
 		for (Int32 i = 0; i < mesh->GetNumMeshElements(); i++) {
 			MeshElement* submesh = mesh->GetMeshElement(i);
 			Material* material = mesh->GetMaterial(i);
 
-			pipeline->BindTexture(RenderStage::RS_PIXEL, material->GetNativeTextureResources());
-			pipeline->BindShader(RenderStage::RS_PIXEL, material->GetNativeShaderResource());
+			pipeline->AddResources(RenderStage::RS_PIXEL, material->GetNativeTextureResources());
+			pipeline->AddResource(RenderStage::RS_PIXEL, material->GetNativeShaderResource());
 
 			pipeline->DrawIndexedPremitive(submesh->GetVertexBuffer(), submesh->GetIndexBuffer());
 		}
 	}
 
-	HighRenderCommandLightPass::HighRenderCommandLightPass(IRenderResourceFactory* factory) {
+	HighRenderCommandPreLightPass::HighRenderCommandPreLightPass(IRenderResourceFactory* factory) {
 		m_vertexShader = LoadShader(factory, "assets/shaders/LightVSShader.cso", ShaderType::ST_VERTEX);
-		m_pixelShader = LoadShader(factory, "assets/shaders/LightPSShader.cso", ShaderType::ST_PIXEL);
+	}
+
+	HighRenderCommandPreLightPass::~HighRenderCommandPreLightPass() {
+		DELETE_OBJECT(m_vertexShader);
+	}
+
+	void HighRenderCommandPreLightPass::Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) {
+		pipeline->AddResource(RenderStage::RS_VERTEX, m_vertexShader);
+		pipeline->AddResourcesFromTargetsToTextures(storage, BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
+
+		Skybox* skybox = scene->GetSkybox();
+		if (skybox != nullptr) {
+			pipeline->AddResource(RenderStage::RS_PIXEL, skybox->GetIBLNativeResource());
+		}
+	}
+
+	HighRenderCommandLightPass::HighRenderCommandLightPass(IRenderResourceFactory* factory) {
+		m_pixelShaderLightSources = LoadShader(factory, "assets/shaders/LightPSShader.cso", ShaderType::ST_PIXEL);
+		m_pixelShaderGlobalIllumination = LoadShader(factory, "assets/shaders/IBLPSShader.cso", ShaderType::ST_PIXEL);
 	}
 
 	HighRenderCommandLightPass::~HighRenderCommandLightPass() {
-		DELETE_OBJECT(m_vertexShader);
-		DELETE_OBJECT(m_pixelShader);
+		DELETE_OBJECT(m_pixelShaderLightSources);
+		DELETE_OBJECT(m_pixelShaderGlobalIllumination);
 	}
 
-	void HighRenderCommandLightPass::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
-		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_3, false, false);
-		scene->DoTraversal(ClassOf<LightComponent>::value, [&](SceneComponent* component) { DrawSingleLight(pipeline, component); });
+	void HighRenderCommandLightPass::Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) {
+		pipeline->SetDepthStencilCleaningFlags(storage.GetResourceFromBatchByTag<ITargetResourceData>(RESOURCE_TAG_DEPTH), false, false);
+		pipeline->ClearTargets(storage, BatchSlot::BS_SLOT_3);
+
+		scene->DoTraversal(ClassOf<LightComponent>::value, [&](SceneComponent* component) { DrawSingleLight(pipeline, storage, component); });
+	
+		Skybox* skybox = scene->GetSkybox();
+		MeshElement* plane = LoadPlaneVolume()->GetMeshElement(0);
+
+		if (skybox != nullptr) {
+			pipeline->AddResource(RenderStage::RS_PIXEL, m_pixelShaderGlobalIllumination);
+			pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_5);
+
+			Matrix4x4 mat4x4TempViewProjection;
+			Matrix4x4 mat4x4TempWorld;
+
+			pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) {
+				UB_Object* buffer = data.As<UB_Object>();
+				mat4x4TempViewProjection = buffer->ViewProjection;
+				mat4x4TempWorld = buffer->World;
+
+				buffer->ViewProjection = Matrix4x4::CreateMatrixOrthographic(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
+				buffer->World = Matrix4x4::Identity();
+			});
+			pipeline->DrawIndexedPremitive(plane->GetVertexBuffer(), plane->GetIndexBuffer());
+			pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) {
+				UB_Object* buffer = data.As<UB_Object>();
+				buffer->ViewProjection = mat4x4TempViewProjection;
+				buffer->World = mat4x4TempWorld;
+			});
+		}
 	}
 
-	void HighRenderCommandLightPass::DrawSingleLight(VirtualRenderPipeline* pipeline, SceneComponent* component) {
+	void HighRenderCommandLightPass::DrawSingleLight(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, SceneComponent* component) {
 		LightComponent* light = component->As<LightComponent>();
 		MeshElement* lightVolume = LoadLightVolume(light->GetLightType())->GetMeshElement(0);
 
-		pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UpdateBasePassUBObject(data, light); });
-		pipeline->UpdateUBuffer(AS_TEXT(UB_ObjectHelper), [&](RawData& data) { UpdateBasePassUBObjectHelper(data, light); });
-		pipeline->UpdateUBuffer(AS_TEXT(UB_Light), [&](RawData& data) { UpdateLightPassUBLight(data, light, false); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) { UpdateBasePassUBObject(data, light); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_ObjectHelper)), [&](RawData& data) { UpdateBasePassUBObjectHelper(data, light); });
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Light)), [&](RawData& data) { UpdateLightPassUBLight(data, light, false); });
 
-		pipeline->GetTargetFromGBuffer("Depth")->Copy(pipeline->GetTargetFromGBuffer("OutputDepth"));
+		ITargetResourceData* dstTarget = storage.GetResourceFromBatchByTag<ITargetResourceData>(RESOURCE_TAG_DEPTH);
+		storage.GetResourceFromBatchByTag<ITargetResourceData>(RESOURCE_TAG_GBUFFER_DEPTH)->Copy(dstTarget);
 
 		// Front light calculation
-		pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
-		pipeline->BindShader(RenderStage::RS_PIXEL, nullptr);
-		pipeline->BindUBuffer(BatchSlot::BS_SLOT_2, RenderStage::RS_VERTEX);
-		pipeline->BindStates(BatchSlot::BS_SLOT_2);
-		pipeline->BindGBuffer(BatchSlot::BS_SLOT_2);
+		pipeline->AddResource(RenderStage::RS_PIXEL, (IShaderResourceData*)nullptr);
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_2);
+		pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_2);
 
-		pipeline->ClearGBuffer(BatchSlot::BS_SLOT_2, false, true, 1);
+		pipeline->SetDepthStencilCleaningFlags(dstTarget, false, true, 1);
+		pipeline->ClearTargets(storage, BatchSlot::BS_SLOT_2);
 		pipeline->DrawIndexedPremitive(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
 
 		// Back light calculation
-		pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShader);
-		pipeline->BindGBuffer(BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
-		pipeline->BindUBuffer(BatchSlot::BS_SLOT_3, RenderStage::RS_PIXEL);
-		pipeline->BindStates(BatchSlot::BS_SLOT_3);
-		pipeline->BindGBuffer(BatchSlot::BS_SLOT_3);
+		pipeline->AddResource(RenderStage::RS_PIXEL, m_pixelShaderLightSources);
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_3);
+		pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_3);
 
 		pipeline->DrawIndexedPremitive(lightVolume->GetVertexBuffer(), lightVolume->GetIndexBuffer());
 	}
@@ -186,7 +234,7 @@ namespace Engine {
 		DELETE_OBJECT(m_pixelShader);
 	}
 
-	void HighRenderCommandSkybox::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
+	void HighRenderCommandSkybox::Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) {
 		Skybox* skybox = scene->GetSkybox();
 		if (skybox == nullptr) {
 			return;
@@ -194,15 +242,42 @@ namespace Engine {
 		
 		MeshElement* cube = LoadCubeVolume()->GetMeshElement(0);
 
-		pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
-		pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShader);
-		pipeline->BindTexture(RenderStage::RS_PIXEL, { skybox->GetNativeResource() });
+		pipeline->AddResource(RenderStage::RS_VERTEX, m_vertexShader);
+		pipeline->AddResource(RenderStage::RS_PIXEL, m_pixelShader);
+		pipeline->AddResource(RenderStage::RS_PIXEL, skybox->GetNativeResource());
 
-		pipeline->BindStates(BatchSlot::BS_SLOT_4);
-		pipeline->BindUBuffer(BatchSlot::BS_SLOT_4, RenderStage::RS_VERTEX);
-		pipeline->BindGBuffer(BatchSlot::BS_SLOT_3);
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_4);
+		pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_3);
 
 		pipeline->DrawIndexedPremitive(cube->GetVertexBuffer(), cube->GetIndexBuffer());
+	}
+
+	HighRenderCommandPostProcessing::HighRenderCommandPostProcessing(IRenderResourceFactory* factory) {
+		m_vertexShader = LoadShader(factory, "assets/shaders/LightVSShader.cso", ShaderType::ST_VERTEX);
+		m_pixelShaderGammaCorrection = LoadShader(factory, "assets/shaders/PostProcessingPSShader.cso", ShaderType::ST_PIXEL);
+	}
+
+	HighRenderCommandPostProcessing::~HighRenderCommandPostProcessing() {
+		DELETE_OBJECT(m_vertexShader);
+		DELETE_OBJECT(m_pixelShaderGammaCorrection);
+	}
+
+	void HighRenderCommandPostProcessing::Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) {
+		MeshElement* plane = LoadPlaneVolume()->GetMeshElement(0);
+		
+		pipeline->AddResource(RenderStage::RS_VERTEX, m_vertexShader);
+		pipeline->AddResource(RenderStage::RS_PIXEL, m_pixelShaderGammaCorrection);
+		pipeline->AddResourcesFromTargetsToTextures(storage, BatchSlot::BS_SLOT_3, RenderStage::RS_PIXEL);
+		
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_6);
+		pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_4);
+
+		pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) {
+			UB_Object* buffer = data.As<UB_Object>();
+			buffer->ViewProjection = Matrix4x4::CreateMatrixOrthographic(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
+			buffer->World = Matrix4x4::Identity();
+		});
+		pipeline->DrawIndexedPremitive(plane->GetVertexBuffer(), plane->GetIndexBuffer());
 	}
 
 	HighRenderCommandBakeHDRIToEnvironmentCubemap::HighRenderCommandBakeHDRIToEnvironmentCubemap(IRenderResourceFactory* factory, ITextureResourceData* equirectangularTexture)
@@ -227,40 +302,39 @@ namespace Engine {
 		DELETE_OBJECT(m_pixelShaderIrradiance);
 	}
 
-	void HighRenderCommandBakeHDRIToEnvironmentCubemap::Execute(VirtualRenderPipeline* pipeline, Scene* scene) {
+	void HighRenderCommandBakeHDRIToEnvironmentCubemap::Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) {
 		MeshElement* cube = LoadCubeVolume()->GetMeshElement(0);
 
-		pipeline->BindShader(RenderStage::RS_VERTEX, m_vertexShader);
-		pipeline->BindUBuffer(BatchSlot::BS_SLOT_1, RenderStage::RS_VERTEX);
-		pipeline->BindStates(BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
-		pipeline->BindStates(BatchSlot::BS_SLOT_1);
+		pipeline->AddResource(RenderStage::RS_VERTEX, m_vertexShader);
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
+		pipeline->AddResources<IStateResourceData>(storage, BatchSlot::BS_SLOT_1);
 
-		BakeEnvironmentCubemap(pipeline, cube->GetVertexBuffer(), cube->GetIndexBuffer());
-		BakeIrradianceCubemap(pipeline, cube->GetVertexBuffer(), cube->GetIndexBuffer());
+		BakeEnvironmentCubemap(pipeline, storage, cube->GetVertexBuffer(), cube->GetIndexBuffer());
+		BakeIrradianceCubemap(pipeline, storage,  cube->GetVertexBuffer(), cube->GetIndexBuffer());
 	}
 
-	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeEnvironmentCubemap(VirtualRenderPipeline* pipeline, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer) {
+	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeEnvironmentCubemap(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer) {
 		pipeline->SetViewport(1080, 1080);
 
-		pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShaderEnvironment);
-		pipeline->BindTexture(RenderStage::RS_PIXEL, { m_equirectangularTexture });
+		pipeline->AddResource(RenderStage::RS_PIXEL, m_pixelShaderEnvironment);
+		pipeline->AddResource(RenderStage::RS_PIXEL, m_equirectangularTexture);
 		
 		for (Int32 i = 0; i < m_mat4x4ViewProjection.size(); i++) {
-			pipeline->BindGBuffer(BatchSlot::BS_SLOT_1);
-			pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
+			pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_1);
+			pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
 			pipeline->DrawIndexedPremitive(cubeVertexBuffer, cubeIndexBuffer);
 		}
 	}
 
-	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeIrradianceCubemap(VirtualRenderPipeline* pipeline, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer) {
+	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeIrradianceCubemap(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer) {
 		pipeline->SetViewport(32, 32);
 		
-		pipeline->BindShader(RenderStage::RS_PIXEL, m_pixelShaderIrradiance);
-		pipeline->BindGBuffer(BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
+		pipeline->AddResource(RenderStage::RS_PIXEL, m_pixelShaderIrradiance);
+		pipeline->AddResourcesFromTargetsToTextures(storage, BatchSlot::BS_SLOT_1, RenderStage::RS_PIXEL);
 
 		for (Int32 i = 0; i < m_mat4x4ViewProjection.size(); i++) {
-			pipeline->BindGBuffer(BatchSlot::BS_SLOT_2);
-			pipeline->UpdateUBuffer(AS_TEXT(UB_Object), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
+			pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_2);
+			pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
 			pipeline->DrawIndexedPremitive(cubeVertexBuffer, cubeIndexBuffer);
 		}
 	}

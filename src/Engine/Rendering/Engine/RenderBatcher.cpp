@@ -2,124 +2,181 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-	template<class TResourceData>
-	Int32 ProcessCommonInit(Array<ResourceSlot<TResourceData>>& arr, TResourceData* resource, EnumFlags<BatchSlot> batchIds) {
-		arr.push_back(ResourceSlot<TResourceData>(batchIds, resource));
-		return static_cast<Int32>(arr.size() - 1);
+	template<>
+	IStateResourceData* RenderResourcesStorage::GetResourceFromBatchByTag(const String& tag) const {
+		return m_batchOfStates.Get(m_resourcesIds.at(tag));
 	}
 
-	template<class TResourceData, class TOutResourceData>
-	const Array<TOutResourceData*> ProcessCommonGet(BatchSlot batchId, const Array<ResourceSlot<TResourceData>>& arr, std::function<TOutResourceData*(TResourceData*)> callback) {
-		Array<TOutResourceData*> result;
-		for (Size i = 0; i < arr.size(); i++) {
-			if (arr[i].IsAssociatedWith(batchId)) {
-				TOutResourceData* resource = callback(arr[i].GetResource());
-				if (resource != nullptr) {
-					result.push_back(resource);
-				}
-			}
-		}
-		return result;
+	template<>
+	IBufferResourceData* RenderResourcesStorage::GetResourceFromBatchByTag(const String& tag) const {
+		return m_batchOfBuffers.Get(m_resourcesIds.at(tag));
 	}
 
-	GBuffer::GBuffer() 
-		: m_batch() {
-
+	template<>
+	ITargetResourceData* RenderResourcesStorage::GetResourceFromBatchByTag(const String& tag) const {
+		return m_batchOfTargets.Get(m_resourcesIds.at(tag));
 	}
 
-	void GBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
-		const Array<ITextureResourceData*> textures = ProcessCommonGet<ITargetResourceData, ITextureResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource->GetTextureResource(); });
-		if (textures.size() > 0) {
-			stage->BindTextures(textures);
-		}
+	template<>
+	ITextureResourceData* RenderResourcesStorage::GetResourceFromBatchByTag(const String& tag) const {
+		return m_batchOfTextures.Get(m_resourcesIds.at(tag));
 	}
 
-	void GBuffer::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
-		const Array<ITargetResourceData*> targets = ProcessCommonGet<ITargetResourceData, ITargetResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource; });
-		pipeline->SetTargets(targets);
+	template<>
+	void RenderResourcesStorage::HandleResources(BatchSlot slot, std::function<void(IStateResourceData*)> callback) const {
+		m_batchOfStates.HandleResources(slot, callback);
 	}
 
-	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, ITargetResourceData* resource) {
-		outId = ProcessCommonInit(m_batch, resource, batchIds);
+	template<>
+	void RenderResourcesStorage::HandleResources(BatchSlot slot, std::function<void(IBufferResourceData*)> callback) const {
+		m_batchOfBuffers.HandleResources(slot, callback);
 	}
 
-	void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, TextureType type, TextureFormat format, Int32 width, Int32 height) {
-		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		outId = ProcessCommonInit(m_batch, factory->CreateTarget(type, format, width, height), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+	template<>
+	void RenderResourcesStorage::HandleResources(BatchSlot slot, std::function<void(ITargetResourceData*)> callback) const {
+		m_batchOfTargets.HandleResources(slot, callback);
 	}
 
-	void GBuffer::Clear(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue) {
-		for (Size i = 0; i < m_batch.size(); i++) {
-			if (m_batch[i].IsAssociatedWith(batchId)) {
-				if (m_batch[i]->IsDepth()) {
-					IDepthStencilResourceData* resource = dynamic_cast<IDepthStencilResourceData*>(m_batch[i].GetResource());
-					resource->SetStencilClearValue(stencilClearValue);
-					resource->EnableDepthClear(enableDepthClear);
-					resource->EnableStencilClear(enableStencilClear);
-				}
-				m_batch[i]->Clear(Core::GetInstance()->GetContext());
-			}
-		}
+	template<>
+	void RenderResourcesStorage::HandleResources(BatchSlot slot, std::function<void(ITextureResourceData*)> callback) const {
+		m_batchOfTextures.HandleResources(slot, callback);
 	}
 
-	ITextureResourceData* GBuffer::GetTargetData(Int32 id) const {
-		return m_batch[id]->GetTextureResource();
+	void RenderResourcesStorage::InitResourceForBatchOfStates(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, StateType type, StateData data) {
+		m_resourcesIds[tag] = m_batchOfStates.Insert(slots | BatchSlot::BS_DELETABLE, factory->CreateState(type, data));
 	}
 
-	ITargetResourceData* GBuffer::GetTarget(Int32 id) const {
-		return m_batch[id].GetResource();
-	}
-
-	UBuffer::UBuffer() 
-		: m_batch() {
-
-	}
-
-	void UBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
-		const Array<IBufferResourceData*> buffers = ProcessCommonGet<IBufferResourceData, IBufferResourceData>(batchId, m_batch, [](IBufferResourceData* resource) { return resource; });
-		if (buffers.size() > 0) {
-			stage->BindBuffers(buffers);
-		}
-	}
-
-	void UBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32& outId) {
+	void RenderResourcesStorage::InitResourceForBatchOfBuffers(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, Int32 bufferSize) {
 		Array<Int8> dummy(bufferSize);
-
-		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		outId = ProcessCommonInit(m_batch, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), dummy.data()), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+		m_resourcesIds[tag] = m_batchOfBuffers.Insert(slots | BatchSlot::BS_DELETABLE, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, static_cast<Int32>(dummy.size()), dummy.data()));
 	}
 
-	void UBuffer::Update(Int32 id) {
-		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_batch[id].GetResource());
-		buffer->Update(Core::GetInstance()->GetContext());
+	void RenderResourcesStorage::InitResourceForBatchOfTargets(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height) {
+		m_resourcesIds[tag] = m_batchOfTargets.Insert(slots | BatchSlot::BS_DELETABLE, factory->CreateTarget(type, format, width, height));
 	}
 
-	RawData UBuffer::GetBufferData(Int32 id) const {
-		IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_batch[id].GetResource());
-		return buffer->GetBufferData();
+	void RenderResourcesStorage::InitResourceForBatchOfTargets(ITargetResourceData* resource, EnumFlags<BatchSlot> slots, const String& tag) {
+		m_resourcesIds[tag] = m_batchOfTargets.Insert(slots, resource);
 	}
 
-	States::States() 
-		: m_batch() {
+	//template<class TResourceData>
+	//Int32 ProcessCommonInit(Array<ResourceSlot<TResourceData>>& arr, TResourceData* resource, EnumFlags<BatchSlot> batchIds) {
+	//	arr.push_back(ResourceSlot<TResourceData>(batchIds, resource));
+	//	return static_cast<Int32>(arr.size() - 1);
+	//}
 
-	}
+	//template<class TResourceData, class TOutResourceData>
+	//const Array<TOutResourceData*> ProcessCommonGet(BatchSlot batchId, const Array<ResourceSlot<TResourceData>>& arr, std::function<TOutResourceData*(TResourceData*)> callback) {
+	//	Array<TOutResourceData*> result;
+	//	for (Size i = 0; i < arr.size(); i++) {
+	//		if (arr[i].IsAssociatedWith(batchId)) {
+	//			TOutResourceData* resource = callback(arr[i].GetResource());
+	//			if (resource != nullptr) {
+	//				result.push_back(resource);
+	//			}
+	//		}
+	//	}
+	//	return result;
+	//}
 
-	void States::Bind(BatchSlot batchId, IRenderStage* stage) {
-		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
-		if (states.size() > 0) {
-			stage->BindSamplers(states);
-		}
-	}
+	//GBuffer::GBuffer() 
+	//	: m_batch() {
 
-	void States::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
-		const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return !resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
-		if (states.size() > 0) {
-			pipeline->SetStates(states);
-		}
-	}
+	//}
 
-	void States::InitNewResource(EnumFlags<BatchSlot> batchIds, StateType type, StateData data) {
-		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		ProcessCommonInit(m_batch, factory->CreateState(type, data), batchIds | BatchSlot::BS_SLOT_DELETABLE);
-	}
+	//void GBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
+	//	const Array<ITextureResourceData*> textures = ProcessCommonGet<ITargetResourceData, ITextureResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource->GetTextureResource(); });
+	//	if (textures.size() > 0) {
+	//		stage->BindTextures(textures);
+	//	}
+	//}
+
+	//void GBuffer::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
+	//	const Array<ITargetResourceData*> targets = ProcessCommonGet<ITargetResourceData, ITargetResourceData>(batchId, m_batch, [](ITargetResourceData* resource) { return resource; });
+	//	pipeline->SetTargets(targets);
+	//}
+
+	//void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, ITargetResourceData* resource) {
+	//	outId = ProcessCommonInit(m_batch, resource, batchIds);
+	//}
+
+	//void GBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, TextureType type, TextureFormat format, Int32 width, Int32 height) {
+	//	IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+	//	outId = ProcessCommonInit(m_batch, factory->CreateTarget(type, format, width, height), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+	//}
+
+	//void GBuffer::Clear(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue) {
+	//	for (Size i = 0; i < m_batch.size(); i++) {
+	//		if (m_batch[i].IsAssociatedWith(batchId)) {
+	//			if (m_batch[i]->IsDepth()) {
+	//				IDepthStencilResourceData* resource = dynamic_cast<IDepthStencilResourceData*>(m_batch[i].GetResource());
+	//				resource->SetStencilClearValue(stencilClearValue);
+	//				resource->EnableDepthClear(enableDepthClear);
+	//				resource->EnableStencilClear(enableStencilClear);
+	//			}
+	//			m_batch[i]->Clear(Core::GetInstance()->GetContext());
+	//		}
+	//	}
+	//}
+
+	//ITextureResourceData* GBuffer::GetTargetData(Int32 id) const {
+	//	return m_batch[id]->GetTextureResource();
+	//}
+
+	//ITargetResourceData* GBuffer::GetTarget(Int32 id) const {
+	//	return m_batch[id].GetResource();
+	//}
+
+	//UBuffer::UBuffer() 
+	//	: m_batch() {
+
+	//}
+
+	//void UBuffer::Bind(BatchSlot batchId, IRenderStage* stage) {
+	//	const Array<IBufferResourceData*> buffers = ProcessCommonGet<IBufferResourceData, IBufferResourceData>(batchId, m_batch, [](IBufferResourceData* resource) { return resource; });
+	//	if (buffers.size() > 0) {
+	//		stage->BindBuffers(buffers);
+	//	}
+	//}
+
+	//void UBuffer::InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32& outId) {
+	//	Array<Int8> dummy(bufferSize);
+
+	//	IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+	//	outId = ProcessCommonInit(m_batch, factory->CreateBuffer(BufferType::BT_UNIFORM, 1, dummy.size(), dummy.data()), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+	//}
+
+	//void UBuffer::Update(Int32 id) {
+	//	IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_batch[id].GetResource());
+	//	buffer->Update(Core::GetInstance()->GetContext());
+	//}
+
+	//RawData UBuffer::GetBufferData(Int32 id) const {
+	//	IDynamicResourceData* buffer = dynamic_cast<IDynamicResourceData*>(m_batch[id].GetResource());
+	//	return buffer->GetBufferData();
+	//}
+
+	//States::States() 
+	//	: m_batch() {
+
+	//}
+
+	//void States::Bind(BatchSlot batchId, IRenderStage* stage) {
+	//	const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
+	//	if (states.size() > 0) {
+	//		stage->BindSamplers(states);
+	//	}
+	//}
+
+	//void States::Bind(BatchSlot batchId, IRenderPipeline* pipeline) {
+	//	const Array<IStateResourceData*> states = ProcessCommonGet<IStateResourceData, IStateResourceData>(batchId, m_batch, [](IStateResourceData* resource) { return !resource->Is(StateType::ST_SAMPLER) ? resource : nullptr; });
+	//	if (states.size() > 0) {
+	//		pipeline->SetStates(states);
+	//	}
+	//}
+
+	//void States::InitNewResource(EnumFlags<BatchSlot> batchIds, StateType type, StateData data) {
+	//	IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+	//	ProcessCommonInit(m_batch, factory->CreateState(type, data), batchIds | BatchSlot::BS_SLOT_DELETABLE);
+	//}
 }

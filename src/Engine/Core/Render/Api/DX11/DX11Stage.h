@@ -19,6 +19,9 @@ namespace Engine {
 
 	private:
 		DX11Context* m_dxContext;
+
+		Int32 m_countOfTakenTexturesSlots;
+		IShaderResourceData* m_lastBindedShader;
 	};
 
 	class DX11StagePS : public IRenderStage {
@@ -33,6 +36,9 @@ namespace Engine {
 
 	private:
 		DX11Context* m_dxContext;
+
+		Int32 m_countOfTakenTexturesSlots;
+		IShaderResourceData* m_lastBindedShader;
 	};
 }
 

@@ -43,6 +43,7 @@ namespace Engine {
     enum class RenderStage {
         RS_VERTEX = 0,
         RS_PIXEL = 1,
+        RS_NUM,
     };
 
     enum class StateType {

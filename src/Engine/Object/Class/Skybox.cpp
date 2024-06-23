@@ -7,6 +7,7 @@ namespace Engine {
 	Skybox::Skybox(const ObjectArgument& arguments) 
 		: Super(arguments) {
 		m_envCubemap = Resource::Load<TextureCube*>("assets/textures/skybox/afternoon_env.exr");
+		m_irrCubemap = Resource::Load<TextureCube*>("assets/textures/skybox/afternoon_irr.exr");
 	}
 
 	Skybox::~Skybox() {
@@ -15,5 +16,9 @@ namespace Engine {
 
 	ITextureResourceData* Skybox::GetNativeResource() const {
 		return m_envCubemap->GetNativeResource();
+	}
+
+	ITextureResourceData* Skybox::GetIBLNativeResource() const {
+		return m_irrCubemap->GetNativeResource();
 	}
 }

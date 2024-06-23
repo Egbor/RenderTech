@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include "Engine/Core/Render/Api/DX11/DX11Stage.h"
 #include "Engine/Core/Render/Api/DX11/DX11Buffer.h"
 #include "Engine/Core/Render/Api/DX11/DX11Texture.h"
@@ -6,19 +8,28 @@
 
 #include "Engine/Core/Render/Api/DX11/DX11Context.h"
 
+#include <algorithm>
+
 namespace Engine {
-	void BindTexturesWithCallback(const Array<ITextureResourceData*>& resources, ComPtr<ID3D11Device> d3dDevice, std::function<void(const Array<ID3D11ShaderResourceView*>&)> bindCallback) {
-		Array<ComPtr<ID3D11ShaderResourceView>> temp(resources.size());
+	Int32 BindTexturesWithCallback(const Array<ITextureResourceData*>& resources, Int32 countOfUnbindedResources, ComPtr<ID3D11Device> d3dDevice, std::function<void(const Array<ID3D11ShaderResourceView*>&)> bindCallback) {
+		Int32 size = resources.size() + std::max(0, countOfUnbindedResources - static_cast<Int32>(resources.size()));
+		
+		Array<ComPtr<ID3D11ShaderResourceView>> temp(size);
 		for (Size i = 0; i < temp.size(); i++) {
-			temp[i] = dynamic_cast<DX11Texture2D*>(resources[i])->GetD3D11ShaderResourceView(d3dDevice);
+			if (i < resources.size()) {
+				temp[i] = dynamic_cast<DX11Texture2D*>(resources[i])->GetD3D11ShaderResourceView(d3dDevice);
+			} else {
+				temp[i] = nullptr;
+			}
 		}
 		
-		Array<ID3D11ShaderResourceView*> textures(resources.size());
+		Array<ID3D11ShaderResourceView*> textures(size);
 		for (Size i = 0; i < textures.size(); i++) {
 			textures[i] = temp[i].Get();
 		}
 
-		bindCallback(textures);
+		bindCallback(textures);	
+		return size;
 	}
 
 	void BindSamplersWithCallback(const Array<IStateResourceData*>& resources, std::function<void(Array<ID3D11SamplerState*>&)> bindCallback) {
@@ -44,12 +55,12 @@ namespace Engine {
 	}
 
 	DX11StageVS::DX11StageVS(DX11Context* dxContext)
-		: m_dxContext(dxContext) {
+		: m_dxContext(dxContext), m_countOfTakenTexturesSlots(0), m_lastBindedShader(nullptr) {
 
 	}
 
 	void DX11StageVS::BindTextures(const Array<ITextureResourceData*>& resources) {
-		BindTexturesWithCallback(resources, m_dxContext->GetD3D11Device(), [&](const Array<ID3D11ShaderResourceView*>& resources) {
+		m_countOfTakenTexturesSlots = BindTexturesWithCallback(resources, m_countOfTakenTexturesSlots, m_dxContext->GetD3D11Device(), [&](const Array<ID3D11ShaderResourceView*>& resources) {
 			ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 			d3dContext->VSSetShaderResources(0, static_cast<UINT>(resources.size()), resources.data());
 		});
@@ -72,8 +83,12 @@ namespace Engine {
 	}
 
 	void DX11StageVS::BindShader(IShaderResourceData* resource) {
-		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
+		if (m_lastBindedShader == resource) {
+			return;
+		}
+		m_lastBindedShader = resource;
 
+		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 		if (resource != nullptr) {
 			DX11VertexShader* shader = dynamic_cast<DX11VertexShader*>(resource);
 			d3dContext->IASetInputLayout(shader->GetD3D11Layout().Get());
@@ -84,12 +99,12 @@ namespace Engine {
 	}
 
 	DX11StagePS::DX11StagePS(DX11Context* dxContext)
-		: m_dxContext(dxContext) {
+		: m_dxContext(dxContext), m_countOfTakenTexturesSlots(0), m_lastBindedShader(nullptr) {
 
 	}
 
 	void DX11StagePS::BindTextures(const Array<ITextureResourceData*>& resources) {
-		BindTexturesWithCallback(resources, m_dxContext->GetD3D11Device(), [&](const Array<ID3D11ShaderResourceView*>& resources) {
+		m_countOfTakenTexturesSlots = BindTexturesWithCallback(resources, m_countOfTakenTexturesSlots, m_dxContext->GetD3D11Device(), [&](const Array<ID3D11ShaderResourceView*>& resources) {
 			ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 			d3dContext->PSSetShaderResources(0, static_cast<UINT>(resources.size()), resources.data());
 		});
@@ -111,8 +126,12 @@ namespace Engine {
 	}
 
 	void DX11StagePS::BindShader(IShaderResourceData* resource) {
-		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
+		if (m_lastBindedShader == resource) {
+			return;
+		}
+		m_lastBindedShader = resource;
 
+		ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 		if (resource != nullptr) {
 			DX11PixelShader* shader = dynamic_cast<DX11PixelShader*>(resource);
 			d3dContext->PSSetShader(shader->GetD3D11Shader().Get(), nullptr, 0);
