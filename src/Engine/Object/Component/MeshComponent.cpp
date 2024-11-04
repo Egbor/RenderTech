@@ -5,28 +5,14 @@ namespace Engine {
     GENERATE_INSTANTIATION(MeshComponent)
 
     MeshComponent::MeshComponent(const ObjectArgument& argument)
-        : Super(argument), m_mesh(nullptr), m_meshResourceId(-1) {
+        : Super(argument), m_mesh(nullptr) {
     }
 
-    void MeshComponent::SetMesh(Mesh* mesh) {
+    void MeshComponent::SetMesh(StaticMesh* mesh) {
         m_mesh = mesh;
     }
 
-    Mesh* MeshComponent::GetMesh() const {
+    StaticMesh* MeshComponent::GetMesh() const {
         return m_mesh;
     }
-
-    //UInt64 MeshComponent::GetBehaviorID() const {
-    //    return MeshComponent::TypeIdClass();
-    //}
-
-    //void MeshComponent::CreateRenderState(AbstractRenderPass* pass) {
-    //    if (pass->Is(RenderPassType::RP_BASE)) {
-    //        BaseRenderPass* baseRenderPass = dynamic_cast<BaseRenderPass*>(pass);
-    //        RenderModel& model = baseRenderPass->ReserveModelInQueue();
-
-    //        model.mesh = m_mesh;
-    //        model.world = Matrix4x4::CreateMatrixWorld(GetWorldPosition(), GetWorldRotation(), GetWorldScale());
-    //    }
-    //}
 }

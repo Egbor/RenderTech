@@ -1,7 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include "Engine/Core/Render/Api/RenderDef.h"
+#include "Engine/Core/Render/Base/RenderDef.h"
 
 namespace Engine {
     typedef Int32 VertexID;

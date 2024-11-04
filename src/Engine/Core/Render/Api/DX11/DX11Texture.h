@@ -2,7 +2,7 @@
 #define DX11TEXTURE_H
 
 #include "Engine/Core/Render/Api/DX11/DX11Def.h"
-#include "Engine/Core/Render/Api/Interface/ITextureResource.h"
+#include "Engine/Core/Render/Base/Resource/TextureResource.h"
 
 namespace Engine {
     struct DX11Texture2DDescription {
@@ -32,12 +32,12 @@ namespace Engine {
         Array<D3D11_SUBRESOURCE_DATA> m_d3dSubresourceData;
     };
 
-    class DX11Texture2D : public ITextureResourceData {
+    class DX11Texture2D : public TextureResource {
     public:
-        DX11Texture2D(ComPtr<ID3D11Texture2D> d3dTexture);
-        DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap);
-        DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Int8* data);
-        DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data);
+        DX11Texture2D(IContext* context, ComPtr<ID3D11Texture2D> d3dTexture);
+        DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, bool isCubemap);
+        DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, Int8* data);
+        DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data);
         virtual ~DX11Texture2D() = default;
 
         TextureFormat GetFormat() const override;

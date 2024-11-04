@@ -139,6 +139,14 @@ namespace Engine {
         LT_UNDEFINED
     };
 
+    enum class ResourceIdentifier {
+        RI_TEXTURE = 0,
+        RI_TARGET = 1,
+        RI_BUFFER = 2,
+        RI_SHADER = 3,
+        RI_STATE = 4,
+    };
+
     enum class TextureFormat {
         TF_R8_BMP,
         TF_R8G8_BMP,
@@ -176,6 +184,11 @@ namespace Engine {
         }
         return format;
     }
+
+    template<class TResourceClass>
+    struct ResourceIdentifierOf {
+        static const ResourceIdentifier value;
+    };
 
     union ClearArg {
         Float rgba[4];

@@ -4,6 +4,8 @@
 #include "Engine/Rendering/Types.h"
 #include "Engine/Math/Vector.h"
 
+#include "Engine/Core/Render/Base/Interface/IBufferResource.h"
+
 namespace Engine {
     struct MeshVertex {
         Vector3 position;
@@ -13,7 +15,6 @@ namespace Engine {
         Vector2 uv;
 
         MeshVertex();
-        MeshVertex(const MeshVertex&) = default;
         ~MeshVertex() = default;
     };
 
@@ -42,6 +43,9 @@ namespace Engine {
 
         Array<MeshVertex>& Vertices();
         Array<MeshFace>& Faces();
+
+        IBufferResourceData* BuildVertexBuffer() const;
+        IBufferResourceData* BuildIndexBuffer() const;
 
         BufferInfo GetMeshInfo();
         BufferInfo GetFaceInfo();

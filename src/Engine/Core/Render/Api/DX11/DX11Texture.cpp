@@ -95,12 +95,13 @@ namespace Engine {
         return m_d3dSubresourceData.data();
     }
 
-    DX11Texture2D::DX11Texture2D(ComPtr<ID3D11Texture2D> d3dTexture) 
-        : m_d3dTexture2D(d3dTexture) {
+    DX11Texture2D::DX11Texture2D(IContext* context, ComPtr<ID3D11Texture2D> d3dTexture) 
+        : TextureResource(context), m_d3dTexture2D(d3dTexture) {
 
     }
 
-    DX11Texture2D::DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, bool isCubemap) {
+    DX11Texture2D::DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, bool isCubemap) 
+        : TextureResource(context) {
         DX11Texture2DDescription textureDesc(width, height, AdjustTargetFormatForTexture(format));
 
         if (format == TextureFormat::TF_R24G8_BMP || format == TextureFormat::TF_R24_BMP_G8_UINT) {
@@ -113,16 +114,21 @@ namespace Engine {
             textureDesc.AddD3D11CubemapPreset();
         }
 
-        CreateD3D11Texture2D(d3dDevice, &textureDesc);
+        DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+        CreateD3D11Texture2D(dxContext->GetD3D11Device(), &textureDesc);
     }
 
-    DX11Texture2D::DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Int8* data) {
+    DX11Texture2D::DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, Int8* data) 
+        : TextureResource(context) {
         DX11Texture2DDescription textureDesc(width, height, format);
         DX11Texture2DSubresourceData textureSubresData(width, format, data);
-        CreateD3D11Texture2D(d3dDevice, &textureDesc, &textureSubresData);
+
+        DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+        CreateD3D11Texture2D(dxContext->GetD3D11Device(), &textureDesc, &textureSubresData);
     }
 
-    DX11Texture2D::DX11Texture2D(ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
+    DX11Texture2D::DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) 
+        : TextureResource(context) {
         DX11Texture2DDescription textureDesc(width, height, format);
         DX11Texture2DSubresourceData textureSubresData(width, format, data);
 
@@ -130,7 +136,8 @@ namespace Engine {
             textureDesc.AddD3D11CubemapPreset();
         }
 
-        CreateD3D11Texture2D(d3dDevice, &textureDesc, &textureSubresData);
+        DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+        CreateD3D11Texture2D(dxContext->GetD3D11Device(), &textureDesc, &textureSubresData);
     }
 
     TextureFormat DX11Texture2D::GetFormat() const {

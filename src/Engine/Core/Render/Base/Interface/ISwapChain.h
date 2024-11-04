@@ -1,7 +1,7 @@
 #ifndef ISWAPCHAIN_H
 #define ISWAPCHAIN_H
 
-#include "Engine/Core/Render/Api/Interface/ITargetResource.h"
+#include "Engine/Core/Render/Base/Resource/TargetResource.h"
 
 namespace Engine {
 	class ISwapChain {
@@ -10,7 +10,7 @@ namespace Engine {
 		virtual Int32 GetHeight() const = 0;
 
 		virtual void Swap() = 0;
-		virtual ITargetResourceData* GetOutputTarget() const = 0;
+		virtual TargetResource* GetOutputTarget() const = 0;
 	};
 }
 

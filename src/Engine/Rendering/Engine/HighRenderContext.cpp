@@ -92,134 +92,107 @@ namespace Engine {
 	}
 
 	AbstractHighRenderContext::AbstractHighRenderContext(IContext* context)
-		: m_pipeline(new VirtualRenderPipeline(context)) {
-
+		: m_context(context) {
+		this->OnInitDraw(context);
 	}
 
 	AbstractHighRenderContext::~AbstractHighRenderContext() {
 		DELETE_ARRAY_OF_OBJECTS(m_commands);
-		DELETE_OBJECT(m_pipeline);
 	}
 
-	void AbstractHighRenderContext::ExtendCommandList(IHighRenderCommand* command) {
+	void AbstractHighRenderContext::ExtendCommandList(AbstractHighRenderCommand* command) {
 		m_commands.push_back(command);
 	}
 
 	void AbstractHighRenderContext::DrawScene(Scene* scene) {
-		this->OnPreDraw();
+		HighRenderPipelineAdapter adapter(m_context->QueryPipeline());
+
 		for (Int32 i = 0; i < m_commands.size(); i++) {
-			m_commands[i]->Execute(m_pipeline, m_storage, scene);
+			m_commands[i]->Execute(&adapter, scene);
 		}
-		this->OnPostDraw();
+		this->OnPostDraw(m_context);
 	}
 
-	inline void AbstractHighRenderContext::InitResourceForBatchOfStates(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, StateType type, StateData data) {
-		m_storage.InitResourceForBatchOfStates(factory, slots, tag, type, data);
-	}
-
-	inline void AbstractHighRenderContext::InitResourceForBatchOfBuffers(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, Int32 bufferSize) {
-		m_storage.InitResourceForBatchOfBuffers(factory, slots, tag, bufferSize);
-	}
-
-	inline void AbstractHighRenderContext::InitResourceForBatchOfTargets(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height) {
-		m_storage.InitResourceForBatchOfTargets(factory, slots, tag, type, format, width, height);
-	}
-
-	inline void AbstractHighRenderContext::InitResourceForBatchOfTargets(ITargetResourceData* resource, EnumFlags<BatchSlot> slots, const String& tag) {
-		m_storage.InitResourceForBatchOfTargets(resource, slots, tag);
-	}
-
-	VirtualRenderPipeline* AbstractHighRenderContext::GetPipeline() const {
-		return m_pipeline;
-	}
-
-	const RenderResourcesStorage& AbstractHighRenderContext::GetStorage() const {
+	HighRenderStorage& AbstractHighRenderContext::GetStorage() {
 		return m_storage;
 	}
 
 	HRC_Base::HRC_Base(IContext* context) 
 		: AbstractHighRenderContext(context) {	
-		ExtendCommandList(new HighRenderCommandPrePass());
-		ExtendCommandList(new HighRenderCommandBasePass(context->QueryResourceFactory()));
-		ExtendCommandList(new HighRenderCommandPreLightPass(context->QueryResourceFactory()));
-		ExtendCommandList(new HighRenderCommandLightPass(context->QueryResourceFactory()));
-		ExtendCommandList(new HighRenderCommandSkybox(context->QueryResourceFactory()));
-		ExtendCommandList(new HighRenderCommandPostProcessing(context->QueryResourceFactory()));
+		ExtendCommandList(new HighRenderCommandPrePass(GetStorage()));
+		ExtendCommandList(new HighRenderCommandBasePass(GetStorage()));
+		ExtendCommandList(new HighRenderCommandLightPass(GetStorage()));
+		//ExtendCommandList(new HighRenderCommandSkybox(context->QueryResourceFactory()));
+		//ExtendCommandList(new HighRenderCommandPostProcessing(context->QueryResourceFactory()));
 	}
 
-	void HRC_Base::DrawInit(IRenderResourceFactory* factory) {
-		Int32 width = GetPipeline()->GetRenderSpaceWidth();
-		Int32 height = GetPipeline()->GetRenderSpaceHeight();
+	void HRC_Base::OnInitDraw(IContext* context) {
+		Viewport viewport;
+		context->QueryPipeline()->GetViewport(viewport);
+
+		Int32 width = viewport.GetWidth();
+		Int32 height = viewport.GetHeight();
 
 		// Render target preporations
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_1, RESOURCE_TAG_GBUFFER_ALBEDO, TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height);
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_1, RESOURCE_TAG_GBUFFER_NORMAL, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_1, RESOURCE_TAG_GBUFFER_ORM, TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_4, RESOURCE_TAG_GBUFFER_DEPTH, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_2 | BatchSlot::BS_SLOT_3, RESOURCE_TAG_DEPTH, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_3, RESOURCE_TAG_FRAME_HDR, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
-		InitResourceForBatchOfTargets(GetPipeline()->GetTarget(), BatchSlot::BS_SLOT_4, RESOURCE_TAG_FRAME);
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_GBUFFER_ALBEDO, TextureType::TT_DEFAULT, TextureFormat::TF_R8G8B8A8_BMP, width, height);
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_GBUFFER_NORMAL, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_GBUFFER_DEPTH, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_GBUFFER_ORM, TextureType::TT_DEFAULT, TextureFormat::TF_B8G8R8A8_BMP, width, height);
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_FRAME_HDR, TextureType::TT_DEFAULT, TextureFormat::TF_R32G32B32A32_FLOAT, width, height);
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_DEPTH, TextureType::TT_DEPTH, TextureFormat::TF_R24_BMP_G8_UINT, width, height);
+		GetStorage().InitResourceAsTarget(context->QuerySwapChain()->GetOutputTarget(), RESOURCE_TAG_FRAME);
 
 		// Default render states for the base pass
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_1, "DefaultSamplerState", StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_1, "DefaultDepthStencilState", StateType::ST_DEPTH_STENCIL, InitDefaultStateData<DepthStencilState>());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_5 | BatchSlot::BS_SLOT_6, "DefaultRasterizerState", StateType::ST_RASTERIZER, InitDefaultStateData<RasterizerState>());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_6, "DefaultBlendState", StateType::ST_BLEND, InitDefaultStateData<BlendState>());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_BLEND_DEFAULT, StateType::ST_BLEND, InitDefaultStateData<BlendState>());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_SAMPLER_DEFAULT, StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_RESTERIZER_DEFAULT, StateType::ST_RASTERIZER, InitDefaultStateData<RasterizerState>());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_DEPTHSTENCIL_DEFAULT, StateType::ST_DEPTH_STENCIL, InitDefaultStateData<DepthStencilState>());
 
 		// Render states for the first step of the ligh pass stenciling
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_2, "FrontDepthStencilState", StateType::ST_DEPTH_STENCIL, GenerateFrontDepthStencilState());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_2, "FrontRasterizerState", StateType::ST_RASTERIZER, GenerateFronRasterizerState());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_2, "FrontBlendState", StateType::ST_BLEND, GenerateFrontBlendState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_DEPTHSTENCIL_FRONT, StateType::ST_DEPTH_STENCIL, GenerateFrontDepthStencilState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_RESTERIZER_FRONT, StateType::ST_RASTERIZER, GenerateFronRasterizerState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_BLEND_FRONT, StateType::ST_BLEND, GenerateFrontBlendState());
 
 		// Render states for the second step of the ligh pass stenciling
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_3, "BackDepthStencilState", StateType::ST_DEPTH_STENCIL, GenerateBackDepthStencilState());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_3 | BatchSlot::BS_SLOT_4, "BackRasterizerState", StateType::ST_RASTERIZER, GenerateBackRasterizerState());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_3 | BatchSlot::BS_SLOT_5, "BackBlendState", StateType::ST_BLEND, GenerateBackBlendState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_DEPTHSTENCIL_BACK, StateType::ST_DEPTH_STENCIL, GenerateBackDepthStencilState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_RESTERIZER_BACK, StateType::ST_RASTERIZER, GenerateBackRasterizerState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_BLEND_BACK, StateType::ST_BLEND, GenerateBackBlendState());
 
 		// Render states for the skybox pass
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_4 | BatchSlot::BS_SLOT_5 | BatchSlot::BS_SLOT_6, "SkyboxDepthStencilState", StateType::ST_DEPTH_STENCIL, GenerateSkyboxDepthStencilState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), "SkyboxDepthStencilState", StateType::ST_DEPTH_STENCIL, GenerateSkyboxDepthStencilState());
 		// InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_6, "PostProcessingDepthStencilState", StateType::ST_DEPTH_STENCIL, GeneratePostProcessingDepthStencilState());
 
-		InitResourceForBatchOfBuffers(factory, BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2 | BatchSlot::BS_SLOT_3, AS_TEXT(UB_Object), sizeof(UB_Object));
-		InitResourceForBatchOfBuffers(factory, BatchSlot::BS_SLOT_1 | BatchSlot::BS_SLOT_2 | BatchSlot::BS_SLOT_3, AS_TEXT(UB_ObjectHelper), sizeof(UB_ObjectHelper));
-		InitResourceForBatchOfBuffers(factory, BatchSlot::BS_SLOT_3, AS_TEXT(UB_Camera), sizeof(UB_Camera));
-		InitResourceForBatchOfBuffers(factory, BatchSlot::BS_SLOT_3, AS_TEXT(UB_Light), sizeof(UB_Light));
+		GetStorage().InitResourceAsBuffer(context->QueryResourceFactory(), AS_TEXT(UB_ObjectHelper), sizeof(UB_ObjectHelper));
+		GetStorage().InitResourceAsBuffer(context->QueryResourceFactory(), AS_TEXT(UB_Object), sizeof(UB_Object));
+		GetStorage().InitResourceAsBuffer(context->QueryResourceFactory(), AS_TEXT(UB_Camera), sizeof(UB_Camera));
+		GetStorage().InitResourceAsBuffer(context->QueryResourceFactory(), AS_TEXT(UB_Light), sizeof(UB_Light));
 	}
 
-	void HRC_Base::OnPreDraw() {
-		GetPipeline()->AddResources<IBufferResourceData>(GetStorage(), BatchSlot::BS_SLOT_1, RenderStage::RS_VERTEX);
-		GetPipeline()->AddResources<IBufferResourceData>(GetStorage(), BatchSlot::BS_SLOT_3, RenderStage::RS_PIXEL);
-	}
-
-	void HRC_Base::OnPostDraw() {
-		GetPipeline()->SwapBuffers();
+	void HRC_Base::OnPostDraw(IContext* context) {
+		context->QuerySwapChain()->Swap();
 	}
 
 	HRC_IBLBacker::HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight) 
 		: AbstractHighRenderContext(context), m_IBLCubeMapOutputWidth(outputWidth), m_IBLCubeMapOutputHeight(outputHeight) {
 		m_texture2D = Resource::Load<Texture2D*>(filename);
 
-		ExtendCommandList(new HighRenderCommandBakeHDRIToEnvironmentCubemap(context->QueryResourceFactory(), m_texture2D->GetNativeResource()));
+		ExtendCommandList(new HighRenderCommandBakeHDRIToEnvironmentCubemap(GetStorage()));
 	}
 	
 	HRC_IBLBacker::~HRC_IBLBacker() {
 		DELETE_OBJECT(m_texture2D);
 	}
 
-	void HRC_IBLBacker::DrawInit(IRenderResourceFactory* factory) {
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_1, "EnvironmentCubemap", TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
-		InitResourceForBatchOfTargets(factory, BatchSlot::BS_SLOT_2, "IrradianceCubemap", TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, 32, 32);
+	void HRC_IBLBacker::OnInitDraw(IContext* context) {
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_BAKING_ENV_CUBEMAP, TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
+		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_BAKING_IRR_CUBEMAP, TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, irrWidth, irrHeight);
 
-		InitResourceForBatchOfBuffers(factory, BatchSlot::BS_SLOT_1, AS_TEXT(UB_Object), sizeof(UB_Object));
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_1, "DefaultSamplerState", StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
-		InitResourceForBatchOfStates(factory, BatchSlot::BS_SLOT_1, "BackRasterizerState", StateType::ST_RASTERIZER, GenerateBackRasterizerState());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_SAMPLER_DEFAULT, StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
+		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_RESTERIZER_BACK, StateType::ST_RASTERIZER, GenerateBackRasterizerState());
+		GetStorage().InitResourceAsBuffer(context->QueryResourceFactory(), AS_TEXT(UB_Object), sizeof(UB_Object));
 	}
 
-	void HRC_IBLBacker::OnPreDraw() {
-		GetPipeline()->AddResources<IBufferResourceData>(GetStorage(), BatchSlot::BS_SLOT_1, RenderStage::RS_VERTEX);
-	}
-
-	void HRC_IBLBacker::OnPostDraw() {
+	void HRC_IBLBacker::OnPostDraw(IContext* context) {
 		if (Resource::Save<ITextureResourceData*>(GetResourceFromBatchByTag<ITextureResourceData>("EnvironmentCubemap"), "assets/textures/skybox/afternoon_env.exr") != ResourceStatus::RS_OK) {
 			OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for the evironment cubmap");
 		}

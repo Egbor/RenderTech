@@ -1,7 +1,7 @@
 #ifndef VIRTUAL_RENDER_PIPELINE_H
 #define VIRTUAL_RENDER_PIPELINE_H
 
-#include "Engine/Core/Render/Api/Interface/IContext.h"
+#include "Engine/Core/Render/Base/Interface/IContext.h"
 #include "Engine/Rendering/Engine/RenderBatcher.h"
 
 #include <optional>
@@ -65,6 +65,10 @@ namespace Engine {
 		Array<ITargetResourceData*> m_localGBuffer;
 		Array<IStateResourceData*> m_localStates;
 		Array<VirtualRenderStage> m_localStages;
+	};
+
+	class HighRenderPipeline {
+
 	};
 }
 

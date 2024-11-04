@@ -1,7 +1,7 @@
-#ifndef ISTATE_RESOURCE_H
-#define ISTATE_RESOURCE_H
+#ifndef STATE_RESOURCE_H
+#define STATE_RESOURCE_H
 
-#include "Engine/Core/Render/Api/RenderDef.h"
+#include "Engine/Core/Render/Base/RenderBase.h"
 
 namespace Engine {
 	enum class ComparisonFunction {
@@ -166,11 +166,23 @@ namespace Engine {
 		return data;
 	}
 
-	class IStateResourceData {
+	class StateResource : public RenderBase {
 	public:
-		virtual ~IStateResourceData() = default;
+		StateResource(IContext* context) : RenderBase(ResourceIdentifier::RI_STATE, context) {}
+		virtual ~StateResource() = default;
+
 		virtual bool Is(StateType type) const = 0;
+
+		static ResourceIdentifier GetResourceIdentifier() { return ResourceIdentifier::RI_STATE; }
+	};
+
+	class StandaloneStateResource : public StateResource {
+	public:
+		StandaloneStateResource(IContext* context) : StateResource(context) {}
+		virtual ~StandaloneStateResource() = default;
+
+		virtual void Bind() const = 0;
 	};
 }
 
-#endif // !ISTATE_RESOURCE_H
+#endif // !STATE_RESOURCE_H

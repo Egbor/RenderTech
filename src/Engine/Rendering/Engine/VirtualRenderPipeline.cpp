@@ -148,6 +148,13 @@ namespace Engine {
 		m_localGBuffer.insert(m_localGBuffer.end(), resources.begin(), resources.end());
 	}
 
+	template<>
+	void VirtualRenderPipeline::AddResources<IShaderResourceData>(const Array<IShaderResourceData*>& resources) {
+		for (Size i = 0; i < m_localStages.size(); i++) {
+			m_localStages[i].m_localShader = resources[i];
+		}
+	}
+
 	void VirtualRenderPipeline::AddResourcesFromTargetsToTextures(const RenderResourcesStorage& storage, BatchSlot slot, RenderStage stage) {
 		storage.HandleResources<ITargetResourceData>(slot, [&](ITargetResourceData* resource) { AddResource(stage, resource->GetTextureResource()); });
 	}

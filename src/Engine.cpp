@@ -1,8 +1,4 @@
 #include "Engine.h"
-
-//#include "Engine/Rendering/Engine/RenderPass/BaseRenderPass.h"
-//#include "Engine/Rendering/Engine/RenderPass/LightRenderPass.h"
-
 #include "Engine/Core/System/Platform/Common/Input.h"
 
 namespace Engine {
@@ -15,9 +11,9 @@ namespace Engine {
 		m_context = new HRC_Base(context);
 		m_context->DrawInit(context->QueryResourceFactory());
 
-		m_threadpool = new EngineThreadPool(Delegate<EngineClass>::Allocate(this, &EngineClass::SyncEntry), 2);
-		m_threadpool->Append(Delegate<EngineClass>::Allocate(this, &EngineClass::GameThreadEntry));
-		m_threadpool->Append(Delegate<EngineClass>::Allocate(this, &EngineClass::RenderThreadEntry));
+		m_threadpool = new EngineThreadPool(Callable<void()>::AllocateDelegate<EngineClass>(this, &EngineClass::SyncEntry), 2);
+		m_threadpool->Append(Callable<void()>::AllocateDelegate<EngineClass>(this, &EngineClass::GameThreadEntry));
+		m_threadpool->Append(Callable<void()>::AllocateDelegate<EngineClass>(this, &EngineClass::RenderThreadEntry));
 	}
 
 	EngineClass::~EngineClass() {

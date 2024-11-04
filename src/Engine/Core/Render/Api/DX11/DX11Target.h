@@ -1,20 +1,20 @@
 #ifndef DX11TARGET_H
 #define DX11TARGET_H
 
-#include "Engine/Core/Render/Api/Interface/ITargetResource.h"
 #include "Engine/Core/Render/Api/DX11/DX11Texture.h"
+#include "Engine/Core/Render/Base/Resource/TargetResource.h"
 
 namespace Engine {
-    class DX11RenderTarget : public ITargetResourceData {
+    class DX11RenderTarget : public TargetResource {
     public:
-        DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, const Float* color);
+        DX11RenderTarget(IContext* context, DX11Texture2D* texture, const Float* color);
         virtual ~DX11RenderTarget();
 
         bool IsDepth() const override;
-        void Copy(ITargetResourceData* dstTarget) const override;
-        void Clear(IContext* context) override;
+        void Copy(TargetResource* dstTarget) const override;
+        void Clear() override;
 
-        ITextureResourceData* GetTextureResource() const override;
+        TextureResource* GetTextureResource() const override;
 
         ComPtr<ID3D11RenderTargetView> GetD3D11RenderTargetView();
 
@@ -26,21 +26,24 @@ namespace Engine {
         UInt32 m_viewId;
     };
 
-    class DX11DepthStencil : public IDepthStencilResourceData {
+    class DX11DepthStencil : public DepthStencilResource {
     public:
-        DX11DepthStencil(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float depth, UInt32 stencil);
+        DX11DepthStencil(IContext* context, DX11Texture2D* texture, Float depth, UInt32 stencil);
         virtual ~DX11DepthStencil();
 
         bool IsDepth() const override;
-        void Copy(ITargetResourceData* dstTarget) const override;
-        void Clear(IContext* context) override;
+        void Copy(TargetResource* dstTarget) const override;
+        void Clear() override;
 
         void SetStencilClearValue(UInt32 value) override;
 
-        void EnableDepthClear(bool enable) override;
-        void EnableStencilClear(bool enable) override;
+        void DisableDepthClear() override;
+        void DisableStencilClear() override;
 
-        ITextureResourceData* GetTextureResource() const override;
+        void EnableDepthClear() override;
+        void EnableStencilClear() override;
+
+        TextureResource* GetTextureResource() const override;
 
         ComPtr<ID3D11DepthStencilView> GetD3D11DepthStencilView();
 

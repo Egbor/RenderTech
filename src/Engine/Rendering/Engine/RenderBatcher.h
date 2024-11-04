@@ -3,178 +3,125 @@
 
 #include "Engine/Core/Core.h"
 #include "Engine/Core/Utils/Enum.h"
+#include "Engine/Core/Utils/Event.h"
 
 namespace Engine {
-	enum class BatchSlot {
-		BS_SLOT_1 = 0x01,
-		BS_SLOT_2 = 0x02,
-		BS_SLOT_3 = 0x04,
-		BS_SLOT_4 = 0x08,
-		BS_SLOT_5 = 0x10,
-		BS_SLOT_6 = 0x20,
-		BS_SLOT_7 = 0x40,
-		BS_SLOT_8 = 0x80,
-		BS_SLOT_ALL = 0xFF,
-		BS_SLOT_NULL = 0x100,
-		BS_DELETABLE = 0x1000
+	enum class HRS_Tag {
+		HRS_NONE = 0x00000000,
+		HRS_STATE = 0x00000001,
+		HRS_TARGET = 0x00000002,
+		HRS_VS_STAGE = 0x00000004,
+		HRS_PS_STAGE = 0x00000008,
+		HRS_STANDALONE = 0x00000010,
+		HRS_ADDITION_1 = 0x40000000,
+		HRS_ADDITION_2 = 0x80000000
 	};
 
-	template<class TResourceData>
-	class ResourceSlot {
+	constexpr EnumFlags<HRS_Tag> TAG_GBUFFER = HRS_Tag::HRS_TARGET | HRS_Tag::HRS_PS_STAGE;
+	constexpr EnumFlags<HRS_Tag> TAG_SAMPLER = HRS_Tag::HRS_STATE | HRS_Tag::HRS_PS_STAGE;
+	constexpr EnumFlags<HRS_Tag> TAG_STATE = HRS_Tag::HRS_STATE | HRS_Tag::HRS_STANDALONE;
+	constexpr EnumFlags<HRS_Tag> TAG_VS_PLUS_PS = HRS_Tag::HRS_VS_STAGE | HRS_Tag::HRS_PS_STAGE;
+	constexpr EnumFlags<HRS_Tag> TAG_ANY = ~HRS_Tag::HRS_NONE;
+
+	struct HRS_Resource {
+		String name;
+		RenderBase* data;
+		Int8 _aligment[8];
+		bool isDeletable;
+	};
+
+	struct HRS_ResourceNode {
+		const HRS_Resource* resource;
+		HRS_ResourceNode* next;
+		HRS_ResourceNode* last;
+		EnumFlags<HRS_Tag> tags;
+	};
+
+	class HighRenderStorage {
+		friend class HighRenderBatcher;
+
 	public:
-		ResourceSlot(EnumFlags<BatchSlot> batchIds, TResourceData* resource) noexcept
-			: m_batchIds(batchIds), m_resource(resource) {
+		HighRenderStorage() = default;
+		~HighRenderStorage();
 
-		}
+		void InitResourceAsState(IRenderResourceFactory* factory, const String& name, StateType type, StateData data);
+		void InitResourceAsBuffer(IRenderResourceFactory* factory, const String& name, Int32 bufferSize);
+		void InitResourceAsTarget(IRenderResourceFactory* factory, const String& name, TextureType type, TextureFormat format, Int32 width, Int32 height);
+		void InitResourceAsTarget(TargetResource* resource, const String& name);
 
-		ResourceSlot(ResourceSlot&& other) noexcept
-			: m_batchIds(std::move(other.m_batchIds)), m_resource(nullptr) {
-			std::swap(m_resource, other.m_resource);
-		}
+	private:
+		Array<HRS_Resource> m_storage;
+	};
 
-		ResourceSlot& operator=(ResourceSlot&& other) noexcept {
-			std::swap(m_batchIds, other.m_batchIds);
-			std::swap(m_resource, other.m_resource);
+	template<class TResourceClass>
+	struct NamePlusResourceWrapper {
+		const String& name;
+		TResourceClass* resource;
+	};
 
-			return *this;
-		}
+	class HighRenderBatcher {
+	public:
+		HighRenderBatcher() = default;
+		~HighRenderBatcher() = default;
 
-		~ResourceSlot() {
-			if (IsAssociatedWith(BatchSlot::BS_DELETABLE)) {
-				DELETE_OBJECT(m_resource);
+		void LinkWithStorage(const HighRenderStorage& storage, const String& name, EnumFlags<HRS_Tag> tags);
+
+		template<class TResourceClass>
+		Array<TResourceClass*> QueryResources(EnumFlags<HRS_Tag> tags) const {
+			ResourceIdentifier id = TResourceClass::GetResourceIdentifier();
+
+			if (id == ResourceIdentifier::RI_TEXTURE) {
+				return SelectResources<TextureResource*>(ResourceIdentifier::RI_TARGET, [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+					if ((resourceTags & tags) == tags) {
+						return dynamic_cast<TargetResource*>(resource->data)->GetTextureResource();
+					}
+				});
 			}
+
+			return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+				if ((resourceTags & tags) == tags) {
+					return dynamic_cast<TResourceClass*>(resource->data);
+				}
+			});
 		}
 
-		explicit ResourceSlot(const ResourceSlot&) noexcept = delete;
-		ResourceSlot& operator=(const ResourceSlot&) noexcept = delete;
-
-		TResourceData* operator->() const {
-			return m_resource;
+		template<class TResourceClass>
+		Array<NamePlusResourceWrapper<TResourceClass>> QueryNamePlusResources() const {
+			return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+				return { resource->name, dynamic_cast<TResourceClass*>(resource->data) };
+			});
 		}
 
-		TResourceData* GetResource() const {
-			return m_resource;
-		}
-
-		bool IsAssociatedWith(BatchSlot slot) const {
-			return static_cast<bool>(m_batchIds & slot);
+		template<class TResourceClass>
+		TResourceClass* QueryResourceByName(const String& name) const {
+			Array<TResourceClass*> resources = SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+				if (resource->name == name) {
+					return dynamic_cast<TResourceClass*>(resource->data);
+				}
+			});
+			return resources.size() > 0 ? resources[i] : nullptr;
 		}
 
 	private:
-		TResourceData* m_resource;
-		EnumFlags<BatchSlot> m_batchIds;
-	};
+		template<class TCastomWrapper>
+		Array<TCastomWrapper> SelectResources(ResourceIdentifier id, std::function<TCastomWrapper(const HRS_Resource*, EnumFlags<HRS_Tag>)> selector) const {
+			auto it = std::find_if(m_topNodes.begin(), m_topNodes.end(), [&](const HRS_ResourceNode* node) {
+				node->resource->data->Is(id);
+			});
 
-	template<class TResourceData>
-	class Batch {
-	public:
-		Batch() = default;
-		~Batch() = default;
+			Array<TCastomWrapper> outcome;
 
-		constexpr Int32 Insert(EnumFlags<BatchSlot> slots, TResourceData* resource) {
-			m_resources.push_back(ResourceSlot(slots, resource));
-			return static_cast<Int32>(m_resources.size() - 1);
-		}
-
-		constexpr TResourceData* Get(Int32 resourceId) const {
-			return m_resources[resourceId].GetResource();
-		}
-
-		constexpr void HandleResources(BatchSlot slot, std::function<void(TResourceData*)> callback) const {
-			for (Size i = 0; i < m_resources.size(); i++) {
-				if (m_resources[i].IsAssociatedWith(slot)) {
-					callback(m_resources[i].GetResource());
+			if (it != m_topNodes.end()) {
+				for (HRS_ResourceNode* node = *it; node->next != nullptr; node = node->next) {
+					outcome.push_back(selector(node->resource, node->tags));
 				}
 			}
+			return outcome;
 		}
 
-	private:
-		Array<ResourceSlot<TResourceData>> m_resources;
+		Array<HRS_ResourceNode*> m_topNodes;
+		Array<HRS_ResourceNode> m_nodes;
 	};
-
-	class RenderResourcesStorage {
-	public:
-		RenderResourcesStorage() = default;
-		~RenderResourcesStorage() = default;
-
-		template<class TResourceData>
-		TResourceData* GetResourceFromBatchByTag(const String& tag) const;
-
-		template<class TResourceData>
-		void HandleResources(BatchSlot slot, std::function<void(TResourceData*)> callback) const;
-
-		void InitResourceForBatchOfStates(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, StateType type, StateData data);
-		void InitResourceForBatchOfBuffers(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, Int32 bufferSize);
-		void InitResourceForBatchOfTargets(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height);
-		void InitResourceForBatchOfTargets(ITargetResourceData* resource, EnumFlags<BatchSlot> slots, const String& tag);
-
-	private:
-		Batch<IStateResourceData> m_batchOfStates;
-		Batch<ITargetResourceData> m_batchOfTargets;
-		Batch<IBufferResourceData> m_batchOfBuffers;
-		Batch<ITextureResourceData> m_batchOfTextures;
-
-		Map<String, Int32> m_resourcesIds;
-	};
-
-	//class IBindableResourceShaderStageBatch {
-	//public:
-	//	virtual ~IBindableResourceShaderStageBatch() = default;
-	//	virtual void Bind(BatchSlot batchId, IRenderStage* stage) = 0;
-	//};
-
-	//class IBindableResourceStandaloneStageBatch {
-	//public:
-	//	virtual ~IBindableResourceStandaloneStageBatch() = default;
-	//	virtual void Bind(BatchSlot batchId, IRenderPipeline* pipeline) = 0;
-	//};
-
-	//class GBuffer : public IBindableResourceStandaloneStageBatch, public IBindableResourceShaderStageBatch {
-	//public:
-	//	GBuffer();
-	//	virtual ~GBuffer() = default;
-
-	//	void Bind(BatchSlot batchId, IRenderStage* stage) override;
-	//	void Bind(BatchSlot batchId, IRenderPipeline* pipeline) override;
-
-	//	void InitNewResource(EnumFlags<BatchSlot> batchIds, Int32& outId, ITargetResourceData* resource);
-	//	void InitNewResource(EnumFlags<BatchSlot> batchIdx, Int32& outId, TextureType type, TextureFormat format, Int32 width, Int32 height);
-
-	//	void Clear(BatchSlot batchId, bool enableDepthClear, bool enableStencilClear, UInt32 stencilClearValue);
-	//	ITextureResourceData* GetTargetData(Int32 id) const;
-	//	ITargetResourceData* GetTarget(Int32 id) const;
-
-	//private:
-	//	Array<ResourceSlot<ITargetResourceData>> m_batch;
-	//};
-
-	//class UBuffer : public IBindableResourceShaderStageBatch {
-	//public:
-	//	UBuffer();
-	//	virtual ~UBuffer() = default;
-
-	//	void Bind(BatchSlot batchId, IRenderStage* stage) override;
-	//	void InitNewResource(EnumFlags<BatchSlot> batchIds, Int32 bufferSize, Int32& outId);
-	//	void Update(Int32 id);
-
-	//	RawData GetBufferData(Int32 id) const;
-
-	//private:
-	//	Array<ResourceSlot<IBufferResourceData>> m_batch;
-	//};
-
-	//class States : public IBindableResourceStandaloneStageBatch, public IBindableResourceShaderStageBatch {
-	//public:
-	//	States();
-	//	virtual ~States() = default;
-
-	//	void Bind(BatchSlot batchId, IRenderStage* stage) override;
-	//	void Bind(BatchSlot batchId, IRenderPipeline* pipeline) override;
-	//	void InitNewResource(EnumFlags<BatchSlot> batchIds, StateType type, StateData data);
-
-	//private:
-	//	Array<ResourceSlot<IStateResourceData>> m_batch;
-	//};
 }
 
 #endif // !RENDER_BUFFER_H

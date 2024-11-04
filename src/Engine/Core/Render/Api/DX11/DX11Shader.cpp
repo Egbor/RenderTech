@@ -1,8 +1,13 @@
 #include "Engine/Core/Render/Api/DX11/DX11Shader.h"
+#include "Engine/Core/Render/Api/DX11/DX11Context.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-	DX11VertexShader::DX11VertexShader(ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code) {
+	DX11VertexShader::DX11VertexShader(IContext* context, Size codeLength, const void* code) 
+		: RenderBase(RenderIdentifier::RI_SHADER, context) {
+		DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+		ComPtr<ID3D11Device> d3dDevice = dxContext->GetD3D11Device();
+
 		HRESULT hr = 0;
 		if (FAILED(hr = d3dDevice->CreateVertexShader(code, codeLength, nullptr, &m_d3dShader))) {
 			throw EngineException("[DX11VertexShader] ID3D11Device::CreateVertexShader() failed");
@@ -12,8 +17,8 @@ namespace Engine {
 		}
 	}
 
-	bool DX11VertexShader::Is(ShaderType type) const {
-		return type == ShaderType::ST_VERTEX;
+	bool DX11VertexShader::Is(RenderStage stage) const {
+		return stage == RenderStage::RS_VERTEX;
 	}
 
 	ComPtr<ID3D11VertexShader> DX11VertexShader::GetD3D11Shader() const {
@@ -24,15 +29,19 @@ namespace Engine {
 		return m_d3dLayout;
 	}
 
-	DX11PixelShader::DX11PixelShader(ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code) {
+	DX11PixelShader::DX11PixelShader(IContext* context, Size codeLength, const void* code) 
+		: RenderBase(RenderIdentifier::RI_SHADER, context) {
+		DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+		ComPtr<ID3D11Device> d3dDevice = dxContext->GetD3D11Device();
+
 		HRESULT hr = 0;
 		if (FAILED(hr = d3dDevice->CreatePixelShader(code, codeLength, nullptr, &m_d3dShader))) {
 			throw EngineException("[DX11PixelShader] ID3D11Device::CreatePixelShader() fialed");
 		}
 	}
 
-	bool DX11PixelShader::Is(ShaderType type) const {
-		return type == ShaderType::ST_PIXEL;
+	bool DX11PixelShader::Is(RenderStage stage) const {
+		return stage == RenderStage::RS_PIXEL;
 	}
 
 	ComPtr<ID3D11PixelShader> DX11PixelShader::GetD3D11Shader() const {

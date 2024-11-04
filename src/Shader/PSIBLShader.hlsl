@@ -33,8 +33,6 @@ float4 main(float4 position : SV_POSITION) : SV_TARGET0 {
         float3 Kd = (float3(1.0f, 1.0f, 1.0f) - Ks) * (1.0f - orm.b);
         
         color = Kd * sRGBToLinear(albedo.rgb) * CubeTexture.Sample(LinearSampler, normalize(normal.xyz)).rgb;
-        //color = ACESFitted(color.rgb);
-        //color = LinearTosRGB(color.rgb);
     }
 
     return float4(color.rgb, 0.0f);

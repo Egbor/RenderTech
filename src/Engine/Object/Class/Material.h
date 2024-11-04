@@ -2,26 +2,33 @@
 #define MATERIAL_H
 
 #include "Engine/Object/Class/Texture.h"
-#include "Engine/Core/Render/Api/Interface/IShaderResource.h"
+#include "Engine/Object/Class/Shader.h"
 
 namespace Engine {
     CLASSTYPE(Material)
     class Material : public Object {
         GENERATE_BODY(Material, Object)
 
+        //template<class TObjectClass>
+        //friend TObjectClass* LoadResourceFromFile(const String&);
+
     private:
         Array<Texture2D*> m_textures;
-        IShaderResourceData* m_shader;
+        Array<Shader*> m_shaders;
+
+        //IShaderResourceData* m_shader;
 
     public:
         Material(const ObjectArgument& argument);
         virtual ~Material();
 
         void AddTexture(Texture2D* texture);
-        void SetShader(const Array<Int8>& bytecode);
+        void AddShader(Shader* shader);
+        //void SetShader(const Array<Int8>& bytecode);
 
-        Array<ITextureResourceData*> GetNativeTextureResources() const;
-        IShaderResourceData* GetNativeShaderResource() const;
+        Array<TextureResource*> GetNativeTextureResources() const;
+        Array<ShaderResource*> GetNativeShaderResources() const;
+        //IShaderResourceData* GetNativeShaderResource() const;
     };
 }
 

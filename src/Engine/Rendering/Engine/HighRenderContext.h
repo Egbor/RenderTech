@@ -10,37 +10,24 @@
 namespace Engine {
 	class AbstractHighRenderContext {
 	private:
-		VirtualRenderPipeline* m_pipeline;
-		Array<IHighRenderCommand*> m_commands;
+		IContext* m_context;
+		Array<AbstractHighRenderCommand*> m_commands;
 
 	public:
 		AbstractHighRenderContext(IContext* context);
 		virtual ~AbstractHighRenderContext();
 
-		void ExtendCommandList(IHighRenderCommand* command);
+		void ExtendCommandList(AbstractHighRenderCommand* command);
 		void DrawScene(Scene* scene);
 
-		virtual void DrawInit(IRenderResourceFactory* factory) = 0;
-
 	protected:
-		VirtualRenderPipeline* GetPipeline() const;
-		const RenderResourcesStorage& GetStorage() const;
+		HighRenderStorage& GetStorage();
 
-		virtual void OnPreDraw() = 0;
-		virtual void OnPostDraw() = 0;
-
-		template<class TResourceData>
-		inline TResourceData* GetResourceFromBatchByTag(const String& tag) const {
-			return m_storage.GetResourceFromBatchByTag<TResourceData>(tag);
-		}
-
-		inline void InitResourceForBatchOfStates(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, StateType type, StateData data);
-		inline void InitResourceForBatchOfBuffers(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, Int32 bufferSize);
-		inline void InitResourceForBatchOfTargets(IRenderResourceFactory* factory, EnumFlags<BatchSlot> slots, const String& tag, TextureType type, TextureFormat format, Int32 width, Int32 height);
-		inline void InitResourceForBatchOfTargets(ITargetResourceData* resource, EnumFlags<BatchSlot> slots, const String& tag);
+		virtual void OnInitDraw(IContext* context) = 0;
+		virtual void OnPostDraw(IContext* context) = 0;
 
 	private:
-		RenderResourcesStorage m_storage;
+		HighRenderStorage m_storage;
 	};
 
 	class HRC_Base : public AbstractHighRenderContext {
@@ -48,15 +35,16 @@ namespace Engine {
 		HRC_Base(IContext* context);
 		virtual ~HRC_Base() = default;
 
-		void DrawInit(IRenderResourceFactory* factory) override;
-
 	private:
-		void OnPreDraw() override;
-		void OnPostDraw() override;
+		void OnInitDraw(IContext* context) override;
+		void OnPostDraw(IContext* context) override;
 	};
 
 	class HRC_IBLBacker : public AbstractHighRenderContext {
 	private:
+		static constexpr Int32 irrWidth = 32;
+		static constexpr Int32 irrHeight = 32;
+
 		Int32 m_IBLCubeMapOutputWidth;
 		Int32 m_IBLCubeMapOutputHeight;
 
@@ -66,11 +54,9 @@ namespace Engine {
 		HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight);
 		virtual ~HRC_IBLBacker();
 
-		void DrawInit(IRenderResourceFactory* factory) override;
-
 	private:
-		void OnPreDraw() override;
-		void OnPostDraw() override;
+		void OnInitDraw(IContext* context) override;
+		void OnPostDraw(IContext* context) override;
 	};
 }
 

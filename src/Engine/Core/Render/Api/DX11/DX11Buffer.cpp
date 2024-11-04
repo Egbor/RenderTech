@@ -3,8 +3,10 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-    DX11Buffer::DX11Buffer(ComPtr<ID3D11Device> d3dDevice, D3D11_USAGE usage, D3D11_BIND_FLAG bindFlags, UINT cpuAccessFlags, UINT size, UINT strides, const void* data)
-        : m_strides(strides), m_offset(0) {
+    DX11Buffer::DX11Buffer(IContext* context, D3D11_USAGE usage, D3D11_BIND_FLAG bindFlags, UINT cpuAccessFlags, UINT size, UINT strides, const void* data)
+        : BufferResource(context), m_strides(strides), m_offset(0)
+        , m_data(RawData::nulldata), m_isMutable(usage == D3D11_USAGE_DYNAMIC) {
+
         D3D11_BUFFER_DESC d3dBufferDesc;
         ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
         d3dBufferDesc.ByteWidth = size * strides;
@@ -17,19 +19,43 @@ namespace Engine {
         d3dSubresourceData.pSysMem = data;
 
         HRESULT hr = 0;
+        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<DX11Context*>(context)->GetD3D11Device();
         if (FAILED(hr = d3dDevice->CreateBuffer(&d3dBufferDesc, &d3dSubresourceData, &m_d3dBuffer))) {
             throw EngineException("[DX11Buffer] ID3DDevice::CreateBuffer() failed");
         }
+
+        if (m_isMutable) {
+            Size dataSize = size * strides;
+
+            m_data = RawData(dataSize);
+            memcpy_s(m_data.As<char>(), dataSize, data, dataSize);
+        }
     }
 
-    Int32 DX11Buffer::GetNumBytes() const {
+    Int32 DX11Buffer::GetNumberOfBytes() const {
         D3D11_BUFFER_DESC d3dBufferDesc;
         m_d3dBuffer->GetDesc(&d3dBufferDesc);
         return static_cast<Int32>(d3dBufferDesc.ByteWidth);
     }
 
-    Int32 DX11Buffer::GetNumElements() const {
-        return static_cast<Int32>(GetNumBytes() / m_strides);
+    Int32 DX11Buffer::GetNumberOfElements() const {
+        return static_cast<Int32>(GetNumberOfBytes() / m_strides);
+    }
+
+    RawData& DX11Buffer::GetBufferData() {
+        assert(m_isMutable);
+        return m_data;
+    }
+
+    void DX11Buffer::Update() {
+        assert(m_isMutable);
+
+        ComPtr<ID3D11DeviceContext> d3dDevice = dynamic_cast<DX11Context*>(GetContext())->GetD3D11Context();
+        Int32 size = GetNumberOfBytes();
+
+        void* data = Lock(d3dDevice);
+        memcpy_s(data, size, m_data.As<char>(), size);
+        Unlock(d3dDevice);
     }
 
     ComPtr<ID3D11Buffer> DX11Buffer::GetD3D11Buffer() const {
@@ -44,42 +70,14 @@ namespace Engine {
         return &m_offset;
     }
 
-    DX11VertexBuffer::DX11VertexBuffer(ComPtr<ID3D11Device> d3dDevice, UINT size, UINT strides, const void* data) 
-        : DX11Buffer(d3dDevice, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, size, strides, data) {
-
-    }
-
-    DX11IndexBuffer::DX11IndexBuffer(ComPtr<ID3D11Device> d3dDevice, UINT size, UINT strides, const void* data) 
-        : DX11Buffer(d3dDevice, D3D11_USAGE_IMMUTABLE, D3D11_BIND_INDEX_BUFFER, 0, size, strides, data) {
-
-    }
-
-    DX11ConstantBuffer::DX11ConstantBuffer(ComPtr<ID3D11Device> d3dDevice, UINT size, UINT strides, const void* data) 
-        : DX11Buffer(d3dDevice, D3D11_USAGE_DYNAMIC, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, size, strides, data)
-        , m_data(size * strides) {
-        memcpy_s(&m_data[0], m_data.size(), data, size * strides);
-    }
-
-    RawData DX11ConstantBuffer::GetBufferData() {
-        return RawData(&m_data[0]);
-    }
-
-    void DX11ConstantBuffer::Update(IContext* context) {
-        DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
-
-        void* data = Lock(dxContext->GetD3D11Context());
-        memcpy_s(data, GetNumBytes(), &m_data[0], m_data.size());
-        Unlock(dxContext->GetD3D11Context());
-    }
-
-    void* DX11ConstantBuffer::Lock(ComPtr<ID3D11DeviceContext> d3dContext) {
+    void* DX11Buffer::Lock(ComPtr<ID3D11DeviceContext> d3dContext) {
         D3D11_MAPPED_SUBRESOURCE d3dMappedSubresources;
         ZeroMemory(&d3dMappedSubresources, sizeof(d3dMappedSubresources));
         d3dContext->Map(m_d3dBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedSubresources);
         return d3dMappedSubresources.pData;
     }
 
-    void DX11ConstantBuffer::Unlock(ComPtr<ID3D11DeviceContext> d3dContext) {
+    void DX11Buffer::Unlock(ComPtr<ID3D11DeviceContext> d3dContext) {
         d3dContext->Unmap(m_d3dBuffer.Get(), 0);
     }
 }

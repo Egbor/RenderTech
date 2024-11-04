@@ -17,8 +17,8 @@ namespace Engine {
 		Skybox(const ObjectArgument& arguments);
 		virtual ~Skybox();
 
-		ITextureResourceData* GetNativeResource() const;
-		ITextureResourceData* GetIBLNativeResource() const;
+		TextureResource* GetNativeResource() const;
+		TextureResource* GetIBLNativeResource() const;
 	};
 }
 

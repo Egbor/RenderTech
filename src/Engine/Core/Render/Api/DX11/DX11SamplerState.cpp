@@ -1,4 +1,5 @@
 #include "Engine/Core/Render/Api/DX11/DX11SamplerState.h"
+#include "Engine/Core/Render/Api/DX11/DX11Context.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
@@ -26,8 +27,11 @@ namespace Engine {
         return d3dSamplerDesc;
     }
 
-    DX11SamplerState::DX11SamplerState(const StateData& data, const IContext* context) {
-        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
+    DX11SamplerState::DX11SamplerState(const StateData& data, IContext* context) 
+        : StateResource(context) {
+        DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+        ComPtr<ID3D11Device> d3dDevice = dxContext->GetD3D11Device();
+
         const D3D11_SAMPLER_DESC dxData = GenerateD3D11SamplerDesc(data.sdSampler);
 
         HRESULT hr = 0;

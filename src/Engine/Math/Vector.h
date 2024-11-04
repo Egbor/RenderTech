@@ -32,6 +32,7 @@ namespace Engine {
         Vector3();
         Vector3(const Vector3&) = default;
 
+        constexpr Vector3(const Vector2& vec, float z) noexcept;
         constexpr Vector3(float x, float y, float z) noexcept;
 
         Vector3 Normalize();
@@ -71,6 +72,8 @@ namespace Engine {
         Vector4();
         Vector4(const Vector4&) = default;
 
+        constexpr Vector4(const Vector3& vec, float w) noexcept;
+        constexpr Vector4(const Vector2& vec, float z, float w) noexcept;
         constexpr Vector4(float x, float y, float z, float w) noexcept;
 
         Vector4 operator+(const Vector4& vector);

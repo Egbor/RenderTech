@@ -2,13 +2,14 @@
 #define DX11CONTEXT_H
 
 #include "Engine/Core/Render/Api/DX11/DX11Def.h"
-#include "Engine/Core/Render/Api/Interface/IContext.h"
+#include "Engine/Core/Render/Base/RenderBase.h"
+#include "Engine/Core/Render/Base/Interface/IContext.h"
 
 #include "Engine/Core/Utils/Factory.h"
 #include "Engine/Core/System/Platform/Interface/IWindow.h"
 
 namespace Engine {
-    class DX11Context : public IContext, IRenderResourceFactory, IRenderPipeline, ISwapChain {
+    class DX11Context : public IContext, public IRenderResourceFactory, public IRenderPipeline, public ISwapChain {
     private:
         ComPtr<ID3D11Device> m_d3dDevice;
         ComPtr<ID3D11DeviceContext> m_d3dContext;
@@ -30,24 +31,24 @@ namespace Engine {
         IRenderPipeline* QueryPipeline() override;
         ISwapChain* QuerySwapChain() override;
 
-        IStateResourceData* CreateState(StateType type, StateData data) override;
-        ITextureResourceData* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) override;
-        ITargetResourceData* CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) override;
-        IBufferResourceData* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) override;
-        IShaderResourceData* CreateShader(ShaderType type, Size codeLength, const void* code) override;
+        StateResource* CreateState(StateType type, StateData data) override;
+        TargetResource* CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) override;
+        BufferResource* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) override;
+        ShaderResource* CreateShader(RenderStage stage, Size codeLength, const void* code) override;
+        TextureResource* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) override;
 
         void SetViewport(Int32 width, Int32 height) override;
-        void SetTargets(const Array<ITargetResourceData*>& targets) override;
-        void SetStates(const Array<IStateResourceData*>& states) override;
+        void SetTargets(const Array<TargetResource*>& targets) override;
+        void SetStates(const Array<StateResource*>& states) override;
 
         void GetViewport(Viewport& viewport) override;
         IRenderStage* GetStage(RenderStage stage) override;
 
-        ITargetResourceData* GetOutputTarget() const override;
+        TargetResource* GetOutputTarget() const override;
 
         void Swap() override;
-        void Draw(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) override;
-        void DrawWaveframe(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) override;
+        void Draw(BufferResource* vertexBuffer, BufferResource* indexBuffer) override;
+        void DrawWaveframe(BufferResource* vertexBuffer, BufferResource* indexBuffer) override;
 
     private:
         void RegisterStateFactory();
@@ -55,13 +56,13 @@ namespace Engine {
         void RegisterBufferFactory();
         void RegisterShaderFactory();
 
-        Factory<StateType, IStateResourceData, StateData> m_stateFactory;
-        Factory<TextureType, ITextureResourceData, ComPtr<ID3D11Device>, TextureFormat, Int32, Int32, Array<Int8*>> m_staticTextureFactory;
-        Factory<TextureType, ITargetResourceData, ComPtr<ID3D11Device>, TextureFormat, Int32, Int32> m_renderTargetFactory;
-        Factory<BufferType, IBufferResourceData, ComPtr<ID3D11Device>, Int32, Int32, const void*> m_bufferFactory;
-        Factory<ShaderType, IShaderResourceData, ComPtr<ID3D11Device>, Size, const void*> m_shaderFactory;
+        Factory<StateType, StateResource, StateData> m_stateFactory;
+        Factory<TextureType, TextureResource, TextureFormat, Int32, Int32, Array<Int8*>> m_staticTextureFactory;
+        Factory<TextureType, TargetResource, TextureFormat, Int32, Int32> m_renderTargetFactory;
+        Factory<BufferType, BufferResource, Int32, Int32, const void*> m_bufferFactory;
+        Factory<RenderStage, ShaderResource, Size, const void*> m_shaderFactory;
 
-        ITargetResourceData* m_backTarget;
+        TargetResource* m_backTarget;
     };
 }
 

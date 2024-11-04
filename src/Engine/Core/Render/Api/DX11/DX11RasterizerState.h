@@ -1,17 +1,16 @@
 #ifndef DX11RASTERIZERSTATE_H
 #define DX11RASTERIZERSTATE_H
 
-#include "Engine/Core/Render/Api/Interface/IStateResource.h"
-#include "Engine/Core/Render/Api/DX11/Interface/IDX11SelfBindable.h"
-#include "Engine/Core/Render/Api/DX11/DX11Context.h"
+#include "Engine/Core/Render/Base/RenderBase.h"
+#include "Engine/Core/Render/Base/Resource/StateResource.h"
 
 namespace Engine {
-    class DX11RasterizerState : public IStateResourceData, public IDX11SelfBindable {
+    class DX11RasterizerState : public StandaloneStateResource {
     public:
-        DX11RasterizerState(const StateData& data, const IContext* context);
+        DX11RasterizerState(const StateData& data, IContext* context);
         virtual ~DX11RasterizerState() = default;
 
-        void Bind(ComPtr<ID3D11DeviceContext> d3dContext) override;
+        void Bind() const override;
         bool Is(StateType type) const override;
 
         ComPtr<ID3D11RasterizerState> GetD3D11RasterizerState() const;

@@ -25,6 +25,10 @@ namespace Engine {
         return m_brightness;
     }
 
+    StaticMesh* LightComponent::GetLightArea() const {
+        return nullptr;
+    }
+
     LightType LightComponent::GetLightType() const {
         return LightType::LT_UNDEFINED;
     }

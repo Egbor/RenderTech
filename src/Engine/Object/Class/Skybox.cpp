@@ -14,11 +14,11 @@ namespace Engine {
 		DELETE_OBJECT(m_envCubemap);
 	}
 
-	ITextureResourceData* Skybox::GetNativeResource() const {
+	TextureResource* Skybox::GetNativeResource() const {
 		return m_envCubemap->GetNativeResource();
 	}
 
-	ITextureResourceData* Skybox::GetIBLNativeResource() const {
+	TextureResource* Skybox::GetIBLNativeResource() const {
 		return m_irrCubemap->GetNativeResource();
 	}
 }

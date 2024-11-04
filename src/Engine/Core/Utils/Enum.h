@@ -60,6 +60,10 @@ namespace Engine {
 			return EnumFlags<TEnumBit>(m_mask ^ flags.m_mask);
 		}
 
+		constexpr EnumFlags<TEnumBit> operator~() const noexcept {
+			return EnumFlags<TEnumBit>(~m_mask);
+		}
+
 		// Assignment operators
 
 		constexpr EnumFlags<TEnumBit>& operator&=(const EnumFlags<TEnumBit>& flags) const noexcept {
@@ -149,6 +153,11 @@ namespace Engine {
 	template<typename TEnumBit>
 	inline constexpr EnumFlags<TEnumBit> operator^(TEnumBit lbit, TEnumBit rbit) noexcept {
 		return EnumFlags<TEnumBit>(lbit) ^ rbit;
+	}
+
+	template<typename TEnumBit>
+	inline constexpr EnumFlags<TEnumBit> operator~(TEnumBit lbit) noexcept {
+		return ~EnumFlags<TEnumBit>(lbit);
 	}
 }
 

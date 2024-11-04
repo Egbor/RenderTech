@@ -1,4 +1,5 @@
 #include "Engine/Rendering/MeshDescription.h"
+#include "Engine/Core/Core.h"
 
 namespace Engine {
     MeshVertex::MeshVertex()
@@ -39,5 +40,15 @@ namespace Engine {
 
     Array<MeshFace>& MeshDescription::Faces() {
         return m_faces;
+    }
+
+    IBufferResourceData* MeshDescription::BuildVertexBuffer() const {
+        IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+        return factory->CreateBuffer(BufferType::BT_VERTEX, static_cast<UInt32>(m_vertices.size()), sizeof(MeshVertex), m_vertices.data());
+    }
+
+    IBufferResourceData* MeshDescription::BuildIndexBuffer() const {
+        IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
+        return factory->CreateBuffer(BufferType::BT_INDEX, static_cast<UInt32>(m_faces.size() * 3), sizeof(UInt32), m_faces.data());
     }
 }

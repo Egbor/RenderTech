@@ -1,4 +1,5 @@
 #include "Engine/Core/Render/Api/DX11/DX11BlendState.h"
+#include "Engine/Core/Render/Api/DX11/DX11Context.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
@@ -49,9 +50,9 @@ namespace Engine {
         return d3dBlendDesc;
     }
 
-    DX11BlendState::DX11BlendState(const StateData& data, const IContext* context) 
-        : m_blendFactor{ 1.0f, 1.0f, 1.0f, 1.0f }, m_sampleMask(0xFFFFFFFF) {
-        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
+    DX11BlendState::DX11BlendState(const StateData& data, IContext* context) 
+        : StandaloneStateResource(context), m_blendFactor{1.0f, 1.0f, 1.0f, 1.0f}, m_sampleMask(0xFFFFFFFF) {
+        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<DX11Context*>(context)->GetD3D11Device();
         const D3D11_BLEND_DESC dxData = GenerateD3D11BlendDesc(data.sdBlend);
 
         HRESULT hr = 0;
@@ -60,7 +61,8 @@ namespace Engine {
         }
     }
 
-    void DX11BlendState::Bind(ComPtr<ID3D11DeviceContext> d3dContext) {
+    void DX11BlendState::Bind() const {
+        ComPtr<ID3D11DeviceContext> d3dContext = dynamic_cast<DX11Context*>(GetContext())->GetD3D11Context();
         d3dContext->OMSetBlendState(m_state.Get(), m_blendFactor, m_sampleMask);
     }
 

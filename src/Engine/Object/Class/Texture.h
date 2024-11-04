@@ -1,10 +1,21 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "Engine/Core/Render/Api/Interface/ITextureResource.h"
+#include "Engine/Core/Render/Base/Resource/TextureResource.h"
+#include "Engine/Core/System/Resource/ResourceMetadata.h"
 #include "Engine/Object/Object.h"
 
 namespace Engine {
+    enum class TextureFace {
+        TF_POSITIVE_X = 0,
+        TF_NEGATIVE_X = 1,
+        TF_POSITIVE_Y = 2,
+        TF_NEGATIVE_Y = 3,
+        TF_POSITIVE_Z = 4,
+        TF_NEGATIVE_Z = 5,
+        TF_DEFAULT = 0
+    };
+
     CLASSTYPE(Texture)
     class Texture : public Object {
         GENERATE_BODY(Texture, Object)
@@ -17,10 +28,12 @@ namespace Engine {
         Int32 GetHeight() const;
         TextureFormat GetFormat() const;
 
-        ITextureResourceData* GetNativeResource() const;
+        bool IsCubemap() const;
+
+        TextureResource* GetNativeResource() const;
 
     protected:
-        ITextureResourceData* m_nativeTexture;
+        TextureResource* m_nativeTexture;
     };
 
     CLASSTYPE(Texture2D)
@@ -28,6 +41,26 @@ namespace Engine {
         GENERATE_BODY(Texture2D, Texture)
 
     public:
+        class Metadata : public IResourceMetadata {
+        public:
+            Metadata(TextureType type);
+
+            Metadata* SetSize(Int32 width, Int32 height);
+            Metadata* SetFormat(TextureFormat format);
+            Int8** GetData(TextureFace face);
+
+            bool IsCubemap() const;
+
+        private:
+            Object* Build() override;
+
+            Array<Int8*> m_data;
+            Int32 m_width;
+            Int32 m_height;
+            TextureFormat m_format;
+            const TextureType m_type;
+        };
+
         Texture2D(const ObjectArgument&);
         virtual ~Texture2D() = default;
 

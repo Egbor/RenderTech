@@ -1,9 +1,9 @@
 #ifndef ICONTEXT_H
 #define ICONTEXT_H
 
-#include "Engine/Core/Render/Api/Interface/IRenderResourceFactory.h"
-#include "Engine/Core/Render/Api/Interface/IRenderPipeline.h"
-#include "Engine/Core/Render/Api/Interface/ISwapChain.h"
+#include "Engine/Core/Render/Base/Interface/IRenderResourceFactory.h"
+#include "Engine/Core/Render/Base/Interface/IRenderPipeline.h"
+#include "Engine/Core/Render/Base/Interface/ISwapChain.h"
 
 namespace Engine {
 	class IContext {

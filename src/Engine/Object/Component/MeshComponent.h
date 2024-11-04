@@ -10,24 +10,15 @@ namespace Engine {
         GENERATE_BODY(MeshComponent, SceneComponent)
 
     private:
-        PROPERTY(ClassType<Mesh>, mesh)
-        Mesh* m_mesh;
+        PROPERTY(ClassType<StaticMesh>, mesh)
+        StaticMesh* m_mesh;
 
     public:
         MeshComponent(const ObjectArgument& argument);
-        MeshComponent(const MeshComponent&) = default;
         virtual ~MeshComponent() = default;
 
-        void SetMesh(Mesh* mesh);
-        Mesh* GetMesh() const;
-
-    //protected:
-    //    virtual UInt64 GetBehaviorID() const override;
-
-    //    void CreateRenderState(AbstractRenderPass* pass) override;
-
-    private:
-        Int32 m_meshResourceId;
+        void SetMesh(StaticMesh* mesh);
+        StaticMesh* GetMesh() const;
     };
 }
 

@@ -69,7 +69,7 @@ namespace Engine {
         }
 
         Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        m_backTarget = new DX11RenderTarget(m_d3dDevice, new DX11Texture2D(backBuffer), color);
+        m_backTarget = new DX11RenderTarget(this, new DX11Texture2D(this, backBuffer), color);
         
         RegisterStateFactory();
         RegisterTextureFactory();
@@ -116,24 +116,24 @@ namespace Engine {
         return dynamic_cast<ISwapChain*>(this);
     }
 
-    IStateResourceData* DX11Context::CreateState(StateType type, StateData data) {
+    StateResource* DX11Context::CreateState(StateType type, StateData data) {
         return m_stateFactory.Create(type, data);
     }
 
-    ITextureResourceData* DX11Context::CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
-        return m_staticTextureFactory.Create(type, m_d3dDevice, format, width, height, data);
+    TextureResource* DX11Context::CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
+        return m_staticTextureFactory.Create(type, format, width, height, data);
     }
 
-    ITargetResourceData* DX11Context::CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) {
-        return m_renderTargetFactory.Create(type, m_d3dDevice, format, width, height);
+    TargetResource* DX11Context::CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) {
+        return m_renderTargetFactory.Create(type, format, width, height);
     }
 
-    IBufferResourceData* DX11Context::CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) {
-        return m_bufferFactory.Create(type, m_d3dDevice, size, strides, data);
+    BufferResource* DX11Context::CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) {
+        return m_bufferFactory.Create(type, size, strides, data);
     }
 
-    IShaderResourceData* DX11Context::CreateShader(ShaderType type, Size codeLength, const void* code) {
-        return m_shaderFactory.Create(type, m_d3dDevice, codeLength, code);
+    ShaderResource* DX11Context::CreateShader(RenderStage stage, Size codeLength, const void* code) {
+        return m_shaderFactory.Create(stage, codeLength, code);
     }
 
     void DX11Context::SetViewport(Int32 width, Int32 height) {
@@ -148,7 +148,7 @@ namespace Engine {
         m_d3dContext->RSSetViewports(1, &d3dViewport);
     }
 
-    void DX11Context::SetTargets(const Array<ITargetResourceData*>& targets) {
+    void DX11Context::SetTargets(const Array<TargetResource*>& targets) {
         Array<ID3D11RenderTargetView*> rendertargets;
         ID3D11DepthStencilView* depthstencil = nullptr;
 
@@ -165,10 +165,10 @@ namespace Engine {
         m_d3dContext->OMSetRenderTargets(static_cast<UINT>(rendertargets.size()), rendertargets.data(), depthstencil);
     }
 
-    void DX11Context::SetStates(const Array<IStateResourceData*>& states) {
+    void DX11Context::SetStates(const Array<StateResource*>& states) {
         for (Size i = 0; i < states.size(); i++) {
-            IDX11SelfBindable* state = dynamic_cast<IDX11SelfBindable*>(states[i]);
-            state->Bind(m_d3dContext);
+            StandaloneStateResource* state = dynamic_cast<StandaloneStateResource*>(states[i]);
+            state->Bind();
         }
     }
 
@@ -196,7 +196,7 @@ namespace Engine {
         throw EngineException("[DX11Context] DX11Context::GetStage() failed. Selected render stage is not supported");
     }
 
-    ITargetResourceData* DX11Context::GetOutputTarget() const {
+    TargetResource* DX11Context::GetOutputTarget() const {
         return m_backTarget;
     }
 
@@ -204,7 +204,7 @@ namespace Engine {
         m_dxgiSwapChain->Present(0, 0);
     }
 
-    void DX11Context::Draw(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) {
+    void DX11Context::Draw(BufferResource* vertexBuffer, BufferResource* indexBuffer) {
         DX11Buffer* vertex = dynamic_cast<DX11Buffer*>(vertexBuffer);
         DX11Buffer* index = dynamic_cast<DX11Buffer*>(indexBuffer);
 
@@ -212,10 +212,10 @@ namespace Engine {
         m_d3dContext->IASetIndexBuffer(index->GetD3D11Buffer().Get(), DXGI_FORMAT_R32_UINT, 0);
 
         m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        m_d3dContext->DrawIndexed(indexBuffer->GetNumElements(), 0, 0);
+        m_d3dContext->DrawIndexed(indexBuffer->GetNumberOfElements(), 0, 0);
     }
 
-    void DX11Context::DrawWaveframe(IBufferResourceData* vertexBuffer, IBufferResourceData* indexBuffer) {
+    void DX11Context::DrawWaveframe(BufferResource* vertexBuffer, BufferResource* indexBuffer) {
         DX11Buffer* vertex = dynamic_cast<DX11Buffer*>(vertexBuffer);
         DX11Buffer* index = dynamic_cast<DX11Buffer*>(indexBuffer);
 
@@ -223,7 +223,7 @@ namespace Engine {
         m_d3dContext->IASetIndexBuffer(index->GetD3D11Buffer().Get(), DXGI_FORMAT_R32_UINT, 0);
 
         m_d3dContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
-        m_d3dContext->DrawIndexed(indexBuffer->GetNumElements(), 0, 0);
+        m_d3dContext->DrawIndexed(indexBuffer->GetNumberOfElements(), 0, 0);
     }
 
     void DX11Context::RegisterStateFactory() {
@@ -238,36 +238,36 @@ namespace Engine {
     }
 
     void DX11Context::RegisterTextureFactory() {
-        m_staticTextureFactory.Register(TextureType::TT_DEFAULT, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
-            return new DX11Texture2D(d3dDevice, format, width, height, data[0]); });
-        m_staticTextureFactory.Register(TextureType::TT_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
-            return new DX11Texture2D(d3dDevice, format, width, height, data); });
+        m_staticTextureFactory.Register(TextureType::TT_DEFAULT, [&](TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
+            return new DX11Texture2D(this, format, width, height, data[0]); });
+        m_staticTextureFactory.Register(TextureType::TT_CUBE, [&](TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
+            return new DX11Texture2D(this, format, width, height, data); });
 
         static Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-        m_renderTargetFactory.Register(TextureType::TT_DEFAULT, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
-            return new DX11RenderTarget(d3dDevice, new DX11Texture2D(d3dDevice, format, width, height, false), color); });
-        m_renderTargetFactory.Register(TextureType::TT_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
-            return new DX11RenderTarget(d3dDevice, new DX11Texture2D(d3dDevice, format, width, height, true), color); });
-        m_renderTargetFactory.Register(TextureType::TT_DEPTH, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
-            return new DX11DepthStencil(d3dDevice, new DX11Texture2D(d3dDevice, format, width, height, false), 1.0f, 0); });
-        m_renderTargetFactory.Register(TextureType::TT_DEPTH_CUBE, [&](ComPtr<ID3D11Device> d3dDevice, TextureFormat format, Int32 width, Int32 height) {
-            return new DX11DepthStencil(d3dDevice, new DX11Texture2D(d3dDevice, format, width, height, true), 1.0f, 0); });
+        m_renderTargetFactory.Register(TextureType::TT_DEFAULT, [&](TextureFormat format, Int32 width, Int32 height) {
+            return new DX11RenderTarget(this, new DX11Texture2D(this, format, width, height, false), color); });
+        m_renderTargetFactory.Register(TextureType::TT_CUBE, [&](TextureFormat format, Int32 width, Int32 height) {
+            return new DX11RenderTarget(this, new DX11Texture2D(this, format, width, height, true), color); });
+        m_renderTargetFactory.Register(TextureType::TT_DEPTH, [&](TextureFormat format, Int32 width, Int32 height) {
+            return new DX11DepthStencil(this, new DX11Texture2D(this, format, width, height, false), 1.0f, 0); });
+        m_renderTargetFactory.Register(TextureType::TT_DEPTH_CUBE, [&](TextureFormat format, Int32 width, Int32 height) {
+            return new DX11DepthStencil(this, new DX11Texture2D(this, format, width, height, true), 1.0f, 0); });
     }
 
     void DX11Context::RegisterBufferFactory() {
-        m_bufferFactory.Register(BufferType::BT_VERTEX, [&](ComPtr<ID3D11Device> d3dDevice, Int32 size, Int32 strides, const void* data) {
-            return new DX11VertexBuffer(d3dDevice, size, strides, data); });
-        m_bufferFactory.Register(BufferType::BT_INDEX, [&](ComPtr<ID3D11Device> d3dDevice, Int32 size, Int32 strides, const void* data) {
-            return new DX11IndexBuffer(d3dDevice, size, strides, data); });
-        m_bufferFactory.Register(BufferType::BT_UNIFORM, [&](ComPtr<ID3D11Device> d3dDevice, Int32 size, Int32 strides, const void* data) {
-            return new DX11ConstantBuffer(d3dDevice, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_VERTEX, [&](Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(this, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_INDEX, [&](Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(this, D3D11_USAGE_IMMUTABLE, D3D11_BIND_INDEX_BUFFER, 0, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_UNIFORM, [&](Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(this, D3D11_USAGE_DYNAMIC, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, size, strides, data); });
     }
 
     void DX11Context::RegisterShaderFactory() {
-        m_shaderFactory.Register(ShaderType::ST_VERTEX, [&](ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code) {
-            return new DX11VertexShader(d3dDevice, codeLength, code); });
-        m_shaderFactory.Register(ShaderType::ST_PIXEL, [&](ComPtr<ID3D11Device> d3dDevice, Size codeLength, const void* code) {
-            return new DX11PixelShader(d3dDevice, codeLength, code); });
+        m_shaderFactory.Register(RenderStage::RS_VERTEX, [&](Size codeLength, const void* code) {
+            return new DX11VertexShader(this, codeLength, code); });
+        m_shaderFactory.Register(RenderStage::RS_PIXEL, [&](Size codeLength, const void* code) {
+            return new DX11PixelShader(this, codeLength, code); });
     }
 }

@@ -26,6 +26,7 @@ namespace Engine {
         Vector4 GetColor() const;
         Float GetBrightness() const;
 
+        virtual StaticMesh* GetLightArea() const;
         virtual LightType GetLightType() const;
 
     //protected:

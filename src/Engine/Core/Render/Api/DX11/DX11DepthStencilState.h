@@ -1,17 +1,16 @@
 #ifndef DX11DEPTHSTENCILSTATE_H
 #define DX11DEPTHSTENCILSTATE_H
 
-#include "Engine/Core/Render/Api/Interface/IStateResource.h"
-#include "Engine/Core/Render/Api/DX11/Interface/IDX11SelfBindable.h"
-#include "Engine/Core/Render/Api/DX11/DX11Context.h"
+#include "Engine/Core/Render/Api/DX11/DX11Def.h"
+#include "Engine/Core/Render/Base/Resource/StateResource.h"
 
 namespace Engine {
-    class DX11DepthStencilState : public IStateResourceData, public IDX11SelfBindable {
+    class DX11DepthStencilState : public StandaloneStateResource {
     public:
-        DX11DepthStencilState(const StateData& data, const IContext* context);
+        DX11DepthStencilState(const StateData& data, IContext* context);
         virtual ~DX11DepthStencilState() = default;
 
-        void Bind(ComPtr<ID3D11DeviceContext> d3dContext) override;
+        void Bind() const override;
         bool Is(StateType type) const override;
 
         ComPtr<ID3D11DepthStencilState> GetD3D11DepthStencilState() const;

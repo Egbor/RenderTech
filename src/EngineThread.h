@@ -25,13 +25,13 @@ namespace Engine {
 
 	class EngineThreadSync {
 	public:
-		EngineThreadSync(EventBase<>& callback, const Int32 syncLimit) 
+		EngineThreadSync(Callable<void()>* callback, const Int32 syncLimit)
 			: m_syncCallback(callback), m_syncSlots() {
 
 		}
 
 		virtual ~EngineThreadSync() {
-			EventBase<>::Free(m_syncCallback);
+			Callable<void()>::Free(m_syncCallback);
 		}
 
 		bool Sync(EngineThreadStatus status, Int32 slotId) {
@@ -40,7 +40,7 @@ namespace Engine {
 			UpdateSyncSlot(slotId, status);
 
 			if (!HasUnsyncedSlot()) {
-				m_syncCallback.Invoke();
+				m_syncCallback->Invoke();
 				UnsyncAllSyncSlots();
 				m_cv.notify_all();
 			} else {
@@ -91,7 +91,7 @@ namespace Engine {
 		std::mutex m_mutex;
 
 		Array<EngineThreadSyncSlot> m_syncSlots;
-		EventBase<>& m_syncCallback;
+		Callable<void()>* m_syncCallback;
 	};
 
 	class EngineThread {
@@ -106,7 +106,7 @@ namespace Engine {
 		}
 
 		template<class ...TArgs>
-		void Start(EngineThreadSync& sync, EventBase<TArgs...>& callback, TArgs... args) {
+		void Start(EngineThreadSync& sync, Callable<TArgs...>* callback, TArgs... args) {
 			m_thread = std::thread([&]() {
 				bool isSyncExit = false;
 				Int32 syncId = sync.ReserveSyncSlot();
@@ -114,10 +114,10 @@ namespace Engine {
 				while (!isSyncExit) {
 					if (m_status != EngineThreadStatus::ETS_Pause) {
 						isSyncExit = sync.Sync(m_status.load(), syncId);
-						callback.Invoke(args...);
+						callback->Invoke(args...);
 					}
 				}
-				EventBase<TArgs...>::Free(callback);
+				Callable<void(TArgs...)>::Free(callback);
 			});
 		}
 
@@ -136,7 +136,7 @@ namespace Engine {
 
 	class EngineThreadPool {
 	public:
-		EngineThreadPool(EventBase<>& syncCallback, const Int32 size) {
+		EngineThreadPool(Callable<void()>* syncCallback, const Int32 size) {
 			m_sync = new EngineThreadSync(syncCallback, size);
 			m_pool.reserve(size);
 		}
@@ -147,7 +147,7 @@ namespace Engine {
 		}
 
 		template<class ...TArgs>
-		void Append(EventBase<TArgs...>& callback, TArgs... args) {
+		void Append(Callable<void(TArgs...)>* callback, TArgs... args) {
 			if (m_pool.capacity() == m_pool.size()) {
 				throw EngineException("[EngineThreadPool] Out of range");
 			}

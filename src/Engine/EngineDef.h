@@ -8,7 +8,9 @@
 #include <unordered_map>
 #include <memory>
 #include <functional>
-//#include "Engine/Core/System/Input/InputDef.h"
+
+#include <boost/uuid.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace Engine {
     template<typename TType>
@@ -66,19 +68,35 @@ namespace Engine {
     template<typename T>
     using ConstListIterator = typename List<T>::const_iterator;
 
-    struct RawData {
-        RawData(void* data) 
-            : data(data) {
+    class RawData {
+    public:
+        constexpr RawData(Size dataSize) noexcept 
+            : m_data(new char[dataSize]), m_size(dataSize) {
+            
+        }
 
+        ~RawData() noexcept {
+            delete[] m_data;
         }
 
         template<typename T>
         T* As() {
+            assert(m_size >= sizeof(T));
             return reinterpret_cast<T*>(data);
         }
 
-        void* data;
+        static const RawData nulldata;
+
+    private:
+        constexpr RawData() noexcept
+            : m_data(nullptr), m_size(0) {
+        }
+
+        char* m_data;
+        Size m_size;
     };
+
+    const RawData RawData::nulldata = RawData();
 
 #define DELETE_OBJECT(obj) if ((obj) != nullptr) { delete (obj); (obj) = nullptr; }
 #define DELETE_ARRAY_OF_OBJECTS(arr) for (auto obj : (arr)) { DELETE_OBJECT(obj); }
@@ -88,6 +106,10 @@ namespace Engine {
 #define IS_POWER_OF_TWO(x) (x && (!(x&(x-1))))
 
 #define INDEX_OF(value) static_cast<UInt32>(value)
+
+
+#define NUMBER_OF_FACES_FOR_SINGLE_TEXTURE 1
+#define NUMBER_OF_FACES_FOR_CUBEMAP_TEXTURE 6
 
 }
 

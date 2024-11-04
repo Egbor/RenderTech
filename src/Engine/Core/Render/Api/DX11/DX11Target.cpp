@@ -13,8 +13,8 @@ namespace Engine {
         d3dContext->CopyResource(d3dDstTexture.Get(), d3dSrcTexture.Get());
     }
 
-    DX11RenderTarget::DX11RenderTarget(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, const Float* color)
-        : m_data(texture), m_viewId(0) {
+    DX11RenderTarget::DX11RenderTarget(IContext* context, DX11Texture2D* texture, const Float* color)
+        : TargetResource(context), m_data(texture), m_viewId(0) {
         memcpy_s(m_clearColor, sizeof(m_clearColor), color, sizeof(m_clearColor));
 
         D3D11_RENDER_TARGET_VIEW_DESC  d3dRenderTargetViewDesc;
@@ -34,6 +34,9 @@ namespace Engine {
             d3dRenderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
             d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
         }
+
+        DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
+        ComPtr<ID3D11Device> d3dDevice = dxContext->GetD3D11Device();
 
         for (Size i = 0; i < m_d3dViews.size(); i++) {
             if (m_d3dViews.size() > 1) {
@@ -55,7 +58,7 @@ namespace Engine {
         return false;
     }
 
-    void DX11RenderTarget::Copy(ITargetResourceData* dstTarget) const {
+    void DX11RenderTarget::Copy(TargetResource* dstTarget) const {
         if (dstTarget->IsDepth()) {
             throw EngineException("[DX11DepthStencil] ITargetResourceData::IsDepth() is true");
         }
@@ -63,12 +66,12 @@ namespace Engine {
         CopyD3D11Texture(m_data->GetD3D11Texture2D(), dynamic_cast<DX11RenderTarget*>(dstTarget)->m_data->GetD3D11Texture2D());
     }
 
-    void DX11RenderTarget::Clear(IContext* context) {
-        ComPtr<ID3D11DeviceContext> d3dContext = dynamic_cast<DX11Context*>(context)->GetD3D11Context();
+    void DX11RenderTarget::Clear() {
+        ComPtr<ID3D11DeviceContext> d3dContext = dynamic_cast<DX11Context*>(GetContext())->GetD3D11Context();
         d3dContext->ClearRenderTargetView(m_d3dViews[m_viewId].Get(), m_clearColor);
     }
 
-    ITextureResourceData* DX11RenderTarget::GetTextureResource() const {
+    TextureResource* DX11RenderTarget::GetTextureResource() const {
         return m_data;
     }
 
@@ -78,8 +81,9 @@ namespace Engine {
         return d3dTarget;
     }
 
-    DX11DepthStencil::DX11DepthStencil(ComPtr<ID3D11Device> d3dDevice, DX11Texture2D* texture, Float depth, UInt32 stencil) 
-        : m_data(texture), m_clearDepth(depth), m_clearStencil(stencil), m_clearFlags(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL), m_viewId(0) {
+    DX11DepthStencil::DX11DepthStencil(IContext* context, DX11Texture2D* texture, Float depth, UInt32 stencil) 
+        : DepthStencilResource(context), m_data(texture), m_clearDepth(depth), m_clearStencil(stencil)
+        , m_clearFlags(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL), m_viewId(0) {
         D3D11_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
         ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
         d3dDepthStencilViewDesc.Format = GetD3D11Format(AdjustTextureFormatForTarget(texture->GetFormat()));
@@ -97,6 +101,8 @@ namespace Engine {
             d3dDepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
             d3dDepthStencilViewDesc.Texture2D.MipSlice = 0;
         }
+
+        ComPtr<ID3D11Device> d3dDevice = dynamic_cast<DX11Context*>(context)->GetD3D11Device();
 
         for (Size i = 0; i < m_d3dViews.size(); i++) {
             if (m_d3dViews.size() > 1) {
@@ -118,7 +124,7 @@ namespace Engine {
         return true;
     }
 
-    void DX11DepthStencil::Copy(ITargetResourceData* dstTarget) const {
+    void DX11DepthStencil::Copy(TargetResource* dstTarget) const {
         if (!dstTarget->IsDepth()) {
             throw EngineException("[DX11DepthStencil] ITargetResourceData::IsDepth() is false");
         }
@@ -126,12 +132,12 @@ namespace Engine {
         CopyD3D11Texture(m_data->GetD3D11Texture2D(), dynamic_cast<DX11DepthStencil*>(dstTarget)->m_data->GetD3D11Texture2D());
     }
 
-    void DX11DepthStencil::Clear(IContext* context) {
-        ComPtr<ID3D11DeviceContext> d3dContext = dynamic_cast<DX11Context*>(context)->GetD3D11Context();
+    void DX11DepthStencil::Clear() {
+        ComPtr<ID3D11DeviceContext> d3dContext = dynamic_cast<DX11Context*>(GetContext())->GetD3D11Context();
         d3dContext->ClearDepthStencilView(m_d3dViews[m_viewId].Get(), m_clearFlags, m_clearDepth, m_clearStencil);
     }
 
-    ITextureResourceData* DX11DepthStencil::GetTextureResource() const {
+    TextureResource* DX11DepthStencil::GetTextureResource() const {
         return m_data;
     }
 
@@ -145,11 +151,19 @@ namespace Engine {
         m_clearStencil = value;
     }
 
-    void DX11DepthStencil::EnableDepthClear(bool enable) {
-        m_clearFlags = enable ? m_clearFlags | D3D11_CLEAR_DEPTH : m_clearFlags & ~D3D11_CLEAR_DEPTH;
+    void DX11DepthStencil::DisableDepthClear() {
+        m_clearFlags &= ~D3D11_CLEAR_DEPTH;
     }
 
-    void DX11DepthStencil::EnableStencilClear(bool enable) {
-        m_clearFlags = enable ? m_clearFlags | D3D11_CLEAR_STENCIL : m_clearFlags & ~D3D11_CLEAR_STENCIL;
+    void DX11DepthStencil::DisableStencilClear() {
+        m_clearFlags &= ~D3D11_CLEAR_STENCIL;
+    }
+
+    void DX11DepthStencil::EnableDepthClear() {
+        m_clearFlags |= D3D11_CLEAR_DEPTH;
+    }
+
+    void DX11DepthStencil::EnableStencilClear() {
+        m_clearFlags |= D3D11_CLEAR_STENCIL;
     }
 }

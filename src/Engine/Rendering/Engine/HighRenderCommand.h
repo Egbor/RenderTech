@@ -1,114 +1,156 @@
 #ifndef HIGH_RENDER_COMMAND_H
 #define HIGH_RENDER_COMMAND_H
 
-#include "Engine/Rendering/Engine/VirtualRenderPipeline.h"
+#include "Engine/Rendering/Engine/HighRenderPipeline.h"
 #include "Engine/Rendering/Engine/Scene/Scene.h"
+
+#include "Engine/Object/Component/MeshComponent.h"
+#include "Engine/Object/Component/LightComponent.h"
 
 #define RESOURCE_TAG_GBUFFER_ALBEDO "GBuffer_Albedo"
 #define RESOURCE_TAG_GBUFFER_NORMAL "GBuffer_Normal"
 #define RESOURCE_TAG_GBUFFER_DEPTH "GBuffer_Depth"
 #define RESOURCE_TAG_GBUFFER_ORM "GBuffer_ORM"
+
+#define RESOURCE_TAG_STATE_BLEND_DEFAULT "State_DefaultBlend"
+#define RESOURCE_TAG_STATE_SAMPLER_DEFAULT "State_DefaultSampler"
+#define RESOURCE_TAG_STATE_RESTERIZER_DEFAULT "State_DefaultResterizer"
+#define RESOURCE_TAG_STATE_DEPTHSTENCIL_DEFAULT "State_DefaultDepthStencil"
+
+#define RESOURCE_TAG_STATE_BLEND_FRONT "State_FrontBlendState"
+#define RESOURCE_TAG_STATE_RESTERIZER_FRONT "State_FrontDepthStencilState"
+#define RESOURCE_TAG_STATE_DEPTHSTENCIL_FRONT "State_FrontDepthStencilState"
+
+#define RESOURCE_TAG_STATE_BLEND_BACK "State_BackBlendState"
+#define RESOURCE_TAG_STATE_RESTERIZER_BACK "State_BackDepthStencilState"
+#define RESOURCE_TAG_STATE_DEPTHSTENCIL_BACK "State_BackDepthStencilState"
+
+#define RESOURCE_TAG_STATE_DEPTHSTENCIL_SKYBOX "SkyboxDepthStencilState"
+
+#define RESOURCE_TAG_BAKING_ENV_CUBEMAP "Cubemap_Environment"
+#define RESOURCE_TAG_BAKING_IRR_CUBEMAP "Cubemap_Irradiance"
+
 #define RESOURCE_TAG_FRAME_HDR "FrameHDR"
 #define RESOURCE_TAG_FRAME "Frame"
 #define RESOURCE_TAG_DEPTH "Depth"
 
 namespace Engine {
-	class IHighRenderCommand {
+	class AbstractHighRenderCommand {
 	public:
-		virtual ~IHighRenderCommand() = default;
-		virtual void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) = 0;
+		AbstractHighRenderCommand();
+		virtual ~AbstractHighRenderCommand();
+
+		virtual void Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) = 0;
+
+	protected:
+		void ClearTargets(const HighRenderBatcher& batcher);
+		void UpdateBuffers(const HighRenderBatcher& batcher);
+
+		virtual void UpdateUBCamera(BufferResource* resource) {};
+		virtual void UpdateUBObject(BufferResource* resource) {};
+		virtual void UpdateUBHelper(BufferResource* resource) {};
+		virtual void UpdateUBLight(BufferResource* resource) {};
+
+	private:
+		Map<String, Callable<void(BufferResource*)>*> m_updater;
 	};
 
-	class HighRenderCommandPrePass : public IHighRenderCommand {
+	class HighRenderCommandPrePass : public AbstractHighRenderCommand {
 	public:
-		HighRenderCommandPrePass() = default;
+		HighRenderCommandPrePass(const HighRenderStorage& storage);
 		virtual ~HighRenderCommandPrePass() = default;
 
-		void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
+		void Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) override;
+
+	private:
+		void UpdateUBCamera(BufferResource* resource) override;
+		void UpdateUBObject(BufferResource* resource) override;
+		void UpdateUBHelper(BufferResource* resource) override;
+
+		Matrix4x4 m_view;
+		Matrix4x4 m_proj;
+
+		Viewport m_currentResolution;
+		CameraComponent* m_camera;
+
+		HighRenderBatcher m_batcher;
 	};
 
-	class HighRenderCommandBasePass : public IHighRenderCommand {
-	private:
-		IShaderResourceData* m_vertexShader;
-
+	class HighRenderCommandBasePass : public AbstractHighRenderCommand {
 	public:
-		HighRenderCommandBasePass(IRenderResourceFactory* factory);
-		virtual ~HighRenderCommandBasePass();
+		HighRenderCommandBasePass(const HighRenderStorage& storage);
+		virtual ~HighRenderCommandBasePass() = default;
 
-		void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
+		void Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) override;
 
 	private:
-		void DrawSingleMesh(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, SceneComponent* component);
+		void DrawSingleMesh(HighRenderPipelineAdapter* pipeline);
+		void UpdateUBObject(BufferResource* resource) override;
+		void UpdateUBHelper(BufferResource* resource) override;
+
+		SceneComponent* m_component;
+
+		HighRenderBatcher m_batcher;
 	};
 
-	class HighRenderCommandPreLightPass : public IHighRenderCommand {
-	private:
-		IShaderResourceData* m_vertexShader;
-
+	class HighRenderCommandLightPass : public AbstractHighRenderCommand {
 	public:
-		HighRenderCommandPreLightPass(IRenderResourceFactory* factory);
-		virtual ~HighRenderCommandPreLightPass();
+		HighRenderCommandLightPass(const HighRenderStorage& storage);
+		virtual ~HighRenderCommandLightPass() = default;
 
-		void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
+		void Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) override;
+
+	private:
+		void DrawSingleLight(HighRenderPipelineAdapter* pipeline);
+		void UpdateUBObject(BufferResource* resource) override;
+		void UpdateUBHelper(BufferResource* resource) override;
+		void UpdateUBLight(BufferResource* resource) override;
+
+		LightComponent* m_component;
+
+		HighRenderBatcher m_batcher;
 	};
 
-	class HighRenderCommandLightPass : public IHighRenderCommand {
+	//class HighRenderCommandSkybox : public AbstractHighRenderCommand {
+	//public:
+	//	HighRenderCommandSkybox(const HighRenderStorage& storage);
+	//	virtual ~HighRenderCommandSkybox() = default;
+
+	//	void Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) override;
+
+	//private:
+	//	void UpdateUBObject(IDynamicResourceData* resource) override;
+
+	//	HighRenderBatcher m_batcher;
+	//};
+
+	//class HighRenderCommandPostProcessing : public AbstractHighRenderCommand {
+	//private:
+	//	IShaderResourceData* m_vertexShader;
+	//	IShaderResourceData* m_pixelShaderGammaCorrection;
+
+	//public:
+	//	HighRenderCommandPostProcessing(IRenderResourceFactory* factory);
+	//	virtual ~HighRenderCommandPostProcessing();
+
+	//	void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
+	//};
+
+	class HighRenderCommandBakeHDRIToEnvironmentCubemap : public AbstractHighRenderCommand {
 	private:
-		IShaderResourceData* m_pixelShaderLightSources;
-		IShaderResourceData* m_pixelShaderGlobalIllumination;
-
-	public:
-		HighRenderCommandLightPass(IRenderResourceFactory* factory);
-		virtual ~HighRenderCommandLightPass();
-
-		void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
-
-	private:
-		void DrawSingleLight(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, SceneComponent* component);
-	};
-
-	class HighRenderCommandSkybox : public IHighRenderCommand {
-	private:
-		IShaderResourceData* m_vertexShader;
-		IShaderResourceData* m_pixelShader;
-
-	public:
-		HighRenderCommandSkybox(IRenderResourceFactory* factory);
-		virtual ~HighRenderCommandSkybox();
-
-		void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
-	};
-
-	class HighRenderCommandPostProcessing : public IHighRenderCommand {
-	private:
-		IShaderResourceData* m_vertexShader;
-		IShaderResourceData* m_pixelShaderGammaCorrection;
-
-	public:
-		HighRenderCommandPostProcessing(IRenderResourceFactory* factory);
-		virtual ~HighRenderCommandPostProcessing();
-
-		void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
-	};
-
-	class HighRenderCommandBakeHDRIToEnvironmentCubemap : public IHighRenderCommand {
-	private:
-		IShaderResourceData* m_vertexShader;
-		IShaderResourceData* m_pixelShaderEnvironment;
-		IShaderResourceData* m_pixelShaderIrradiance;
-		ITextureResourceData* m_equirectangularTexture;
-
 		Array<Matrix4x4> m_mat4x4ViewProjection;
 
 	public:
-		HighRenderCommandBakeHDRIToEnvironmentCubemap(IRenderResourceFactory* factory, ITextureResourceData* equirectangularTexture);
-		virtual ~HighRenderCommandBakeHDRIToEnvironmentCubemap();
+		HighRenderCommandBakeHDRIToEnvironmentCubemap(const HighRenderStorage& storage);
+		virtual ~HighRenderCommandBakeHDRIToEnvironmentCubemap() = default;
 
-		void Execute(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, Scene* scene) override;
+		void Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) override;
 
 	private:
-		void BakeEnvironmentCubemap(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer);
-		void BakeIrradianceCubemap(VirtualRenderPipeline* pipeline, const RenderResourcesStorage& storage, IBufferResourceData* cubeVertexBuffer, IBufferResourceData* cubeIndexBuffer);
+		void BakeEnvironmentCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material);
+		void BakeIrradianceCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material);
+
+		HighRenderBatcher m_batcher;
 	};
 }
 

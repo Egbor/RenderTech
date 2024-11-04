@@ -4,6 +4,8 @@
 #include "rapidxml-1.13/rapidxml.hpp"
 #include "rapidxml-1.13/rapidxml_utils.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 namespace Engine {
 	InputKey ConvertStringToKey(const String& key) {
 		static Map<String, InputKey> keytable = {
@@ -64,7 +66,7 @@ namespace Engine {
 		};
 
 		String copyOfString = key;
-		std::transform(copyOfString.begin(), copyOfString.end(), copyOfString.begin(), std::tolower);
+		boost::algorithm::to_lower(copyOfString);
 		return keytable.at(copyOfString);
 	}
 
@@ -79,7 +81,7 @@ namespace Engine {
 		};
 
 		String copyOfString = value;
-		std::transform(copyOfString.begin(), copyOfString.end(), copyOfString.begin(), std::tolower);
+		boost::algorithm::to_lower(copyOfString);
 		return valuetable.at(copyOfString);
 	}
 
