@@ -42,12 +42,12 @@ namespace Engine {
         return m_faces;
     }
 
-    IBufferResourceData* MeshDescription::BuildVertexBuffer() const {
+    BufferResource* MeshDescription::BuildVertexBuffer() const {
         IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
         return factory->CreateBuffer(BufferType::BT_VERTEX, static_cast<UInt32>(m_vertices.size()), sizeof(MeshVertex), m_vertices.data());
     }
 
-    IBufferResourceData* MeshDescription::BuildIndexBuffer() const {
+    BufferResource* MeshDescription::BuildIndexBuffer() const {
         IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
         return factory->CreateBuffer(BufferType::BT_INDEX, static_cast<UInt32>(m_faces.size() * 3), sizeof(UInt32), m_faces.data());
     }

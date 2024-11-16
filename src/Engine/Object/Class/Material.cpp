@@ -11,7 +11,6 @@ namespace Engine {
     Material::~Material() {
         DELETE_ARRAY_OF_OBJECTS(m_textures);
         DELETE_ARRAY_OF_OBJECTS(m_shaders);
-        //DELETE_OBJECT(m_shader);
     }
 
     void Material::AddTexture(Texture2D* texture) {
@@ -21,11 +20,6 @@ namespace Engine {
     void Material::AddShader(Shader* shader) {
         m_shaders[static_cast<Int32>(shader->GetAssociatedStage())] = shader;
     }
-
-    //void Material::SetShader(const Array<Int8>& bytecode) {
-    //    IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-    //    m_shader = factory->CreateShader(ShaderType::ST_PIXEL, bytecode.size(), bytecode.data());
-    //}
 
     Array<TextureResource*> Material::GetNativeTextureResources() const {
         Array<TextureResource*> nativeTextures(m_textures.size());
@@ -43,7 +37,32 @@ namespace Engine {
         return nativeShaders;
     }
 
-    //IShaderResourceData* Material::GetNativeShaderResource() const {
-    //    return m_shader;
-    //}
+    Material::Metadata::Metadata() 
+        : m_shaderPaths(), m_texturePaths() {
+
+    }
+
+    Material::Metadata* Material::Metadata::AddTexturePath(const String& path) {
+        m_texturePaths.push_back(path);
+        return this;
+    }
+
+    Material::Metadata* Material::Metadata::AddShaderPath(const String& path) {
+        m_shaderPaths.push_back(path);
+        return this;
+    }
+
+    Object* Material::Metadata::Build() {
+        Material* material = ClassType<Material>::CreateObject(ObjectArgument::Dummy());
+        
+        for (Size i = 0; i < m_texturePaths.size(); i++) {
+            material->AddTexture(Core::Load<Texture2D>(m_texturePaths[i]));
+        }
+
+        for (Size i = 0; i < m_shaderPaths.size(); i++) {
+            material->AddShader(Core::Load<Shader>(m_shaderPaths[i]));
+        }
+
+        return material;
+    }
 }

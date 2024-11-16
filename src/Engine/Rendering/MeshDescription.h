@@ -44,8 +44,8 @@ namespace Engine {
         Array<MeshVertex>& Vertices();
         Array<MeshFace>& Faces();
 
-        IBufferResourceData* BuildVertexBuffer() const;
-        IBufferResourceData* BuildIndexBuffer() const;
+        BufferResource* BuildVertexBuffer() const;
+        BufferResource* BuildIndexBuffer() const;
 
         BufferInfo GetMeshInfo();
         BufferInfo GetFaceInfo();

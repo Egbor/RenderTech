@@ -48,25 +48,40 @@ namespace Engine {
         
     }
 
-    Texture2D::Metadata* Texture2D::Metadata::SetSize(Int32 width, Int32 height) {
-        assert(!IsCubemap() || (width == height));
+    Texture2D::Metadata::~Metadata() {
+        for (Size i = 0; i < m_data.size(); i++) {
+            delete[] m_data[i];
+            m_data[i] = nullptr;
+        }
+    }
 
-        m_width = width;
-        m_height = height;
+    Texture2D::Metadata* Texture2D::Metadata::SetWidth(Int32 value) {
+        m_width = value;
+    }
 
-        return this;
+    Texture2D::Metadata* Texture2D::Metadata::SetHeight(Int32 value) {
+        m_height = value;
     }
 
     Texture2D::Metadata* Texture2D::Metadata::SetFormat(TextureFormat format) {
         m_format = format;
     }
 
-    Int8** Texture2D::Metadata::GetData(TextureFace face) {
+    Texture2D::Metadata* Texture2D::Metadata::SetData(const Int8* bits, TextureFace face) {
         Int32 faceIndex = static_cast<Int32>(face);
+        Int32 faceSize = m_height * m_width * GetBytesPrePixel(m_format);
 
-        assert(IsCubemap() || (faceIndex == 0));
+        assert(faceIndex < m_data.size());
 
-        return &m_data[faceIndex];
+        if (m_data[faceIndex] != nullptr) {
+            delete[] m_data[faceIndex];
+            m_data[faceIndex] = nullptr;
+        }
+
+        m_data[faceIndex] = new Int8[faceSize];
+        std::memcpy(m_data[faceIndex], bits, faceSize);
+
+        return this;
     }
 
     Object* Texture2D::Metadata::Build() {
@@ -80,6 +95,14 @@ namespace Engine {
 
     bool Texture2D::Metadata::IsCubemap() const {
         return m_type == TextureType::TT_CUBE || m_type == TextureType::TT_DEPTH_CUBE;
+    }
+
+    Int32 Texture2D::Metadata::GetWidth() const {
+        return m_width;
+    }
+
+    Int32 Texture2D::Metadata::GetHeight() const {
+        return m_height;
     }
 
     GENERATE_INSTANTIATION(TextureCube)

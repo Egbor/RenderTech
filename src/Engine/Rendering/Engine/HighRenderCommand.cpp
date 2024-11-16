@@ -3,37 +3,37 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-	IShaderResourceData* LoadShader(IRenderResourceFactory* factory, const String& filename, ShaderType type) {
-		const Array<Int8> code = Resource::Load<const Array<Int8>>(filename);
-		return factory->CreateShader(type, code.size(), code.data());
-	}
+	//IShaderResourceData* LoadShader(IRenderResourceFactory* factory, const String& filename, ShaderType type) {
+	//	const Array<Int8> code = Resource::Load<const Array<Int8>>(filename);
+	//	return factory->CreateShader(type, code.size(), code.data());
+	//}
 
-	Mesh* LoadLightVolume(LightType type) {
-		switch (type) {
-		case LightType::LT_POINT:
-			static Mesh* pointLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
-			return pointLight;
-		case LightType::LT_SPOT:
-			static Mesh* spotLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
-			return spotLight;
-		case LightType::LT_DIRECTIONAL:
-			static Mesh* directionalLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
-			return directionalLight;
-		default:
-			break;
-		}
-		throw EngineException("[Global] LoadLightVolume() failed. The selected light is not supported");
-	}
+	//Mesh* LoadLightVolume(LightType type) {
+	//	switch (type) {
+	//	case LightType::LT_POINT:
+	//		static Mesh* pointLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
+	//		return pointLight;
+	//	case LightType::LT_SPOT:
+	//		static Mesh* spotLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
+	//		return spotLight;
+	//	case LightType::LT_DIRECTIONAL:
+	//		static Mesh* directionalLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
+	//		return directionalLight;
+	//	default:
+	//		break;
+	//	}
+	//	throw EngineException("[Global] LoadLightVolume() failed. The selected light is not supported");
+	//}
 
-	Mesh* LoadCubeVolume() {
-		static Mesh* screen = Resource::Load<Mesh*>("assets/models/Cube.fbx");
-		return screen;
-	}
+	//Mesh* LoadCubeVolume() {
+	//	static Mesh* screen = Resource::Load<Mesh*>("assets/models/Cube.fbx");
+	//	return screen;
+	//}
 
-	Mesh* LoadPlaneVolume() {
-		static Mesh* screen = Resource::Load<Mesh*>("assets/models/Plane.fbx");
-		return screen;
-	}
+	//Mesh* LoadPlaneVolume() {
+	//	static Mesh* screen = Resource::Load<Mesh*>("assets/models/Plane.fbx");
+	//	return screen;
+	//}
 
 	void UpdatePrePassUBCamera(RawData& data, CameraComponent* component, Float viewportWidth, Float viewportHeight) {
 		UB_Camera* buffer = data.As<UB_Camera>();
@@ -400,16 +400,13 @@ namespace Engine {
 	//}
 
 	void HighRenderCommandBakeHDRIToEnvironmentCubemap::Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) {
-		// MeshElement* cube = LoadCubeVolume()->GetMeshElement(0);
-		StaticMesh* staticCubeMesh = Core::Load<BasicMesh>("models\\Cube.obj")->BuildStaticMesh();
+		StaticMesh* staticCubeMesh = Core::Load<StaticMesh>("models\\Cube.rtasset");
 
 		pipeline->BindResources(m_batcher.QueryResources<StateResource>(HRS_Tag::HRS_PS_STAGE), RenderStage::RS_PIXEL);
 		pipeline->BindResources(m_batcher.QueryResources<StateResource>(HRS_Tag::HRS_STANDALONE));
 
-		BakeEnvironmentCubemap(pipeline, staticCubeMesh->GetSubmesh(0), Core::Load<Material>("materials\\baking\\RawEnvironmentSkybox.xml"));
-		BakeIrradianceCubemap(pipeline, staticCubeMesh->GetSubmesh(0), Core::Load<Material>("materials\\baking\\RawIrradianceSkybox.xml"));
-
-		DELETE_OBJECT(staticCubeMesh);
+		BakeEnvironmentCubemap(pipeline, staticCubeMesh->GetSubmesh(0), Core::Load<Material>("materials\\baking\\RawEnvironmentSkybox.rtasset"));
+		BakeIrradianceCubemap(pipeline, staticCubeMesh->GetSubmesh(0), Core::Load<Material>("materials\\baking\\RawIrradianceSkybox.rtasset"));
 	}
 
 	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeEnvironmentCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material) {

@@ -44,16 +44,21 @@ namespace Engine {
         class Metadata : public IResourceMetadata {
         public:
             Metadata(TextureType type);
+            ~Metadata();
 
-            Metadata* SetSize(Int32 width, Int32 height);
+            Metadata* SetWidth(Int32 value);
+            Metadata* SetHeight(Int32 value);
             Metadata* SetFormat(TextureFormat format);
-            Int8** GetData(TextureFace face);
+            Metadata* SetData(const Int8* bits, TextureFace face);
 
             bool IsCubemap() const;
 
-        private:
+            Int32 GetWidth() const;
+            Int32 GetHeight() const;
+
             Object* Build() override;
 
+        private:
             Array<Int8*> m_data;
             Int32 m_width;
             Int32 m_height;

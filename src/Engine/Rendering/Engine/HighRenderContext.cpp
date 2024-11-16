@@ -174,13 +174,13 @@ namespace Engine {
 
 	HRC_IBLBacker::HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight) 
 		: AbstractHighRenderContext(context), m_IBLCubeMapOutputWidth(outputWidth), m_IBLCubeMapOutputHeight(outputHeight) {
-		m_texture2D = Resource::Load<Texture2D*>(filename);
+		// m_texture2D = Resource::Load<Texture2D*>(filename);
 
 		ExtendCommandList(new HighRenderCommandBakeHDRIToEnvironmentCubemap(GetStorage()));
 	}
 	
 	HRC_IBLBacker::~HRC_IBLBacker() {
-		DELETE_OBJECT(m_texture2D);
+		// DELETE_OBJECT(m_texture2D);
 	}
 
 	void HRC_IBLBacker::OnInitDraw(IContext* context) {

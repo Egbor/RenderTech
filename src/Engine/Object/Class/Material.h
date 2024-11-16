@@ -9,26 +9,34 @@ namespace Engine {
     class Material : public Object {
         GENERATE_BODY(Material, Object)
 
-        //template<class TObjectClass>
-        //friend TObjectClass* LoadResourceFromFile(const String&);
-
     private:
         Array<Texture2D*> m_textures;
         Array<Shader*> m_shaders;
 
-        //IShaderResourceData* m_shader;
-
     public:
+        class Metadata : public IResourceMetadata {
+        public:
+            Metadata();
+            ~Metadata() = default;
+
+            Metadata* AddTexturePath(const String& path);
+            Metadata* AddShaderPath(const String& path);
+
+            Object* Build() override;
+
+        private:
+            Array<String> m_texturePaths;
+            Array<String> m_shaderPaths;
+        };
+
         Material(const ObjectArgument& argument);
         virtual ~Material();
 
         void AddTexture(Texture2D* texture);
         void AddShader(Shader* shader);
-        //void SetShader(const Array<Int8>& bytecode);
 
         Array<TextureResource*> GetNativeTextureResources() const;
         Array<ShaderResource*> GetNativeShaderResources() const;
-        //IShaderResourceData* GetNativeShaderResource() const;
     };
 }
 

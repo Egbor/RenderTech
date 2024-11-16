@@ -185,6 +185,32 @@ namespace Engine {
         return format;
     }
 
+    constexpr static Int32 GetBytesPrePixel(TextureFormat format) {
+        switch (format) {
+        case Engine::TextureFormat::TF_R8_BMP:
+            return 1;
+        case Engine::TextureFormat::TF_R8G8_BMP:
+        case Engine::TextureFormat::TF_R16_UINT:
+        case Engine::TextureFormat::TF_R16_INT:
+            return 2;
+        case Engine::TextureFormat::TF_R8G8B8A8_BMP_sRGB:
+        case Engine::TextureFormat::TF_B8G8R8A8_BMP_sRGB:
+        case Engine::TextureFormat::TF_R8G8B8A8_BMP:
+        case Engine::TextureFormat::TF_B8G8R8A8_BMP:
+        case Engine::TextureFormat::TF_R24G8_BMP:
+        case Engine::TextureFormat::TF_R24_BMP_G8_UINT:
+        case Engine::TextureFormat::TF_R32_INT:
+        case Engine::TextureFormat::TF_R32_UINT:
+        case Engine::TextureFormat::TF_R32_FLOAT:
+            return 4;
+        case Engine::TextureFormat::TF_R32G32B32A32_FLOAT:
+            return 128;
+        default:
+            break;
+        }
+        return 0;
+    }
+
     template<class TResourceClass>
     struct ResourceIdentifierOf {
         static const ResourceIdentifier value;

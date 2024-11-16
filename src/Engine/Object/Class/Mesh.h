@@ -15,13 +15,31 @@ namespace Engine {
     class StaticMesh : public Object {
         GENERATE_BODY(StaticMesh, Object)
 
-        friend class BasicMesh;
-
     private:
         Array<MeshUnit> m_submeshes;
         Array<Material*> m_materials;
 
     public:
+        class Metadata : public IResourceMetadata {
+        public:
+            Metadata();
+            ~Metadata() = default;
+
+            Metadata* AddSubmesh(MeshDescription* description);
+            Metadata* SetMeshOptimization(bool value);
+            Metadata* SetLeftHandedOptimization(bool value);
+
+            bool HasMeshOptimization() const;
+            bool HasLeftHandedOptimization() const;
+
+            Object* Build() override;
+
+        private:
+            Array<MeshUnit> m_submeshes;
+            bool m_hasMeshOptimization;
+            bool m_hasLeftHandedOptiization;
+        };
+
         StaticMesh(const ObjectArgument& argument);
         virtual ~StaticMesh() = default;
 
@@ -32,68 +50,6 @@ namespace Engine {
 
         Int32 GetNumberOfElements() const;
     };
-
-    CLASSTYPE(BasicMesh)
-    class BasicMesh : public Object {
-        GENERATE_BODY(BasicMesh, Object)
-
-    private:
-        Array<MeshUnit> m_submeshes;
-
-    public:
-        BasicMesh(const ObjectArgument& argument);
-        virtual ~BasicMesh();
-
-        void AddSubmesh(MeshDescription* description);
-        StaticMesh* BuildStaticMesh() const;
-    };
-
-
-
-    //CLASSTYPE(MeshElement)
-    //class MeshElement : public Object {
-    //    GENERATE_BODY(MeshElement, Object)
-
-    //    friend class Mesh;
-
-    //private:
-    //    IBufferResourceData* m_vertexBuffer;
-    //    IBufferResourceData* m_indexBuffer;
-
-    //public:
-    //    MeshElement(const ObjectArgument& arguments);
-    //    virtual ~MeshElement();
-
-    //    Int32 GetNumIndexies() const;
-
-    //    IBufferResourceData* GetVertexBuffer() const;
-    //    IBufferResourceData* GetIndexBuffer() const;
-
-    //protected:
-    //    void Create(const BufferInfo& vertexInfo, const BufferInfo& indexInfo);
-    //};
-
-    //CLASSTYPE(Mesh)
-    //class Mesh : public Object {
-    //    GENERATE_BODY(Mesh, Object)
-
-    //private:
-    //    Array<MeshElement*> m_submeshes;
-    //    Array<Material*> m_materials;
-
-    //public:
-    //    Mesh(const ObjectArgument& argument);
-    //    virtual ~Mesh();
-
-    //    void AddMeshElement(MeshDescription* meshDesc);
-    //    void SetMaterial(Int32 slot, Material* material);
-
-    //    MeshElement* GetMeshElement(Int32 slot) const;
-    //    Material* GetMaterial(Int32 slot) const;
-
-    //    Int32 GetNumMeshElements() const;
-    //    Int32 GetNumMaterials() const;
-    //};
 }
 
 #endif // MESH_H

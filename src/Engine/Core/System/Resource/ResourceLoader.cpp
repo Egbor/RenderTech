@@ -8,15 +8,12 @@
 
 #include "Engine/Rendering/MeshAttributes.h"
 
-#include <assimp\Importer.hpp>
-#include <assimp\scene.h>
-#include <assimp\postprocess.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <rapidxml-1.13/rapidxml.hpp>
 #include <rapidxml-1.13/rapidxml_utils.hpp>
 #include <FreeImage.h>
-
-#include <filesystem>
-#include <sstream>
 
 namespace Engine {
 
@@ -132,170 +129,6 @@ namespace Engine {
         }
     }
 
-    template<>
-    void ResourceLoader::Load(ResourceNode* root, const String& path, Texture2D* outResource) {
-        Int32 dataSize = 0;
-
-        Array<String> paths;
-
-        if (outResource->IsCubemap()) {
-            dataSize = NUMBER_OF_FACES_FOR_CUBEMAP_TEXTURE;
-            paths.resize(dataSize);
-
-            // Setup texture factory for a cubemap
-        } else {
-            dataSize = NUMBER_OF_FACES_FOR_SINGLE_TEXTURE;
-            paths.resize(dataSize);
-
-            // Setup texture factory for a regular texture
-        }
-
-        Array<Int8*> data(dataSize);
-        Array<FIBITMAP*> dibs(dataSize);
-
-        for (Int32 i = 0; i < dataSize; i++) {
-            dibs[i] = LoadFreeImageResource(paths[i]);
-            data[i] = reinterpret_cast<Int8*>(FreeImage_GetBits(dibs[i]));
-        }
-
-        UnloadFreeImageResources(dibs);
-        //FIBITMAP* dib = LoadFreeImageResource(root->Filename(path));
-
-        //Array<Int8*> data;
-        //Int32 width = static_cast<Int32>(FreeImage_GetWidth(dib));
-        //Int32 height = static_cast<Int32>(FreeImage_GetHeight(dib));
-        //data.push_back(reinterpret_cast<Int8*>(FreeImage_GetBits(dib)));
-
-        ////Texture2D* texture = ClassType<Texture2D>::CreateObject(ObjectArgument::Dummy());
-        //outResource->Create(width, height, ToFormat(dib), data);
-
-        //FreeImage_Unload(dib);
-
-        root->Set(path, outResource);
-    }
-
-    template<>
-    TextureCube* LoadResourceFromFile(const String& filename) {
-        std::filesystem::path filepath(filename);
-
-        Array<FIBITMAP*> dibs;
-        Array<Int8*> data;
-
-        for (Int32 i = 0; i < 6; i++) {
-            std::filesystem::path tempFilepath(filepath);
-            tempFilepath.replace_filename(filepath.stem().string() + std::to_string(i + 1) + filepath.extension().string());
-
-            dibs.push_back(LoadFreeImageResource(tempFilepath.string()));
-            data.push_back(reinterpret_cast<Int8*>(FreeImage_GetBits(dibs[dibs.size() - 1])));
-        }
-
-        Int32 width = static_cast<Int32>(FreeImage_GetWidth(dibs[0]));
-        Int32 height = static_cast<Int32>(FreeImage_GetHeight(dibs[0]));
-
-        TextureCube* texture = ClassType<TextureCube>::CreateObject(ObjectArgument::Dummy());
-        texture->Create(width, height, ToFormat(dibs[0]), data);
-
-        UnloadFreeImageResources(dibs);
-
-        return texture;
-    }
-
-
-    // Section of shader resource loader
-
-
-    template<>
-    void ResourceLoader::Load(ResourceNode* root, const String& path, Shader* outResource) {
-        std::filesystem::path filepath(root->Filename(path));
-        std::ifstream in(filepath, std::ios::binary);
-
-        if (!in.is_open()) {
-            throw EngineException("[Resource] Binary file can not be opened");
-        }
-
-        in.seekg(0, std::ios::end);
-
-        Array<Int8> code(in.tellg());
-
-        in.seekg(0, std::ios::beg);
-        in.read(reinterpret_cast<char*>(code.data()), code.size());
-
-        outResource->Build(code);
-        root->Set(path, outResource);
-    }
-
-
-    // Section of material resource loader
-
-
-#define RTMTL_TAG_TYPE(rtmtlAttributes) rtmtlAttributes.at("type")
-#define RTMTL_TAG_PATH(rtmtlAttributes) rtmtlAttributes.at("path")
-
-#define RTMTL_SHADER_TYPE(rtmtlAttributes) rtmltShaderTypes.at(RTMTL_TAG_TYPE(rtmtlAttributes))
-#define RTMTL_CALL_LOADER(tag, attributes, root, material) rtmltLoaders.at(tag)(attributes, root, material) 
-
-    void LoadTextureFromMaterial(const Map<String, String>& attributes, ResourceNode* root, Material* out);
-    void LoadShaderFromMaterial(const Map<String, String>& attributes, ResourceNode* root, Material* out);
-
-
-    static const Map<String, RenderStage> rtmltShaderTypes = {
-        { "vertex", RenderStage::RS_VERTEX },
-        { "pixel", RenderStage::RS_PIXEL },
-    };
-
-    static const Map<String, std::function<void(const Map<String, String>&, ResourceNode*, Material*)>> rtmltLoaders {
-        { "texture2d", LoadTextureFromMaterial },
-        { "shader", LoadShaderFromMaterial },
-    };
-
-    void LoadTextureFromMaterial(const Map<String, String>& attributes, ResourceNode* root, Material* out) {
-        Texture2D* texture = dynamic_cast<Texture2D*>(root->Get(RTMTL_TAG_PATH(attributes)));
-        if (texture == nullptr) {
-            texture = ClassType<Texture2D>::CreateObject(ObjectArgument::Dummy());
-
-            ResourceLoader::Load<Texture2D>(root, RTMTL_TAG_PATH(attributes), texture);
-        }
-        out->AddTexture(texture);
-    }
-
-    void LoadShaderFromMaterial(const Map<String, String>& attributes, ResourceNode* root, Material* out) {
-        Shader* shader = dynamic_cast<Shader*>(root->Get(RTMTL_TAG_PATH(attributes)));
-        if (shader == nullptr) {
-            shader = ClassType<Shader>::CreateObject(ObjectArgument::Dummy());
-            shader->Init(RTMTL_SHADER_TYPE(attributes));
-            
-            ResourceLoader::Load<Shader>(root, RTMTL_TAG_PATH(attributes), shader);
-        }
-        out->AddShader(shader);
-    }
-
-	template<>
-	void ResourceLoader::Load(ResourceNode* root, const String& path, Material* outResource) {
-		rapidxml::file<>* xmlFile = new rapidxml::file<>(root->Filename(path).c_str());
-		rapidxml::xml_document<>* xmlDocument = new rapidxml::xml_document<>();
-
-		xmlDocument->parse<0>(xmlFile->data());
-
-		rapidxml::xml_node<>* xmlRoot = xmlDocument->first_node();
-		if (std::strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), "material") != 0) {
-			throw EngineException("[Resource] The XML file does not meet material conditions");
-		}
-
-		for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-			Map<String, String> xmlAtributes;
-			for (rapidxml::xml_attribute<>* attr = node->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
-				xmlAtributes[boost::algorithm::to_lower_copy(attr->name())] = boost::algorithm::to_lower_copy(attr->value());
-			}
-            RTMTL_CALL_LOADER(boost::algorithm::to_lower_copy(node->name()), xmlAtributes, root, outResource);
-		}
-
-		delete xmlDocument;
-		delete xmlFile;
-
-        root->Set(path, outResource);
-	}
-
-
     // Section of mesh resource loader
 
 
@@ -313,7 +146,7 @@ namespace Engine {
 #define TryImportVector3DData(ref, refId, ptrVector, ptrVectorId) if (ptrVector != nullptr) { ImportAssimpVector3DData(ref, refId, ptrVector[ptrVectorId]); }
 #define TryImportVector2DData(ref, refId, ptrVector, ptrVectorId) if (ptrVector != nullptr) { ImportAssimpVector2DData(ref, refId, ptrVector[ptrVectorId]); }
 
-    void StartSubmeshImportingProcess(aiMesh* mesh, const aiScene* scene, BasicMesh* outMesh) {
+    void StartSubmeshImportingProcess(aiMesh* mesh, const aiScene* scene, StaticMesh::Metadata* metadata) {
         MeshDescription desc;
         MeshAttributes meshAttributes(desc);
 
@@ -331,41 +164,308 @@ namespace Engine {
             desc.CreateFace({ (int)face.mIndices[0], (int)face.mIndices[1], (int)face.mIndices[2] });
         }
 
-        outMesh->AddSubmesh(&desc);
+        metadata->AddSubmesh(&desc);
     }
 
-    void StartMeshImportingProcess(aiNode* node, const aiScene* scene, BasicMesh* outMesh) {
+    void StartMeshImportingProcess(aiNode* node, const aiScene* scene, StaticMesh::Metadata* metadata) {
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            StartSubmeshImportingProcess(scene->mMeshes[node->mMeshes[i]], scene, outMesh);
+            StartSubmeshImportingProcess(scene->mMeshes[node->mMeshes[i]], scene, metadata);
         }
 
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
-            StartMeshImportingProcess(node->mChildren[i], scene, outMesh);
+            StartMeshImportingProcess(node->mChildren[i], scene, metadata);
         }
     }
 
-    template<>
-    void ResourceLoader::Load(ResourceNode* root, const String& path, BasicMesh* outResource) {
+    Object* LoadAssetStaticMesh(rapidxml::xml_node<>* xmlRoot);
+    Object* LoadAssetTexture2D(rapidxml::xml_node<>* xmlRoot);
+    Object* LoadAssetMaterial(rapidxml::xml_node<>* xmlRoot);
+    Object* LoadAssetCubemap(rapidxml::xml_node<>* xmlRoot);
+    Object* LoadAssetShader(rapidxml::xml_node<>* xmlRoot);
+
+    void LoadAssetMetadataLeftHandedOptimization(IResourceMetadata* metadata, const Map<String, String>& attributes);
+    void LoadAssetMetadataMeshOptimization(IResourceMetadata* metadata, const Map<String, String>& attributes);
+    void LoadAssetMetadataResolution(IResourceMetadata* metadata, const Map<String, String>& attributes);
+    void LoadAssetMetadataSizeX(IResourceMetadata* metadata, const Map<String, String>& attributes);
+    void LoadAssetMetadataType(IResourceMetadata* metadata, const Map<String, String>& attributes);
+
+    static const Map<String, std::function<Object*(rapidxml::xml_node<>*)>> rtAssetLoaders {
+        { "staticmesh", LoadAssetStaticMesh },
+        { "texture2d", LoadAssetTexture2D },
+        { "material", LoadAssetMaterial },
+        { "cubemap", LoadAssetCubemap },
+        { "shader", LoadAssetShader },
+    };
+
+    static const Map<String, std::function<void(IResourceMetadata*, const Map<String, String>&)>> rtAssetMetadataLoaders {
+        { "lefthandedoptimization", LoadAssetMetadataLeftHandedOptimization },
+        { "meshoptimization", LoadAssetMetadataMeshOptimization },
+        { "resolution", LoadAssetMetadataResolution },
+        { "sizex", LoadAssetMetadataSizeX },
+        { "type", LoadAssetMetadataType },
+    };
+
+    static const Map<String, TextureFace> rtFaces {
+        { "+x", TextureFace::TF_POSITIVE_X },
+        { "-x", TextureFace::TF_NEGATIVE_X },
+        { "+y", TextureFace::TF_POSITIVE_Y },
+        { "-y", TextureFace::TF_NEGATIVE_Y },
+        { "+z", TextureFace::TF_POSITIVE_Z },
+        { "-z", TextureFace::TF_NEGATIVE_Z },
+    };
+
+    static const Map<String, RenderStage> rtShaderTypes {
+        { "vertex", RenderStage::RS_VERTEX },
+        { "pixel", RenderStage::RS_PIXEL },
+    };
+
+#define RTASSET_TAG_METADATA "metadata"
+#define RTASSET_TAG_FACES "faces"
+#define RTASSET_TAG_DATA "data"
+
+#define RTASSET_ATTRIBUTE_HEIGHT "height"
+#define RTASSET_ATTRIBUTE_WIDTH "width"
+#define RTASSET_ATTRIBUTE_VALUE "value"
+#define RTASSET_ATTRIBUTE_PATH "path"
+#define RTASSET_ATTRIBUTE_TYPE "type"
+#define RTASSET_ATTRIBUTE_ID "id"
+
+    void ParseMetadataSection(IResourceMetadata* metadata, rapidxml::xml_node<>* xmlRoot) {
+        Map<String, String> attributes;
+
+        for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
+            for (rapidxml::xml_attribute<>* attr = node->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
+                attributes[boost::algorithm::to_lower_copy(attr->name())] = attr->value();
+            }
+
+            auto function = rtAssetMetadataLoaders.at(boost::algorithm::to_lower_copy(node->name()));
+            function(metadata, attributes);
+        }
+    }
+
+    void ParseTextureDataSection(IResourceMetadata* metadata, rapidxml::xml_node<>* xmlRoot) {
+        TextureFace face = TextureFace::TF_DEFAULT;
+        String path = "";
+
+        for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
+            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_ID) == 0) {
+                face = rtFaces.at(boost::algorithm::to_lower_copy(attr->value()));
+            }
+            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+                path = attr->value();
+            }
+        }
+
+        assert(!path.empty());
+
+        FIBITMAP* dib = LoadFreeImageResource(path);
+        Texture2D::Metadata* textureMetadata = dynamic_cast<Texture2D::Metadata*>(metadata);
+
+        assert(FreeImage_GetWidth(dib) == textureMetadata->GetWidth());
+        assert(FreeImage_GetHeight(dib) == textureMetadata->GetHeight());
+
+        textureMetadata->SetFormat(ToFormat(dib));
+        textureMetadata->SetData(reinterpret_cast<Int8*>(FreeImage_GetBits(dib)), face);
+
+        FreeImage_Unload(dib);
+    }
+
+    void ParseShaderDataSection(IResourceMetadata* metadata, rapidxml::xml_node<>* xmlRoot) {
+        String path = "";
+
+        for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
+            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+                path = attr->value();
+            }
+        }
+
+        assert(!path.empty());
+
+        std::ifstream in(path, std::ios::binary);
+        Shader::Metadata* shaderMetadata = dynamic_cast<Shader::Metadata*>(metadata);
+
+        if (!in.is_open()) {
+            throw EngineException("[Resource] Shader .CSO file can not be opened");
+        }
+
+        in.seekg(0, std::ios::end);
+
+        Int32 dataLength = in.tellg();
+        Int8* data = shaderMetadata->SetDataLength(dataLength)->GetData();
+
+        in.seekg(0, std::ios::beg);
+        in.read(reinterpret_cast<char*>(data), dataLength);
+    }
+
+    void ParseStaticMeshDataSection(IResourceMetadata* metadata, rapidxml::xml_node<>* xmlRoot) {
+        String path = "";
+
+        for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
+            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+                path = attr->value();
+            }
+        }
+
+        assert(!path.empty());
+
         Assimp::Importer importer;
+        StaticMesh::Metadata* meshMetadata = dynamic_cast<StaticMesh::Metadata*>(metadata);
+
+        UInt32 flags = aiProcessPreset_TargetRealtime_Quality;
+        flags |= (meshMetadata->HasLeftHandedOptimization()) ? aiProcess_ConvertToLeftHanded : 0;
+        flags |= (meshMetadata->HasMeshOptimization()) ? aiProcess_OptimizeMeshes : 0;
 
         importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80.0f);
         importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
 
-        const aiScene* scene = importer.ReadFile(
-            root->Filename(path),
-            aiProcessPreset_TargetRealtime_Quality |
-            aiProcess_ConvertToLeftHanded |
-            //aiProcess_RemoveComponent |
-            //aiProcess_OptimizeGraph |
-            aiProcess_OptimizeMeshes |
-            0
-        );
-
+        const aiScene* scene = importer.ReadFile(path, flags);
         if (scene == nullptr) {
             throw EngineException("[Resource] Failed to load model");
         }
-        StartMeshImportingProcess(scene->mRootNode, scene, outResource);
 
-        root->Set(path, outResource);
+        StartMeshImportingProcess(scene->mRootNode, scene, meshMetadata);
+    }
+
+    void LoadAssetMetadataLeftHandedOptimization(IResourceMetadata* metadata, const Map<String, String>& attributes) {
+        StaticMesh::Metadata* meshMetadata = dynamic_cast<StaticMesh::Metadata*>(metadata);
+        meshMetadata->SetLeftHandedOptimization(true);
+    }
+
+    void LoadAssetMetadataMeshOptimization(IResourceMetadata* metadata, const Map<String, String>& attributes) {
+        StaticMesh::Metadata* meshMetadata = dynamic_cast<StaticMesh::Metadata*>(metadata);
+        meshMetadata->SetMeshOptimization(true);
+    }
+
+    void LoadAssetMetadataResolution(IResourceMetadata* metadata, const Map<String, String>& attributes) {
+        Texture2D::Metadata* textureMetadata = dynamic_cast<Texture2D::Metadata*>(metadata);
+
+        Int32 width = std::stoi(attributes.at(RTASSET_ATTRIBUTE_WIDTH));
+        Int32 height = std::stoi(attributes.at(RTASSET_ATTRIBUTE_HEIGHT));
+
+        assert(!textureMetadata->IsCubemap() || width == height);
+
+        textureMetadata->SetWidth(width)->SetHeight(height);
+    }
+
+    void LoadAssetMetadataSizeX(IResourceMetadata* metadata, const Map<String, String>& attributes) {
+        Texture2D::Metadata* textureMetadata = dynamic_cast<Texture2D::Metadata*>(metadata);
+        Int32 size = std::stoi(attributes.at(RTASSET_ATTRIBUTE_VALUE));
+        textureMetadata->SetWidth(size)->SetHeight(size);
+    }
+
+    void LoadAssetMetadataType(IResourceMetadata* metadata, const Map<String, String>& attributes) {
+        Shader::Metadata* shaderMetadata = dynamic_cast<Shader::Metadata*>(metadata);
+        RenderStage stage = rtShaderTypes.at(boost::algorithm::to_lower_copy(attributes.at(RTASSET_ATTRIBUTE_VALUE)));
+        shaderMetadata->SetType(stage);
+    }
+
+    Object* LoadAssetTexture2D(rapidxml::xml_node<>* xmlRoot) {
+        Texture2D::Metadata metadata(TextureType::TT_DEFAULT);
+        for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
+            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_METADATA) == 0) {
+                ParseMetadataSection(&metadata, node);
+            }
+
+            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_DATA) == 0) {
+                ParseTextureDataSection(&metadata, node);
+            }
+        }
+        return metadata.Build();
+    }
+
+    Object* LoadAssetMaterial(rapidxml::xml_node<>* xmlRoot) {
+        Material::Metadata metadata;
+        for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
+            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_METADATA) == 0) {
+                ParseMetadataSection(&metadata, node);
+            }
+
+            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_DATA) == 0) {
+                for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
+                    String type = "";
+                    String path = "";
+
+                    if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_TYPE) == 0) {
+                        type = boost::algorithm::to_lower_copy(attr->value());
+                    }
+
+                    if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+                        path = attr->value();
+                    }
+
+                    assert(!(type.empty() || path.empty()));
+
+                    if (strcmp("texture", type.c_str()) == 0) {
+                        metadata.AddTexturePath(path);
+                    } else if (strcmp("shader", type.c_str()) == 0) {
+                        metadata.AddShaderPath(path);
+                    }
+                }
+            }
+        }
+        return metadata.Build();
+    }
+
+    Object* LoadAssetCubemap( rapidxml::xml_node<>* xmlRoot) {
+        Texture2D::Metadata metadata(TextureType::TT_CUBE);
+        for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
+            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_METADATA) == 0) {
+                ParseMetadataSection(&metadata, node);
+            }
+
+            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_FACES) == 0) {
+                for (rapidxml::xml_node<>* dataNode = node->first_node(); dataNode != nullptr; dataNode = dataNode->next_sibling()) {
+                    if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_DATA) == 0) {
+                        ParseTextureDataSection(&metadata, dataNode);
+                    }
+                }
+            }
+        }
+        return metadata.Build();
+    }
+
+    Object* LoadAssetShader(rapidxml::xml_node<>* xmlRoot) {
+        Shader::Metadata metadata;
+        for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
+            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_METADATA) == 0) {
+                ParseMetadataSection(&metadata, node);
+            }
+
+            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_DATA) == 0) {
+                ParseShaderDataSection(&metadata, node);
+            }
+        }
+        return metadata.Build();
+    }
+
+    Object* LoadAssetStaticMesh(rapidxml::xml_node<>* xmlRoot) {
+        StaticMesh::Metadata metadata;
+        for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
+            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_METADATA) == 0) {
+                ParseMetadataSection(&metadata, node);
+            }
+
+            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_DATA) == 0) {
+                ParseShaderDataSection(&metadata, node);
+            }
+        }
+        return metadata.Build();
+    }
+
+    Object* ResourceLoader::Load(const String& path) {        
+        rapidxml::file<>* xmlFile = new rapidxml::file<>(path.c_str());
+        rapidxml::xml_document<>* xmlDocument = new rapidxml::xml_document<>();
+
+        xmlDocument->parse<0>(xmlFile->data());
+
+        rapidxml::xml_node<>* xmlRoot = xmlDocument->first_node();
+
+        auto function = rtAssetLoaders.at(xmlRoot->name());  
+        Object* resource = function(xmlRoot);
+
+        delete xmlDocument;
+        delete xmlFile;
+
+        return resource;
     }
 }
