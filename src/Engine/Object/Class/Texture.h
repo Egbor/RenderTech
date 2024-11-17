@@ -46,6 +46,7 @@ namespace Engine {
             Metadata(TextureType type);
             ~Metadata();
 
+            Metadata* SetName(const String& value);
             Metadata* SetWidth(Int32 value);
             Metadata* SetHeight(Int32 value);
             Metadata* SetFormat(TextureFormat format);
@@ -59,6 +60,7 @@ namespace Engine {
             Object* Build() override;
 
         private:
+            String m_name;
             Array<Int8*> m_data;
             Int32 m_width;
             Int32 m_height;

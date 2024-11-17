@@ -44,7 +44,7 @@ namespace Engine {
 
     Texture2D::Metadata::Metadata(TextureType type) 
         : m_type(type), m_data(IsCubemap() ? NUMBER_OF_FACES_FOR_CUBEMAP_TEXTURE : NUMBER_OF_FACES_FOR_SINGLE_TEXTURE)
-        , m_width(0), m_height(0) {
+        , m_width(0), m_height(0), m_name() {
         
     }
 
@@ -53,6 +53,10 @@ namespace Engine {
             delete[] m_data[i];
             m_data[i] = nullptr;
         }
+    }
+
+    Texture2D::Metadata* Texture2D::Metadata::SetName(const String& name) {
+        m_name = name;
     }
 
     Texture2D::Metadata* Texture2D::Metadata::SetWidth(Int32 value) {
@@ -89,6 +93,7 @@ namespace Engine {
 
         Texture2D* texture = ClassType<Texture2D>::CreateObject(ObjectArgument::Dummy());
         texture->m_nativeTexture = factory->CreateTexture(m_type, m_format, m_width, m_height, m_data);
+        texture->SetName(m_name);
 
         return texture;
     }

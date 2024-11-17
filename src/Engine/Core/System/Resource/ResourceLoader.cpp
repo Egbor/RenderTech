@@ -183,6 +183,8 @@ namespace Engine {
     Object* LoadAssetCubemap(rapidxml::xml_node<>* xmlRoot);
     Object* LoadAssetShader(rapidxml::xml_node<>* xmlRoot);
 
+    void SaveAssetTexture2D(Object* object);
+
     void LoadAssetMetadataLeftHandedOptimization(IResourceMetadata* metadata, const Map<String, String>& attributes);
     void LoadAssetMetadataMeshOptimization(IResourceMetadata* metadata, const Map<String, String>& attributes);
     void LoadAssetMetadataResolution(IResourceMetadata* metadata, const Map<String, String>& attributes);
@@ -195,6 +197,10 @@ namespace Engine {
         { "material", LoadAssetMaterial },
         { "cubemap", LoadAssetCubemap },
         { "shader", LoadAssetShader },
+    };
+
+    static const Map<UInt64, std::function<void(Object*)>> rtAssetSavers {
+        { Texture2D::TypeIdClass(), SaveAssetTexture2D },
     };
 
     static const Map<String, std::function<void(IResourceMetadata*, const Map<String, String>&)>> rtAssetMetadataLoaders {
@@ -229,6 +235,12 @@ namespace Engine {
 #define RTASSET_ATTRIBUTE_PATH "path"
 #define RTASSET_ATTRIBUTE_TYPE "type"
 #define RTASSET_ATTRIBUTE_ID "id"
+
+    //void MaybeInitAssetSavers() {
+    //    if (rtAssetSavers.empty()) {
+    //        rtAssetSavers[Texture2D::TypeIdClass()] = SaveAssetTexture2D;
+    //    }
+    //}
 
     void ParseMetadataSection(IResourceMetadata* metadata, rapidxml::xml_node<>* xmlRoot) {
         Map<String, String> attributes;
@@ -359,6 +371,10 @@ namespace Engine {
         shaderMetadata->SetType(stage);
     }
 
+
+    // Load assets section
+
+
     Object* LoadAssetTexture2D(rapidxml::xml_node<>* xmlRoot) {
         Texture2D::Metadata metadata(TextureType::TT_DEFAULT);
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
@@ -452,6 +468,43 @@ namespace Engine {
         return metadata.Build();
     }
 
+    
+    // Save assets section
+
+
+    void SaveAssetTexture2D(Object* object) {
+        const TextureResource* texture = object->As<Texture2D>()->GetNativeResource();
+        const Int32 facesNum = texture->IsCubemap() ? NUMBER_OF_FACES_FOR_CUBEMAP_TEXTURE : NUMBER_OF_FACES_FOR_SINGLE_TEXTURE;
+
+        Int32 width = texture->GetWidth();
+        Int32 height = texture->GetHeight();
+
+        FREE_IMAGE_TYPE type = ToFreeImageFormat(texture->GetFormat());
+        FREE_IMAGE_FORMAT format;
+
+        String path = "bin\\textures\\" + object->GetName();
+        String extend;
+
+        if (type == FIT_RGBAF) {
+            format = FIF_EXR;
+            extend = ".exr";
+        } else {
+            format = FIF_PNG;
+            extend = ".png";
+        }
+
+        FIBITMAP* dib = FreeImage_AllocateT(type, width, height);
+        for (Int32 face = 0; face < facesNum; face++) {
+            Int8* bits = reinterpret_cast<Int8*>(FreeImage_GetBits(dib));
+            Int32 size = width * height * FreeImage_GetBPP(dib) / 8;
+
+            texture->ReadByCPUAccess(bits, face, size);
+            FreeImage_Save(format, dib, (path + std::to_string(face) + extend).c_str());
+        }
+        FreeImage_Unload(dib);
+    }
+
+
     Object* ResourceLoader::Load(const String& path) {        
         rapidxml::file<>* xmlFile = new rapidxml::file<>(path.c_str());
         rapidxml::xml_document<>* xmlDocument = new rapidxml::xml_document<>();
@@ -467,5 +520,10 @@ namespace Engine {
         delete xmlFile;
 
         return resource;
+    }
+
+    void ResourceLoader::Save(const String& path, Object* object) {
+        auto function = rtAssetSavers.at(object->TypeIdClass());
+        function(object);
     }
 }
