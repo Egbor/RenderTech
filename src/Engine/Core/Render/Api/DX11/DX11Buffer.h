@@ -7,7 +7,8 @@
 namespace Engine {
     class DX11Buffer : public BufferResource {
     public:
-        DX11Buffer(IContext* context, D3D11_USAGE usage, D3D11_BIND_FLAG bindFlags, UINT cpuAccessFlags, UINT size, UINT strides, const void* data);
+        DX11Buffer(const String& name, IContext* context, D3D11_USAGE usage, D3D11_BIND_FLAG bindFlags, 
+            UINT cpuAccessFlags, UINT size, UINT strides, const void* data);
         virtual ~DX11Buffer() = default;
 
         Int32 GetNumberOfBytes() const override;

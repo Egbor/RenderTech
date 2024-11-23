@@ -10,8 +10,8 @@ namespace Engine {
 		GENERATE_BODY(Skybox, Object)
 
 	private:
-		TextureCube* m_envCubemap;
-		TextureCube* m_irrCubemap;
+		Texture2D* m_envCubemap;
+		Texture2D* m_irrCubemap;
 
 	public:
 		Skybox(const ObjectArgument& arguments);

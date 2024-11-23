@@ -6,7 +6,8 @@
 namespace Engine {
 	class TextureResource : public RenderBase {
 	public:
-		TextureResource(IContext* context) : RenderBase(ResourceIdentifier::RI_TEXTURE, context) {}
+		TextureResource(const String& name, IContext* context) 
+			: RenderBase(name, context, ResourceIdentifier::RI_TEXTURE) {}
 		virtual ~TextureResource() = default;
 
 		virtual Int32 GetWidth() const = 0;

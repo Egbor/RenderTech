@@ -211,8 +211,12 @@ public:
 	private:
 		using TCallable = Callable<void(TArgs...)>;
 
+		static constexpr Int32 MIN_NUMBER_OF_CALLCACK_LIST = 16;
+
 	public:
-		Event() : m_callbackList() {};
+		Event() : m_callbackList() {
+			m_callbackList.reserve(MIN_NUMBER_OF_CALLCACK_LIST);
+		};
 
 		~Event() {
 			for (Size i = 0; i < m_callbackList.size(); i++) {
@@ -226,17 +230,17 @@ public:
 			}
 		}
 
-		void operator+=(const TCallable& callback) {
-			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { item->IsEqual(callback); });
+		void operator+=(TCallable* callback) {
+			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { item->IsEqual(*callback); });
 			if (it == m_callbackList.end()) {
-				m_callbackList.push_back(new TCallable(callback));
+				m_callbackList.push_back(callback);
 			}
 		}
 
-		void operator-=(const TCallable& callback) {
-			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { item->IsEqual(callback); });
+		void operator-=(TCallable* callback) {
+			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { item->IsEqual(*callback); });
 			if (it != m_callbackList.end()) {
-				DELETE_OBJECT(*it);
+				TCallable::Free(*it);
 				m_callbackList.erase(it);
 			}
 		}

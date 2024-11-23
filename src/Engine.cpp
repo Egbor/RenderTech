@@ -8,8 +8,8 @@ namespace Engine {
 		m_time = new Time();
 		m_world = ClassType<World>::CreateObject(ObjectArgument::Dummy());
 
-		m_context = new HRC_Base(context);
-		m_context->DrawInit(context->QueryResourceFactory());
+		m_context = new HRC_IBLBacker(context, "", 1080, 1080); // new HRC_Base(context);
+		//m_context->DrawInit(context->QueryResourceFactory());
 
 		m_threadpool = new EngineThreadPool(Callable<void()>::AllocateDelegate<EngineClass>(this, &EngineClass::SyncEntry), 2);
 		m_threadpool->Append(Callable<void()>::AllocateDelegate<EngineClass>(this, &EngineClass::GameThreadEntry));
@@ -28,8 +28,8 @@ namespace Engine {
 		m_world->Start();
 		m_threadpool->Start();
 
-		IWindow* window = Core::GetInstance()->GetWindow();
-		while (!window->HasQuit()) {}
+		//IWindow* window = Core::GetInstance()->GetWindow();
+		//while (!window->HasQuit()) {}
 
 		m_threadpool->Reset();
 	}

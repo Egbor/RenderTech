@@ -10,13 +10,13 @@ namespace Engine {
 
     VisibleObject::VisibleObject(const ObjectArgument& argument)
         : Super(argument) {
-        Mesh* mesh = Core::Load<Mesh>("models/Cyberpunk_Robot.obj"); // Resource::Load<Mesh*>("assets/models/Cyberpunk_Robot.obj");
-        Material* material = Core::Load<Material>("materials/Cyberpunk_Robot.xml"); // Resource::Load<Material*>("assets/materials/Cyberpunk_Robot.xml");
-        mesh->SetMaterial(0, material);
+        //StaticMesh* mesh = Core::Load<StaticMesh>("models/Cyberpunk_Robot.obj"); // Resource::Load<Mesh*>("assets/models/Cyberpunk_Robot.obj");
+        //Material* material = Core::Load<Material>("materials/Cyberpunk_Robot.xml"); // Resource::Load<Material*>("assets/materials/Cyberpunk_Robot.xml");
+        //mesh->SetMaterial(0, material);
 
-        m_meshComponent = ClassType<MeshComponent>::CreateObject(ObjectArgument::Dummy());
-        m_meshComponent->AttachToComponent(GetRootComponent());
-        m_meshComponent->SetMesh(mesh);
+        //m_meshComponent = ClassType<MeshComponent>::CreateObject(ObjectArgument::Dummy());
+        //m_meshComponent->AttachToComponent(GetRootComponent());
+        //m_meshComponent->SetMesh(mesh);
 
         SetEntityScale(Vector3(0.005f, 0.005f, 0.005f));
     }

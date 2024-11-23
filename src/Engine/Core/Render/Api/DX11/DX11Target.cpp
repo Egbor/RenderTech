@@ -13,7 +13,7 @@ namespace Engine {
         d3dContext->CopyResource(d3dDstTexture.Get(), d3dSrcTexture.Get());
     }
 
-    DX11RenderTarget::DX11RenderTarget(IContext* context, DX11Texture2D* texture, const Float* color)
+    DX11RenderTarget::DX11RenderTarget(const String& name, IContext* context, DX11Texture2D* texture, const Float* color)
         : TargetResource(context), m_data(texture), m_viewId(0) {
         memcpy_s(m_clearColor, sizeof(m_clearColor), color, sizeof(m_clearColor));
 
@@ -66,6 +66,10 @@ namespace Engine {
         CopyD3D11Texture(m_data->GetD3D11Texture2D(), dynamic_cast<DX11RenderTarget*>(dstTarget)->m_data->GetD3D11Texture2D());
     }
 
+    void DX11RenderTarget::SelectFace(TextureFace face) {
+        m_viewId = static_cast<Int32>(face);
+    }
+
     void DX11RenderTarget::Clear() {
         ComPtr<ID3D11DeviceContext> d3dContext = dynamic_cast<DX11Context*>(GetContext())->GetD3D11Context();
         d3dContext->ClearRenderTargetView(m_d3dViews[m_viewId].Get(), m_clearColor);
@@ -77,11 +81,11 @@ namespace Engine {
 
     ComPtr<ID3D11RenderTargetView> DX11RenderTarget::GetD3D11RenderTargetView() {
         const ComPtr<ID3D11RenderTargetView>& d3dTarget = m_d3dViews[m_viewId];
-        m_viewId = (m_viewId + 1) % m_d3dViews.size();
+        // m_viewId = (m_viewId + 1) % m_d3dViews.size();
         return d3dTarget;
     }
 
-    DX11DepthStencil::DX11DepthStencil(IContext* context, DX11Texture2D* texture, Float depth, UInt32 stencil) 
+    DX11DepthStencil::DX11DepthStencil(const String& name, IContext* context, DX11Texture2D* texture, Float depth, UInt32 stencil) 
         : DepthStencilResource(context), m_data(texture), m_clearDepth(depth), m_clearStencil(stencil)
         , m_clearFlags(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL), m_viewId(0) {
         D3D11_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
@@ -137,13 +141,17 @@ namespace Engine {
         d3dContext->ClearDepthStencilView(m_d3dViews[m_viewId].Get(), m_clearFlags, m_clearDepth, m_clearStencil);
     }
 
+    void DX11DepthStencil::SelectFace(TextureFace face) {
+        m_viewId = static_cast<Int32>(face);
+    }
+
     TextureResource* DX11DepthStencil::GetTextureResource() const {
         return m_data;
     }
 
     ComPtr<ID3D11DepthStencilView> DX11DepthStencil::GetD3D11DepthStencilView() {
         const ComPtr<ID3D11DepthStencilView>& d3dTarget = m_d3dViews[m_viewId];
-        m_viewId = (m_viewId + 1) % m_d3dViews.size();
+        // m_viewId = (m_viewId + 1) % m_d3dViews.size();
         return d3dTarget;
     }
 

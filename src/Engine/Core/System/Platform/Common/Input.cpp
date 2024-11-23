@@ -1,11 +1,11 @@
 #include "Engine/Core/System/Platform/Common/Input.h"
 
 namespace Engine{
-	void Input::AddAction(const String& tag, EventBase<>& callback) {
+	void Input::AddAction(const String& tag, Callable<void()>* callback) {
 		m_actions[tag] += callback;
 	}
 
-	void Input::AddAxis(const String& tag, EventBase<Float>& callback) {
+	void Input::AddAxis(const String& tag, Callable<void(Float)>* callback) {
 		m_axis[tag] += callback;
 	}
 

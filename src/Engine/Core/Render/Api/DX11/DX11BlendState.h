@@ -1,12 +1,13 @@
 #ifndef DX11BLENDSTATE_H
 #define DX11BLENDSTATE_H
 
+#include "Engine/Core/Render/Api/DX11/DX11Def.h"
 #include "Engine/Core/Render/Base/Resource/StateResource.h"
 
 namespace Engine {
     class DX11BlendState : public StandaloneStateResource {
     public:
-        DX11BlendState(const StateData& data, IContext* context);
+        DX11BlendState(const String& name, const StateData& data, IContext* context);
         virtual ~DX11BlendState() = default;
 
         void Bind() const override;

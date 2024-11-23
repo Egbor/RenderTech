@@ -42,6 +42,10 @@ namespace Engine {
 
     }
 
+    Material::Metadata* Material::Metadata::SetName(const String& value) {
+        return dynamic_cast<Material::Metadata*>(_SetName(value));
+    }
+
     Material::Metadata* Material::Metadata::AddTexturePath(const String& path) {
         m_texturePaths.push_back(path);
         return this;
@@ -52,7 +56,14 @@ namespace Engine {
         return this;
     }
 
+    IResourceMetadata* Material::Metadata::_SetName(const String& value) {
+        m_name = value;
+        return this;
+    }
+
     Object* Material::Metadata::Build() {
+        assert(!m_name.empty());
+
         Material* material = ClassType<Material>::CreateObject(ObjectArgument::Dummy());
         
         for (Size i = 0; i < m_texturePaths.size(); i++) {

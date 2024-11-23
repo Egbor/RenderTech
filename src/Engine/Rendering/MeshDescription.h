@@ -4,7 +4,7 @@
 #include "Engine/Rendering/Types.h"
 #include "Engine/Math/Vector.h"
 
-#include "Engine/Core/Render/Base/Interface/IBufferResource.h"
+#include "Engine/Core/Render/Base/Resource/BufferResource.h"
 
 namespace Engine {
     struct MeshVertex {
@@ -44,8 +44,8 @@ namespace Engine {
         Array<MeshVertex>& Vertices();
         Array<MeshFace>& Faces();
 
-        BufferResource* BuildVertexBuffer() const;
-        BufferResource* BuildIndexBuffer() const;
+        BufferResource* BuildVertexBuffer(const String& name) const;
+        BufferResource* BuildIndexBuffer(const String& name) const;
 
         BufferInfo GetMeshInfo();
         BufferInfo GetFaceInfo();

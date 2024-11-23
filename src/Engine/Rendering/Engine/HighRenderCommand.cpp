@@ -1,5 +1,4 @@
 #include "Engine/Rendering/Engine/HighRenderCommand.h"
-#include "Engine/Core/System/Resource/Resource.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
@@ -94,15 +93,16 @@ namespace Engine {
 	}
 
 	void AbstractHighRenderCommand::UpdateBuffers(const HighRenderBatcher& batcher) {
-		Array<NamePlusResourceWrapper<BufferResource>> resources = batcher.QueryNamePlusResources<BufferResource>();
+		Array<BufferResource*> resources = batcher.QueryResources<BufferResource>(TAG_ANY);
+		// Array<NamePlusResourceWrapper<BufferResource>> resources = batcher.QueryNamePlusResources<BufferResource>();
 
 		for (Size i = 0; i < resources.size(); i++) {
-			NamePlusResourceWrapper<BufferResource>& wrapper = resources[i];
+			//NamePlusResourceWrapper<BufferResource>& wrapper = resources[i];
 
-			auto it = m_updater.find(wrapper.name);
+			auto it = m_updater.find(resources[i]->GetName());
 			if (it != m_updater.end()) {
-				it->second->Invoke(wrapper.resource);
-				wrapper.resource->Update();
+				it->second->Invoke(resources[i]);
+				resources[i]->Update();
 			}
 		}
 	}
@@ -376,7 +376,7 @@ namespace Engine {
 	//}
 
 	HighRenderCommandBakeHDRIToEnvironmentCubemap::HighRenderCommandBakeHDRIToEnvironmentCubemap(const HighRenderStorage& storage)
-		: AbstractHighRenderCommand(), m_mat4x4ViewProjection(6) {
+		: AbstractHighRenderCommand(), m_mat4x4ViewProjection(6), m_faceId(0) {
 		Matrix4x4 proj = Matrix4x4::CreateMatrixOrthographic(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
 
 		m_mat4x4ViewProjection[0] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::right, Vector3::up) * proj;
@@ -414,32 +414,35 @@ namespace Engine {
 		pipeline->BindResources(material->GetNativeShaderResources());
 		pipeline->BindResources(material->GetNativeTextureResources());
 		
-		for (Int32 i = 0; i < m_mat4x4ViewProjection.size(); i++) {
+		for (m_faceId = 0; m_faceId < m_mat4x4ViewProjection.size(); m_faceId++) {
 			UpdateBuffers(m_batcher);
 
-			pipeline->BindResources(m_batcher.QueryResources<TargetResource>(HRS_Tag::HRS_ADDITION_1));
-			pipeline->GetDirectAccessToPipeline()->Draw(mesh.vertexBuffer, mesh.indexBuffer);
+			Array<TargetResource*> targets = m_batcher.QueryResources<TargetResource>(HRS_Tag::HRS_ADDITION_1);
+			targets[0]->SelectFace(static_cast<TextureFace>(m_faceId));
 
-			//pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_1);
-			//pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
-			//pipeline->DrawIndexedPremitive(cubeVertexBuffer, cubeIndexBuffer);
+			pipeline->BindResources(targets);
+			pipeline->GetDirectAccessToPipeline()->Draw(mesh.vertexBuffer, mesh.indexBuffer);
 		}
 	}
 
 	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeIrradianceCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material) {
 		pipeline->SetViewportResolution(32, 32);
 		pipeline->BindResources(material->GetNativeShaderResources());
-		pipeline->BindResources(m_batcher.QueryResources<TextureResource>(HRS_Tag::HRS_TARGET), RenderStage::RS_PIXEL);
+		pipeline->BindResources(m_batcher.QueryResources<TextureResource>(HRS_Tag::HRS_ADDITION_1), RenderStage::RS_PIXEL);
 
-		for (Int32 i = 0; i < m_mat4x4ViewProjection.size(); i++) {
+		for (m_faceId = 0; m_faceId < m_mat4x4ViewProjection.size(); m_faceId++) {
 			UpdateBuffers(m_batcher);
 
-			pipeline->BindResources(m_batcher.QueryResources<TargetResource>(HRS_Tag::HRS_ADDITION_2));
-			pipeline->GetDirectAccessToPipeline()->Draw(mesh.vertexBuffer, mesh.indexBuffer);
+			Array<TargetResource*> targets = m_batcher.QueryResources<TargetResource>(HRS_Tag::HRS_ADDITION_2);
+			targets[0]->SelectFace(static_cast<TextureFace>(m_faceId));
 
-			//pipeline->AddResources<ITargetResourceData>(storage, BatchSlot::BS_SLOT_2);
-			//pipeline->UpdateBuffer(storage.GetResourceFromBatchByTag<IBufferResourceData>(AS_TEXT(UB_Object)), [&](RawData& data) { UB_Object* buffer = data.As<UB_Object>(); buffer->ViewProjection = m_mat4x4ViewProjection[i]; });
-			//pipeline->DrawIndexedPremitive(cubeVertexBuffer, cubeIndexBuffer);
+			pipeline->BindResources(targets);
+			pipeline->GetDirectAccessToPipeline()->Draw(mesh.vertexBuffer, mesh.indexBuffer);
 		}
+	}
+
+	void HighRenderCommandBakeHDRIToEnvironmentCubemap::UpdateUBObject(BufferResource* resource) {
+		UB_Object* buffer = resource->GetBufferData().As<UB_Object>();
+		buffer->ViewProjection = m_mat4x4ViewProjection[m_faceId];
 	}
 }

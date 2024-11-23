@@ -6,7 +6,8 @@
 namespace Engine {
 	class BufferResource : public RenderBase {
 	public:
-		BufferResource(IContext* context) : RenderBase(ResourceIdentifier::RI_BUFFER, context) {}
+		BufferResource(const String& name, IContext* context) 
+			: RenderBase(name, context, ResourceIdentifier::RI_BUFFER) {}
 		virtual ~BufferResource() = default;
 
 		virtual Int32 GetNumberOfBytes() const = 0;

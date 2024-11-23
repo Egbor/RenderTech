@@ -44,10 +44,10 @@ namespace Engine {
 		HighRenderStorage() = default;
 		~HighRenderStorage();
 
-		void InitResourceAsState(IRenderResourceFactory* factory, const String& name, StateType type, StateData data);
-		void InitResourceAsBuffer(IRenderResourceFactory* factory, const String& name, Int32 bufferSize);
-		void InitResourceAsTarget(IRenderResourceFactory* factory, const String& name, TextureType type, TextureFormat format, Int32 width, Int32 height);
-		void InitResourceAsTarget(TargetResource* resource, const String& name);
+		StateResource* InitResourceAsState(IRenderResourceFactory* factory, const String& name, StateType type, StateData data);
+		BufferResource* InitResourceAsBuffer(IRenderResourceFactory* factory, const String& name, Int32 bufferSize);
+		TargetResource* InitResourceAsTarget(IRenderResourceFactory* factory, const String& name, TextureType type, TextureFormat format, Int32 width, Int32 height);
+		TargetResource* InitResourceAsTarget(TargetResource* resource, const String& name);
 
 	private:
 		Array<HRS_Resource> m_storage;
@@ -68,16 +68,6 @@ namespace Engine {
 
 		template<class TResourceClass>
 		Array<TResourceClass*> QueryResources(EnumFlags<HRS_Tag> tags) const {
-			ResourceIdentifier id = TResourceClass::GetResourceIdentifier();
-
-			if (id == ResourceIdentifier::RI_TEXTURE) {
-				return SelectResources<TextureResource*>(ResourceIdentifier::RI_TARGET, [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
-					if ((resourceTags & tags) == tags) {
-						return dynamic_cast<TargetResource*>(resource->data)->GetTextureResource();
-					}
-				});
-			}
-
 			return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
 				if ((resourceTags & tags) == tags) {
 					return dynamic_cast<TResourceClass*>(resource->data);
@@ -99,7 +89,16 @@ namespace Engine {
 					return dynamic_cast<TResourceClass*>(resource->data);
 				}
 			});
-			return resources.size() > 0 ? resources[i] : nullptr;
+			return resources.size() > 0 ? resources[0] : nullptr;
+		}
+
+		template<>
+		Array<TextureResource*> QueryResources(EnumFlags<HRS_Tag> tags) const {
+			return SelectResources<TextureResource*>(ResourceIdentifier::RI_TARGET, [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+				if ((resourceTags & tags) == tags) {
+					return dynamic_cast<TargetResource*>(resource->data)->GetTextureResource();
+				}
+			});
 		}
 
 	private:

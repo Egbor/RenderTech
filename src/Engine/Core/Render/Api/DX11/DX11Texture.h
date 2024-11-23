@@ -34,10 +34,10 @@ namespace Engine {
 
     class DX11Texture2D : public TextureResource {
     public:
-        DX11Texture2D(IContext* context, ComPtr<ID3D11Texture2D> d3dTexture);
-        DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, bool isCubemap);
-        DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, Int8* data);
-        DX11Texture2D(IContext* context, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data);
+        DX11Texture2D(const String& name, IContext* context, ComPtr<ID3D11Texture2D> d3dTexture);
+        DX11Texture2D(const String& name, IContext* context, TextureFormat format, Int32 width, Int32 height, bool isCubemap);
+        DX11Texture2D(const String& name, IContext* context, TextureFormat format, Int32 width, Int32 height, Int8* data);
+        DX11Texture2D(const String& name, IContext* context, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data);
         virtual ~DX11Texture2D() = default;
 
         TextureFormat GetFormat() const override;

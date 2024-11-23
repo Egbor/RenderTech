@@ -69,7 +69,7 @@ namespace Engine {
         }
 
         Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        m_backTarget = new DX11RenderTarget(this, new DX11Texture2D(this, backBuffer), color);
+        m_backTarget = new DX11RenderTarget("OutputTarget", this, new DX11Texture2D("OutputTarget_tex2d", this, backBuffer), color);
         
         RegisterStateFactory();
         RegisterTextureFactory();
@@ -116,24 +116,24 @@ namespace Engine {
         return dynamic_cast<ISwapChain*>(this);
     }
 
-    StateResource* DX11Context::CreateState(StateType type, StateData data) {
-        return m_stateFactory.Create(type, data);
+    StateResource* DX11Context::CreateState(StateType type, const String& name, StateData data) {
+        return m_stateFactory.Create(type, name, data);
     }
 
-    TextureResource* DX11Context::CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
-        return m_staticTextureFactory.Create(type, format, width, height, data);
+    TextureResource* DX11Context::CreateTexture(TextureType type, const String& name, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
+        return m_staticTextureFactory.Create(type, name, format, width, height, data);
     }
 
-    TargetResource* DX11Context::CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) {
-        return m_renderTargetFactory.Create(type, format, width, height);
+    TargetResource* DX11Context::CreateTarget(TextureType type, const String& name, TextureFormat format, Int32 width, Int32 height) {
+        return m_renderTargetFactory.Create(type, name, format, width, height);
     }
 
-    BufferResource* DX11Context::CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) {
-        return m_bufferFactory.Create(type, size, strides, data);
+    BufferResource* DX11Context::CreateBuffer(BufferType type, const String& name, Int32 size, Int32 strides, const void* data) {
+        return m_bufferFactory.Create(type, name, size, strides, data);
     }
 
-    ShaderResource* DX11Context::CreateShader(RenderStage stage, Size codeLength, const void* code) {
-        return m_shaderFactory.Create(stage, codeLength, code);
+    ShaderResource* DX11Context::CreateShader(RenderStage stage, const String& name, Size codeLength, const void* code) {
+        return m_shaderFactory.Create(stage, name, codeLength, code);
     }
 
     void DX11Context::SetViewport(Int32 width, Int32 height) {
@@ -227,47 +227,47 @@ namespace Engine {
     }
 
     void DX11Context::RegisterStateFactory() {
-        m_stateFactory.Register(StateType::ST_BLEND, [&](StateData& data) {
-            return new DX11BlendState(data, this); });
-        m_stateFactory.Register(StateType::ST_DEPTH_STENCIL, [&](StateData& data) {
-            return new DX11DepthStencilState(data, this); });
-        m_stateFactory.Register(StateType::ST_RASTERIZER, [&](StateData& data) {
-            return new DX11RasterizerState(data, this); });
-        m_stateFactory.Register(StateType::ST_SAMPLER, [&](StateData& data) {
-            return new DX11SamplerState(data, this); });
+        m_stateFactory.Register(StateType::ST_BLEND, [&](const String& name, StateData& data) {
+            return new DX11BlendState(name, data, this); });
+        m_stateFactory.Register(StateType::ST_DEPTH_STENCIL, [&](const String& name, StateData& data) {
+            return new DX11DepthStencilState(name, data, this); });
+        m_stateFactory.Register(StateType::ST_RASTERIZER, [&](const String& name, StateData& data) {
+            return new DX11RasterizerState(name, data, this); });
+        m_stateFactory.Register(StateType::ST_SAMPLER, [&](const String& name, StateData& data) {
+            return new DX11SamplerState(name, data, this); });
     }
 
     void DX11Context::RegisterTextureFactory() {
-        m_staticTextureFactory.Register(TextureType::TT_DEFAULT, [&](TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
-            return new DX11Texture2D(this, format, width, height, data[0]); });
-        m_staticTextureFactory.Register(TextureType::TT_CUBE, [&](TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) { 
-            return new DX11Texture2D(this, format, width, height, data); });
+        m_staticTextureFactory.Register(TextureType::TT_DEFAULT, [&](const String& name, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
+            return new DX11Texture2D(name, this, format, width, height, data[0]); });
+        m_staticTextureFactory.Register(TextureType::TT_CUBE, [&](const String& name, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) {
+            return new DX11Texture2D(name, this, format, width, height, data); });
 
         static Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-        m_renderTargetFactory.Register(TextureType::TT_DEFAULT, [&](TextureFormat format, Int32 width, Int32 height) {
-            return new DX11RenderTarget(this, new DX11Texture2D(this, format, width, height, false), color); });
-        m_renderTargetFactory.Register(TextureType::TT_CUBE, [&](TextureFormat format, Int32 width, Int32 height) {
-            return new DX11RenderTarget(this, new DX11Texture2D(this, format, width, height, true), color); });
-        m_renderTargetFactory.Register(TextureType::TT_DEPTH, [&](TextureFormat format, Int32 width, Int32 height) {
-            return new DX11DepthStencil(this, new DX11Texture2D(this, format, width, height, false), 1.0f, 0); });
-        m_renderTargetFactory.Register(TextureType::TT_DEPTH_CUBE, [&](TextureFormat format, Int32 width, Int32 height) {
-            return new DX11DepthStencil(this, new DX11Texture2D(this, format, width, height, true), 1.0f, 0); });
+        m_renderTargetFactory.Register(TextureType::TT_DEFAULT, [&](const String& name, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11RenderTarget(name, this, new DX11Texture2D(name + "_tex2d", this, format, width, height, false), color); });
+        m_renderTargetFactory.Register(TextureType::TT_CUBE, [&](const String& name, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11RenderTarget(name, this, new DX11Texture2D(name + "_tex2d", this, format, width, height, true), color); });
+        m_renderTargetFactory.Register(TextureType::TT_DEPTH, [&](const String& name, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11DepthStencil(name, this, new DX11Texture2D(name + "_tex2d", this, format, width, height, false), 1.0f, 0); });
+        m_renderTargetFactory.Register(TextureType::TT_DEPTH_CUBE, [&](const String& name, TextureFormat format, Int32 width, Int32 height) {
+            return new DX11DepthStencil(name, this, new DX11Texture2D(name + "_tex2d", this, format, width, height, true), 1.0f, 0); });
     }
 
     void DX11Context::RegisterBufferFactory() {
-        m_bufferFactory.Register(BufferType::BT_VERTEX, [&](Int32 size, Int32 strides, const void* data) {
-            return new DX11Buffer(this, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, size, strides, data); });
-        m_bufferFactory.Register(BufferType::BT_INDEX, [&](Int32 size, Int32 strides, const void* data) {
-            return new DX11Buffer(this, D3D11_USAGE_IMMUTABLE, D3D11_BIND_INDEX_BUFFER, 0, size, strides, data); });
-        m_bufferFactory.Register(BufferType::BT_UNIFORM, [&](Int32 size, Int32 strides, const void* data) {
-            return new DX11Buffer(this, D3D11_USAGE_DYNAMIC, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_VERTEX, [&](const String& name, Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(name, this, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_INDEX, [&](const String& name, Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(name, this, D3D11_USAGE_IMMUTABLE, D3D11_BIND_INDEX_BUFFER, 0, size, strides, data); });
+        m_bufferFactory.Register(BufferType::BT_UNIFORM, [&](const String& name, Int32 size, Int32 strides, const void* data) {
+            return new DX11Buffer(name, this, D3D11_USAGE_DYNAMIC, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, size, strides, data); });
     }
 
     void DX11Context::RegisterShaderFactory() {
-        m_shaderFactory.Register(RenderStage::RS_VERTEX, [&](Size codeLength, const void* code) {
-            return new DX11VertexShader(this, codeLength, code); });
-        m_shaderFactory.Register(RenderStage::RS_PIXEL, [&](Size codeLength, const void* code) {
-            return new DX11PixelShader(this, codeLength, code); });
+        m_shaderFactory.Register(RenderStage::RS_VERTEX, [&](const String& name, Size codeLength, const void* code) {
+            return new DX11VertexShader(name, this, codeLength, code); });
+        m_shaderFactory.Register(RenderStage::RS_PIXEL, [&](const String& name, Size codeLength, const void* code) {
+            return new DX11PixelShader(name, this, codeLength, code); });
     }
 }

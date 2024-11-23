@@ -11,8 +11,8 @@ namespace Engine {
 		Input() = default;
 		virtual ~Input() = default;
 
-		void AddAction(const String& tag, EventBase<>& callback);
-		void AddAxis(const String& tag, EventBase<Float>& callback);
+		void AddAction(const String& tag, Callable<void()>* callback);
+		void AddAxis(const String& tag, Callable<void(Float)>* callback);
 
 		void NotifyAboutActionTriggering(const InputConfig* config);
 		void NotifyAboutAxisTriggering(const InputConfig* config);

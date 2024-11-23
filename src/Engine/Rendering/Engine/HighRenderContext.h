@@ -1,7 +1,6 @@
 #ifndef HIGH_RENDER_CONTEXT_H
 #define HIGH_RENDER_CONTEXT_H
 
-#include "Engine/Rendering/Engine/VirtualRenderPipeline.h"
 #include "Engine/Rendering/Engine/HighRenderCommand.h"
 #include "Engine/Rendering/Engine/Scene/Scene.h"
 
@@ -48,7 +47,8 @@ namespace Engine {
 		Int32 m_IBLCubeMapOutputWidth;
 		Int32 m_IBLCubeMapOutputHeight;
 
-		Texture2D* m_texture2D;
+		TargetResource* m_envOutput;
+		TargetResource* m_irrOutput;
 
 	public:
 		HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight);

@@ -20,6 +20,7 @@ namespace Engine {
 			Metadata();
 			~Metadata();
 
+			Metadata* SetName(const String& value);
 			Metadata* SetType(RenderStage stage);
 			Metadata* SetDataLength(Int32 length);
 			Int8* GetData() const;
@@ -27,6 +28,10 @@ namespace Engine {
 			Object* Build() override;
 
 		private:
+			IResourceMetadata* _SetName(const String& value) override;
+
+			String m_name;
+
 			Int8* m_data;
 			Int32 m_dataLength;
 			RenderStage m_stage;

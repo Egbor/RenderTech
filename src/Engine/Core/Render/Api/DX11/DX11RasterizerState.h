@@ -1,13 +1,13 @@
 #ifndef DX11RASTERIZERSTATE_H
 #define DX11RASTERIZERSTATE_H
 
-#include "Engine/Core/Render/Base/RenderBase.h"
+#include "Engine/Core/Render/Api/DX11/DX11Def.h"
 #include "Engine/Core/Render/Base/Resource/StateResource.h"
 
 namespace Engine {
     class DX11RasterizerState : public StandaloneStateResource {
     public:
-        DX11RasterizerState(const StateData& data, IContext* context);
+        DX11RasterizerState(const String& name, const StateData& data, IContext* context);
         virtual ~DX11RasterizerState() = default;
 
         void Bind() const override;

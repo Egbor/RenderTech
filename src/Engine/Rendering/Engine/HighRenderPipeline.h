@@ -6,7 +6,7 @@
 namespace Engine {
 	class HighRenderPipelineAdapter {
 	public:
-		constexpr HighRenderPipelineAdapter(IRenderPipeline* pipeline) noexcept;
+		HighRenderPipelineAdapter(IRenderPipeline* pipeline) noexcept;
 
 		void SetViewportResolution(Int32 width, Int32 height);
 
@@ -14,10 +14,10 @@ namespace Engine {
 		void EnableRenderStage(RenderStage stage);
 
 		template<class TResourceClass>
-		constexpr void BindResources(const Array<TResourceClass*>& resources);
+		void BindResources(const Array<TResourceClass*>& resources);
 		
 		template<class TResourceClass>
-		constexpr void BindResources(const Array<TResourceClass*>& resources, RenderStage stage);
+		void BindResources(const Array<TResourceClass*>& resources, RenderStage stage);
 
 		IRenderPipeline* GetDirectAccessToPipeline() const;
 

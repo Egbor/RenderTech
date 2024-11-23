@@ -6,11 +6,13 @@
 namespace Engine {
 	class TargetResource : public RenderBase {
 	public:
-		TargetResource(IContext* context) : RenderBase(ResourceIdentifier::RI_TARGET, context) {}
+		TargetResource(const String& name, IContext* context) 
+			: RenderBase(name, context, ResourceIdentifier::RI_TARGET) {}
 		virtual ~TargetResource() = default;
 
 		virtual bool IsDepth() const = 0;
 		virtual void Copy(TargetResource* dstTarget) const = 0;
+		virtual void SelectFace(TextureFace face) = 0;
 		virtual void Clear() = 0;
 
 		virtual TextureResource* GetTextureResource() const = 0;
@@ -20,7 +22,7 @@ namespace Engine {
 
 	class DepthStencilResource : public TargetResource {
 	public:
-		DepthStencilResource(IContext* context) : TargetResource(context) {}
+		DepthStencilResource(const String& name, IContext* context) : TargetResource(name, context) {}
 		virtual ~DepthStencilResource() = default;
 
 		virtual void SetStencilClearValue(UInt32 value) = 0;

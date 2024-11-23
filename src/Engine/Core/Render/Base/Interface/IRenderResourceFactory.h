@@ -11,11 +11,11 @@ namespace Engine {
 	class IRenderResourceFactory {
 	public:
 		virtual ~IRenderResourceFactory() = default;
-		virtual StateResource* CreateState(StateType type, StateData data) = 0;
-		virtual TargetResource* CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) = 0;
-		virtual BufferResource* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) = 0;
-		virtual ShaderResource* CreateShader(RenderStage stage, Size codeLength, const void* code) = 0;
-		virtual TextureResource* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) = 0;
+		virtual StateResource* CreateState(StateType type, const String& name, StateData data) = 0;
+		virtual TargetResource* CreateTarget(TextureType type, const String& name, TextureFormat format, Int32 width, Int32 height) = 0;
+		virtual BufferResource* CreateBuffer(BufferType type, const String& name, Int32 size, Int32 strides, const void* data) = 0;
+		virtual ShaderResource* CreateShader(RenderStage stage, const String& name, Size codeLength, const void* code) = 0;
+		virtual TextureResource* CreateTexture(TextureType type, const String& name, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) = 0;
 	};
 }
 

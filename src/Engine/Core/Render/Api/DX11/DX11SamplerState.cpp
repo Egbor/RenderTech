@@ -27,8 +27,8 @@ namespace Engine {
         return d3dSamplerDesc;
     }
 
-    DX11SamplerState::DX11SamplerState(const StateData& data, IContext* context) 
-        : StateResource(context) {
+    DX11SamplerState::DX11SamplerState(const String& name, const StateData& data, IContext* context) 
+        : StateResource(name, context) {
         DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
         ComPtr<ID3D11Device> d3dDevice = dxContext->GetD3D11Device();
 

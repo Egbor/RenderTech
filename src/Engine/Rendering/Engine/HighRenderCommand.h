@@ -150,7 +150,10 @@ namespace Engine {
 		void BakeEnvironmentCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material);
 		void BakeIrradianceCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material);
 
+		void UpdateUBObject(BufferResource* resource) override;
+
 		HighRenderBatcher m_batcher;
+		Int32 m_faceId;
 	};
 }
 

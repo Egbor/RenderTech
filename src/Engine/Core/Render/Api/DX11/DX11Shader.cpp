@@ -3,8 +3,8 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-	DX11VertexShader::DX11VertexShader(IContext* context, Size codeLength, const void* code) 
-		: RenderBase(RenderIdentifier::RI_SHADER, context) {
+	DX11VertexShader::DX11VertexShader(const String& name, IContext* context, Size codeLength, const void* code) 
+		: ShaderResource(name, context) {
 		DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
 		ComPtr<ID3D11Device> d3dDevice = dxContext->GetD3D11Device();
 
@@ -29,8 +29,8 @@ namespace Engine {
 		return m_d3dLayout;
 	}
 
-	DX11PixelShader::DX11PixelShader(IContext* context, Size codeLength, const void* code) 
-		: RenderBase(RenderIdentifier::RI_SHADER, context) {
+	DX11PixelShader::DX11PixelShader(const String& name, IContext* context, Size codeLength, const void* code) 
+		: ShaderResource(name, context) {
 		DX11Context* dxContext = dynamic_cast<DX11Context*>(context);
 		ComPtr<ID3D11Device> d3dDevice = dxContext->GetD3D11Device();
 

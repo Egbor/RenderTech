@@ -7,7 +7,7 @@
 namespace Engine {
     class DX11DepthStencilState : public StandaloneStateResource {
     public:
-        DX11DepthStencilState(const StateData& data, IContext* context);
+        DX11DepthStencilState(const String& name, const StateData& data, IContext* context);
         virtual ~DX11DepthStencilState() = default;
 
         void Bind() const override;

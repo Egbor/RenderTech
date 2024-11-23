@@ -1,5 +1,4 @@
 #include "Engine/Rendering/Engine/HighRenderContext.h"
-#include "Engine/Core/System/Resource/Resource.h"
 
 #include <Windows.h>
 
@@ -174,7 +173,7 @@ namespace Engine {
 
 	HRC_IBLBacker::HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight) 
 		: AbstractHighRenderContext(context), m_IBLCubeMapOutputWidth(outputWidth), m_IBLCubeMapOutputHeight(outputHeight) {
-		// m_texture2D = Resource::Load<Texture2D*>(filename);
+		// m_texture2D = Core::Load<Texture2D>(filename);// Resource::Load<Texture2D*>(filename);
 
 		ExtendCommandList(new HighRenderCommandBakeHDRIToEnvironmentCubemap(GetStorage()));
 	}
@@ -184,8 +183,8 @@ namespace Engine {
 	}
 
 	void HRC_IBLBacker::OnInitDraw(IContext* context) {
-		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_BAKING_ENV_CUBEMAP, TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
-		GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_BAKING_IRR_CUBEMAP, TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, irrWidth, irrHeight);
+		m_envOutput = GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_BAKING_ENV_CUBEMAP, TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, m_IBLCubeMapOutputWidth, m_IBLCubeMapOutputHeight);
+		m_irrOutput = GetStorage().InitResourceAsTarget(context->QueryResourceFactory(), RESOURCE_TAG_BAKING_IRR_CUBEMAP, TextureType::TT_CUBE, TextureFormat::TF_R32G32B32A32_FLOAT, irrWidth, irrHeight);
 
 		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_SAMPLER_DEFAULT, StateType::ST_SAMPLER, InitDefaultStateData<SamplerState>());
 		GetStorage().InitResourceAsState(context->QueryResourceFactory(), RESOURCE_TAG_STATE_RESTERIZER_BACK, StateType::ST_RASTERIZER, GenerateBackRasterizerState());
@@ -193,11 +192,20 @@ namespace Engine {
 	}
 
 	void HRC_IBLBacker::OnPostDraw(IContext* context) {
-		if (Resource::Save<ITextureResourceData*>(GetResourceFromBatchByTag<ITextureResourceData>("EnvironmentCubemap"), "assets/textures/skybox/afternoon_env.exr") != ResourceStatus::RS_OK) {
-			OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for the evironment cubmap");
-		}
-		if (Resource::Save<ITextureResourceData*>(GetResourceFromBatchByTag<ITextureResourceData>("IrradianceCubemap"), "assets/textures/skybox/afternoon_irr.exr") != ResourceStatus::RS_OK) {
-			OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for the irradiance cubmap");
-		}
+		Texture2D* envCubemap = Texture2D::Metadata(TextureType::TT_CUBE).SetData(m_envOutput->GetTextureResource())->SetName("AfternoonEnv")->Build()->As<Texture2D>();
+		Texture2D* irrCubemap = Texture2D::Metadata(TextureType::TT_CUBE).SetData(m_irrOutput->GetTextureResource())->SetName("AfternoonIrr")->Build()->As<Texture2D>();
+
+		ResourceLoader::Save(envCubemap);
+		ResourceLoader::Save(irrCubemap);
+
+		//if (Resource::Save<ITextureResourceData*>(GetResourceFromBatchByTag<ITextureResourceData>("EnvironmentCubemap"), "assets/textures/skybox/afternoon_env.exr") != ResourceStatus::RS_OK) {
+		//	OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for the evironment cubmap");
+		//}
+		//if (Resource::Save<ITextureResourceData*>(GetResourceFromBatchByTag<ITextureResourceData>("IrradianceCubemap"), "assets/textures/skybox/afternoon_irr.exr") != ResourceStatus::RS_OK) {
+		//	OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for the irradiance cubmap");
+		//}
+
+		DELETE_OBJECT(envCubemap);
+		DELETE_OBJECT(irrCubemap);
 	}
 }

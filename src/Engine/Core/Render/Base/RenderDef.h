@@ -165,6 +165,16 @@ namespace Engine {
         TF_UNKNOWN
     };
 
+    enum class TextureFace {
+        TF_POSITIVE_X = 0,
+        TF_NEGATIVE_X = 1,
+        TF_POSITIVE_Y = 2,
+        TF_NEGATIVE_Y = 3,
+        TF_POSITIVE_Z = 4,
+        TF_NEGATIVE_Z = 5,
+        TF_DEFAULT = 0
+    };
+
     constexpr static TextureFormat AdjustTargetFormatForTexture(TextureFormat format) {
         switch (format) {
         case TextureFormat::TF_R24_BMP_G8_UINT:

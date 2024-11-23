@@ -5,7 +5,7 @@ namespace Engine {
 	GENERATE_INSTANTIATION(Shader)
 
 	Shader::Shader(const ObjectArgument& arguments) 
-		: Object(arguments), m_shader(nullptr), m_stage() {
+		: Object(arguments), m_shader(nullptr), m_stage(), m_name() {
 
 	}
 
@@ -33,6 +33,9 @@ namespace Engine {
 		}
 	}
 
+	Shader::Metadata* Shader::Metadata::SetName(const String& value) {
+		return dynamic_cast<Shader::Metadata*>(_SetName(value));
+	}
 
 	Shader::Metadata* Shader::Metadata::SetType(RenderStage stage) {
 		m_stage = stage;
@@ -55,19 +58,21 @@ namespace Engine {
 		return m_data;
 	}
 
+	IResourceMetadata* Shader::Metadata::_SetName(const String& value) {
+		m_name = value;
+		return this;
+	}
+
 	Object* Shader::Metadata::Build() {
+		assert(!m_name.empty());
+
 		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
 
 		Shader* shader = ClassType<Shader>::CreateObject(ObjectArgument::Dummy());
 		shader->m_stage = m_stage;
-		shader->m_shader = factory->CreateShader(m_stage, m_dataLength, m_data);
+		shader->m_shader = factory->CreateShader(m_stage, m_name + "_shdrRes", m_dataLength, m_data);
 
+		shader->SetName(m_name);
 		return shader;
-	}
-
-	void Shader::InitializeNativeResource(RenderStage stage, const Array<Int8>& code) {
-		IRenderResourceFactory* factory = Core::GetInstance()->GetContext()->QueryResourceFactory();
-		m_shader = factory->CreateShader(stage, code.size(), code.data());
-		m_stage = stage;
 	}
 }

@@ -168,7 +168,8 @@ namespace Engine {
 
 	class StateResource : public RenderBase {
 	public:
-		StateResource(IContext* context) : RenderBase(ResourceIdentifier::RI_STATE, context) {}
+		StateResource(const String& name, IContext* context) 
+			: RenderBase(name, context, ResourceIdentifier::RI_STATE) {}
 		virtual ~StateResource() = default;
 
 		virtual bool Is(StateType type) const = 0;
@@ -178,7 +179,7 @@ namespace Engine {
 
 	class StandaloneStateResource : public StateResource {
 	public:
-		StandaloneStateResource(IContext* context) : StateResource(context) {}
+		StandaloneStateResource(const String& name, IContext* context) : StateResource(name, context) {}
 		virtual ~StandaloneStateResource() = default;
 
 		virtual void Bind() const = 0;

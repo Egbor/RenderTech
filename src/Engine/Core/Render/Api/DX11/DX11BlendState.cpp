@@ -50,8 +50,8 @@ namespace Engine {
         return d3dBlendDesc;
     }
 
-    DX11BlendState::DX11BlendState(const StateData& data, IContext* context) 
-        : StandaloneStateResource(context), m_blendFactor{1.0f, 1.0f, 1.0f, 1.0f}, m_sampleMask(0xFFFFFFFF) {
+    DX11BlendState::DX11BlendState(const String& name, const StateData& data, IContext* context) 
+        : StandaloneStateResource(name, context), m_blendFactor{1.0f, 1.0f, 1.0f, 1.0f}, m_sampleMask(0xFFFFFFFF) {
         ComPtr<ID3D11Device> d3dDevice = dynamic_cast<DX11Context*>(context)->GetD3D11Device();
         const D3D11_BLEND_DESC dxData = GenerateD3D11BlendDesc(data.sdBlend);
 

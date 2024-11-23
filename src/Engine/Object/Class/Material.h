@@ -19,12 +19,16 @@ namespace Engine {
             Metadata();
             ~Metadata() = default;
 
+            Metadata* SetName(const String& value);
             Metadata* AddTexturePath(const String& path);
             Metadata* AddShaderPath(const String& path);
 
             Object* Build() override;
 
         private:
+            IResourceMetadata* _SetName(const String& value) override;
+
+            String m_name;
             Array<String> m_texturePaths;
             Array<String> m_shaderPaths;
         };

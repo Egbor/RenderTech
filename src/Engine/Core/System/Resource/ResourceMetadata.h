@@ -7,6 +7,7 @@ namespace Engine {
 	class IResourceMetadata {
 	public:
 		virtual ~IResourceMetadata() = default;
+		virtual IResourceMetadata* _SetName(const String& name) = 0;
 		virtual Object* Build() = 0;
 	};
 }

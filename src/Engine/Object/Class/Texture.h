@@ -6,39 +6,9 @@
 #include "Engine/Object/Object.h"
 
 namespace Engine {
-    enum class TextureFace {
-        TF_POSITIVE_X = 0,
-        TF_NEGATIVE_X = 1,
-        TF_POSITIVE_Y = 2,
-        TF_NEGATIVE_Y = 3,
-        TF_POSITIVE_Z = 4,
-        TF_NEGATIVE_Z = 5,
-        TF_DEFAULT = 0
-    };
-
-    CLASSTYPE(Texture)
-    class Texture : public Object {
-        GENERATE_BODY(Texture, Object)
-
-    public:
-        Texture(const ObjectArgument& argument);
-        virtual ~Texture() = default;
-
-        Int32 GetWidth() const;
-        Int32 GetHeight() const;
-        TextureFormat GetFormat() const;
-
-        bool IsCubemap() const;
-
-        TextureResource* GetNativeResource() const;
-
-    protected:
-        TextureResource* m_nativeTexture;
-    };
-
     CLASSTYPE(Texture2D)
-    class Texture2D : public Texture {
-        GENERATE_BODY(Texture2D, Texture)
+    class Texture2D : public Object {
+        GENERATE_BODY(Texture2D, Object)
 
     public:
         class Metadata : public IResourceMetadata {
@@ -51,6 +21,7 @@ namespace Engine {
             Metadata* SetHeight(Int32 value);
             Metadata* SetFormat(TextureFormat format);
             Metadata* SetData(const Int8* bits, TextureFace face);
+            Metadata* SetData(TextureResource* resaource);
 
             bool IsCubemap() const;
 
@@ -60,29 +31,31 @@ namespace Engine {
             Object* Build() override;
 
         private:
+            IResourceMetadata* _SetName(const String& value) override;
+
             String m_name;
             Array<Int8*> m_data;
             Int32 m_width;
             Int32 m_height;
             TextureFormat m_format;
             const TextureType m_type;
+
+            TextureResource* m_resource;
         };
 
         Texture2D(const ObjectArgument&);
-        virtual ~Texture2D() = default;
+        virtual ~Texture2D();
 
-        void Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData);
-    };
+        bool IsCubemap() const;
+        Int32 GetWidth() const;
+        Int32 GetHeight() const;
+        TextureFormat GetFormat() const;
 
-    CLASSTYPE(TextureCube)
-    class TextureCube : public Texture {
-        GENERATE_BODY(TextureCube, Texture)
+        TextureResource* GetNativeResource() const;
 
-    public:
-        TextureCube(const ObjectArgument&);
-        virtual ~TextureCube() = default;
-
-        void Create(Int32 width, Int32 height, TextureFormat format, Array<Int8*> rawData);
+    private:
+        TextureResource* m_nativeTexture;
+        bool m_hasExternNativeTexture;
     };
 }
 

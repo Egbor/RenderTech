@@ -7,7 +7,7 @@
 namespace Engine {
     class DX11SamplerState : public StateResource {
     public:
-        DX11SamplerState(const StateData& data, IContext* context);
+        DX11SamplerState(const String& name, const StateData& data, IContext* context);
         virtual ~DX11SamplerState() = default;
 
         bool Is(StateType type) const override;

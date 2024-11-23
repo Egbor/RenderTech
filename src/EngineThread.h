@@ -153,7 +153,7 @@ namespace Engine {
 			}
 
 			m_pool.push_back(new EngineThread());
-			m_pool[m_pool.size() - 1]->Start(*m_sync, callback, args...);
+			m_pool[m_pool.size() - 1]->Start<TArgs...>(*m_sync, callback, args...);
 		}
 
 		void Start() {

@@ -1,5 +1,4 @@
 #include "Engine/Object/Component/PointLightComponent.h"
-#include "Engine/Core/System/Resource/Resource.h"
 //#include "Engine/Rendering/Engine/RenderPass/LightRenderPass.h"
 
 namespace Engine {

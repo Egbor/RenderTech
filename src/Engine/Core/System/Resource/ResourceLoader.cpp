@@ -190,6 +190,7 @@ namespace Engine {
     void LoadAssetMetadataResolution(IResourceMetadata* metadata, const Map<String, String>& attributes);
     void LoadAssetMetadataSizeX(IResourceMetadata* metadata, const Map<String, String>& attributes);
     void LoadAssetMetadataType(IResourceMetadata* metadata, const Map<String, String>& attributes);
+    void LoadAssetMetadataName(IResourceMetadata* metadata, const Map<String, String>& attributes);
 
     static const Map<String, std::function<Object*(rapidxml::xml_node<>*)>> rtAssetLoaders {
         { "staticmesh", LoadAssetStaticMesh },
@@ -209,6 +210,7 @@ namespace Engine {
         { "resolution", LoadAssetMetadataResolution },
         { "sizex", LoadAssetMetadataSizeX },
         { "type", LoadAssetMetadataType },
+        { "name", LoadAssetMetadataName },
     };
 
     static const Map<String, TextureFace> rtFaces {
@@ -371,6 +373,10 @@ namespace Engine {
         shaderMetadata->SetType(stage);
     }
 
+    void LoadAssetMetadataName(IResourceMetadata* metadata, const Map<String, String>& attributes) {
+        metadata->_SetName(attributes.at(RTASSET_ATTRIBUTE_VALUE));
+    }
+
 
     // Load assets section
 
@@ -522,7 +528,7 @@ namespace Engine {
         return resource;
     }
 
-    void ResourceLoader::Save(const String& path, Object* object) {
+    void ResourceLoader::Save(Object* object) {
         auto function = rtAssetSavers.at(object->TypeIdClass());
         function(object);
     }

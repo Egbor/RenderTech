@@ -7,7 +7,7 @@
 namespace Engine {
     class DX11VertexShader : public ShaderResource {
     public:
-        DX11VertexShader(IContext* context, Size codeLength, const void* code);
+        DX11VertexShader(const String& name, IContext* context, Size codeLength, const void* code);
         virtual ~DX11VertexShader() = default;
 
         bool Is(RenderStage stage) const override;
@@ -22,7 +22,7 @@ namespace Engine {
 
     class DX11PixelShader : public ShaderResource {
     public:
-        DX11PixelShader(IContext* context, Size codeLength, const void* code);
+        DX11PixelShader(const String& name, IContext* context, Size codeLength, const void* code);
         virtual ~DX11PixelShader() = default;
 
         bool Is(RenderStage stage) const override;

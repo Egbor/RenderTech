@@ -1,7 +1,7 @@
 #include "Engine/Rendering/Engine/HighRenderPipeline.h"
 
 namespace Engine {
-	HighRenderPipelineAdapter::HighRenderPipelineAdapter(IRenderPipeline* pipeline)
+	HighRenderPipelineAdapter::HighRenderPipelineAdapter(IRenderPipeline* pipeline) noexcept
 		: m_pipeline(pipeline) {
 
 	}
@@ -21,17 +21,17 @@ namespace Engine {
 	}
 
 	template<>
-	constexpr void HighRenderPipelineAdapter::BindResources<IStateResourceData>(const Array<IStateResourceData*>& resources) {
+	void HighRenderPipelineAdapter::BindResources<StateResource>(const Array<StateResource*>& resources) {
 		m_pipeline->SetStates(resources);
 	}
 
 	template<>
-	constexpr void HighRenderPipelineAdapter::BindResources<ITargetResourceData>(const Array<ITargetResourceData*>& resources) {
+	void HighRenderPipelineAdapter::BindResources<TargetResource>(const Array<TargetResource*>& resources) {
 		m_pipeline->SetTargets(resources);
 	}
 
 	template<>
-	constexpr void HighRenderPipelineAdapter::BindResources<IShaderResourceData>(const Array<IShaderResourceData*>& resources) {
+	 void HighRenderPipelineAdapter::BindResources<ShaderResource>(const Array<ShaderResource*>& resources) {
 		for (Int32 i = 0; i < static_cast<Int32>(RenderStage::RS_NUM); i++) {
 			IRenderStage* _stage = m_pipeline->GetStage(static_cast<RenderStage>(i));
 			_stage->BindShader(resources[i]);
@@ -39,19 +39,19 @@ namespace Engine {
 	}
 
 	template<>
-	constexpr void HighRenderPipelineAdapter::BindResources<IStateResourceData>(const Array<IStateResourceData*>& resources, RenderStage stage) {
+	void HighRenderPipelineAdapter::BindResources<StateResource>(const Array<StateResource*>& resources, RenderStage stage) {
 		IRenderStage* _stage = m_pipeline->GetStage(stage);
 		_stage->BindSamplers(resources);
 	}
 
 	template<>
-	constexpr void HighRenderPipelineAdapter::BindResources<ITextureResourceData>(const Array<ITextureResourceData*>& resources, RenderStage stage) {
+	void HighRenderPipelineAdapter::BindResources<TextureResource>(const Array<TextureResource*>& resources, RenderStage stage) {
 		IRenderStage* _stage = m_pipeline->GetStage(stage);
 		_stage->BindTextures(resources);
 	}
 
 	template<>
-	constexpr void HighRenderPipelineAdapter::BindResources<IBufferResourceData>(const Array<IBufferResourceData*>& resources, RenderStage stage) {
+	void HighRenderPipelineAdapter::BindResources<BufferResource>(const Array<BufferResource*>& resources, RenderStage stage) {
 		IRenderStage* _stage = m_pipeline->GetStage(stage);
 		_stage->BindBuffers(resources);
 	}

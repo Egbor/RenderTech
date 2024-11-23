@@ -48,7 +48,7 @@ namespace Engine {
         }
 
         Float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        m_target = new DX11RenderTarget(context, new DX11Texture2D(context, backBuffer), color);
+        m_target = new DX11RenderTarget("SwapOutput", context, new DX11Texture2D("SwapOutput_tex2d", context, backBuffer), color);
     }
 
     DX11SwapChain::~DX11SwapChain() {

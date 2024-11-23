@@ -8,16 +8,19 @@ namespace Engine {
 
 	class RenderBase {
 	public:
-		RenderBase(ResourceIdentifier identifier, IContext* context);
+		RenderBase(const String& name, IContext* context, ResourceIdentifier identifier);
 		virtual ~RenderBase() = default;
 
 		bool Is(ResourceIdentifier identifier) const;
 		bool Is(const RenderBase& object) const;
 
+		const String& GetName() const;
+
 	protected:
 		IContext* GetContext() const;
 
 	private:
+		String m_name;
 		IContext* m_context;
 		ResourceIdentifier m_identifier;
 	};

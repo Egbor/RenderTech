@@ -20,15 +20,15 @@ namespace Engine {
 		virtual ~InputComponent() = default;
 
 		template<class TOwner>
-		void BindAction(const String& tag, TOwner* owner, typename Method<TOwner>::TMethodPtr method) {
+		void BindAction(const String& tag, TOwner* owner, typename Method<TOwner, void()>::TMethodPtr method) {
 			Input* input = Core::GetInstance()->GetInput();
-			input->AddAction(tag, Delegate<TOwner>::Allocate(owner, method));
+			input->AddAction(tag, Callable<void()>::AllocateDelegate(owner, method));
 		}
 
 		template<class TOwner>
-		void BindAxis(const String& tag, TOwner* owner, typename Method<TOwner, Float>::TMethodPtr method) {
+		void BindAxis(const String& tag, TOwner* owner, typename Method<TOwner, void(Float)>::TMethodPtr method) {
 			Input* input = Core::GetInstance()->GetInput();
-			input->AddAxis(tag, Delegate<TOwner, Float>::Allocate(owner, method));
+			input->AddAxis(tag, Callable<void(Float)>::AllocateDelegate(owner, method));
 		}
 
 		void UpdateInputs();

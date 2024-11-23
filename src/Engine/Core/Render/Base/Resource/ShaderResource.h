@@ -6,7 +6,8 @@
 namespace Engine {
 	class ShaderResource : public RenderBase {
 	public:
-		ShaderResource(IContext* context) : RenderBase(ResourceIdentifier::RI_SHADER, context) {}
+		ShaderResource(const String& name, IContext* context) 
+			: RenderBase(name, context, ResourceIdentifier::RI_SHADER) {}
 		virtual ~ShaderResource() = default;
 
 		virtual bool Is(RenderStage stage) const = 0;

@@ -70,7 +70,7 @@ namespace Engine {
 
     class RawData {
     public:
-        constexpr RawData(Size dataSize) noexcept 
+        RawData(Size dataSize) noexcept 
             : m_data(new char[dataSize]), m_size(dataSize) {
             
         }
@@ -82,7 +82,7 @@ namespace Engine {
         template<typename T>
         T* As() {
             assert(m_size >= sizeof(T));
-            return reinterpret_cast<T*>(data);
+            return reinterpret_cast<T*>(m_data);
         }
 
         static const RawData nulldata;

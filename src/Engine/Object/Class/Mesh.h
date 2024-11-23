@@ -26,6 +26,7 @@ namespace Engine {
             ~Metadata() = default;
 
             Metadata* AddSubmesh(MeshDescription* description);
+            Metadata* SetName(const String& value);
             Metadata* SetMeshOptimization(bool value);
             Metadata* SetLeftHandedOptimization(bool value);
 
@@ -35,13 +36,16 @@ namespace Engine {
             Object* Build() override;
 
         private:
+            IResourceMetadata* _SetName(const String& value) override;
+
+            String m_name;
             Array<MeshUnit> m_submeshes;
             bool m_hasMeshOptimization;
             bool m_hasLeftHandedOptiization;
         };
 
         StaticMesh(const ObjectArgument& argument);
-        virtual ~StaticMesh() = default;
+        virtual ~StaticMesh();
 
         void SetMaterial(Material* material, Int32 index);
 

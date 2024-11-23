@@ -9,6 +9,13 @@ namespace Engine {
 
     }
 
+    StaticMesh::~StaticMesh() {
+        for (Size i = 0; i < m_submeshes.size(); i++) {
+            DELETE_OBJECT(m_submeshes[i].vertexBuffer);
+            DELETE_OBJECT(m_submeshes[i].indexBuffer);
+        }
+    }
+
     void StaticMesh::SetMaterial(Material* material, Int32 index) {
         if (index >= m_materials.size()) {
             throw EngineException("[Mesh] A material index out of range");
@@ -40,16 +47,22 @@ namespace Engine {
     }
 
     StaticMesh::Metadata::Metadata() 
-        : m_hasMeshOptimization(false), m_hasLeftHandedOptiization(false) {
+        : m_name(), m_submeshes(), m_hasMeshOptimization(false), m_hasLeftHandedOptiization(false) {
 
     }
 
     StaticMesh::Metadata* StaticMesh::Metadata::AddSubmesh(MeshDescription* description) {
+        assert(!m_name.empty());
+
         m_submeshes.push_back({
-            description->BuildVertexBuffer(),
-            description->BuildIndexBuffer()
+            description->BuildVertexBuffer(m_name + "_vbufRes"),
+            description->BuildIndexBuffer(m_name + "_ibufRes")
         });
         return this;
+    }
+
+    StaticMesh::Metadata* StaticMesh::Metadata::SetName(const String& value) {
+        return dynamic_cast<StaticMesh::Metadata*>(_SetName(value));
     }
 
     StaticMesh::Metadata* StaticMesh::Metadata::SetMeshOptimization(bool value) {
@@ -68,6 +81,11 @@ namespace Engine {
 
     bool StaticMesh::Metadata::HasLeftHandedOptimization() const {
         return m_hasLeftHandedOptiization;
+    }
+
+    IResourceMetadata* StaticMesh::Metadata::_SetName(const String& value) {
+        m_name = value;
+        return this;
     }
 
     Object* StaticMesh::Metadata::Build() {

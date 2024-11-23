@@ -25,8 +25,8 @@ namespace Engine {
         return d3dRasterizerDesc;
     }
 
-    DX11RasterizerState::DX11RasterizerState(const StateData& data, IContext* context) 
-        : StandaloneStateResource(context) {
+    DX11RasterizerState::DX11RasterizerState(const String& name, const StateData& data, IContext* context) 
+        : StandaloneStateResource(name, context) {
         ComPtr<ID3D11Device> d3dDevice = dynamic_cast<const DX11Context*>(context)->GetD3D11Device();
         const D3D11_RASTERIZER_DESC dxData = GenerateD3D11RasterizerDesc(data.sdRasterizer);
 

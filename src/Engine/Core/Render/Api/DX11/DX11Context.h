@@ -31,11 +31,11 @@ namespace Engine {
         IRenderPipeline* QueryPipeline() override;
         ISwapChain* QuerySwapChain() override;
 
-        StateResource* CreateState(StateType type, StateData data) override;
-        TargetResource* CreateTarget(TextureType type, TextureFormat format, Int32 width, Int32 height) override;
-        BufferResource* CreateBuffer(BufferType type, Int32 size, Int32 strides, const void* data) override;
-        ShaderResource* CreateShader(RenderStage stage, Size codeLength, const void* code) override;
-        TextureResource* CreateTexture(TextureType type, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) override;
+        StateResource* CreateState(StateType type, const String& name, StateData data) override;
+        TargetResource* CreateTarget(TextureType type, const String& name, TextureFormat format, Int32 width, Int32 height) override;
+        BufferResource* CreateBuffer(BufferType type, const String& name, Int32 size, Int32 strides, const void* data) override;
+        ShaderResource* CreateShader(RenderStage stage, const String& name, Size codeLength, const void* code) override;
+        TextureResource* CreateTexture(TextureType type, const String& name, TextureFormat format, Int32 width, Int32 height, Array<Int8*> data) override;
 
         void SetViewport(Int32 width, Int32 height) override;
         void SetTargets(const Array<TargetResource*>& targets) override;
@@ -56,11 +56,11 @@ namespace Engine {
         void RegisterBufferFactory();
         void RegisterShaderFactory();
 
-        Factory<StateType, StateResource, StateData> m_stateFactory;
-        Factory<TextureType, TextureResource, TextureFormat, Int32, Int32, Array<Int8*>> m_staticTextureFactory;
-        Factory<TextureType, TargetResource, TextureFormat, Int32, Int32> m_renderTargetFactory;
-        Factory<BufferType, BufferResource, Int32, Int32, const void*> m_bufferFactory;
-        Factory<RenderStage, ShaderResource, Size, const void*> m_shaderFactory;
+        Factory<StateType, StateResource, const String&, StateData> m_stateFactory;
+        Factory<RenderStage, ShaderResource, const String&, Size, const void*> m_shaderFactory;
+        Factory<BufferType, BufferResource, const String&, Int32, Int32, const void*> m_bufferFactory;
+        Factory<TextureType, TargetResource, const String&, TextureFormat, Int32, Int32> m_renderTargetFactory;
+        Factory<TextureType, TextureResource, const String&, TextureFormat, Int32, Int32, Array<Int8*>> m_staticTextureFactory;
 
         TargetResource* m_backTarget;
     };
