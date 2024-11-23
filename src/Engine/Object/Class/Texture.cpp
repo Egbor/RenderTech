@@ -102,7 +102,7 @@ namespace Engine {
         return this;
     }
 
-    IResourceMetadata* Texture2D::Metadata::_SetName(const String& name) {
+    IResourceMetadata* Texture2D::Metadata::_SetName(const String& value) {
         m_name = value;
         return this;
     }

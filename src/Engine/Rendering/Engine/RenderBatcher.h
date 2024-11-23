@@ -75,17 +75,17 @@ namespace Engine {
 			});
 		}
 
-		template<class TResourceClass>
-		Array<NamePlusResourceWrapper<TResourceClass>> QueryNamePlusResources() const {
-			return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
-				return { resource->name, dynamic_cast<TResourceClass*>(resource->data) };
-			});
-		}
+		//template<class TResourceClass>
+		//Array<NamePlusResourceWrapper<TResourceClass>> QueryNamePlusResources() const {
+		//	return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+		//		return { resource->data->GetName(), dynamic_cast<TResourceClass*>(resource->data)};
+		//	});
+		//}
 
 		template<class TResourceClass>
 		TResourceClass* QueryResourceByName(const String& name) const {
 			Array<TResourceClass*> resources = SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
-				if (resource->name == name) {
+				if (resource->data->GetName() == name) {
 					return dynamic_cast<TResourceClass*>(resource->data);
 				}
 			});
@@ -105,7 +105,7 @@ namespace Engine {
 		template<class TCastomWrapper>
 		Array<TCastomWrapper> SelectResources(ResourceIdentifier id, std::function<TCastomWrapper(const HRS_Resource*, EnumFlags<HRS_Tag>)> selector) const {
 			auto it = std::find_if(m_topNodes.begin(), m_topNodes.end(), [&](const HRS_ResourceNode* node) {
-				node->resource->data->Is(id);
+				return node->resource->data->Is(id);
 			});
 
 			Array<TCastomWrapper> outcome;

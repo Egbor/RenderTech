@@ -238,11 +238,7 @@ namespace Engine {
 #define RTASSET_ATTRIBUTE_TYPE "type"
 #define RTASSET_ATTRIBUTE_ID "id"
 
-    //void MaybeInitAssetSavers() {
-    //    if (rtAssetSavers.empty()) {
-    //        rtAssetSavers[Texture2D::TypeIdClass()] = SaveAssetTexture2D;
-    //    }
-    //}
+    // TODO - https://stackoverflow.com/questions/76290329/boostto-lower-copy-too-expensive-as-it-extracts-a-facet-from-the-passed-loca
 
     void ParseMetadataSection(IResourceMetadata* metadata, rapidxml::xml_node<>* xmlRoot) {
         Map<String, String> attributes;

@@ -35,17 +35,17 @@ namespace Engine {
 	}
 
 	void HighRenderBatcher::LinkWithStorage(const HighRenderStorage& storage, const String& name, EnumFlags<HRS_Tag> tags) {
-		auto itRes = std::find_if(storage.m_storage.begin(), storage.m_storage.end(), [&](const HRS_Resource& res) { res.name == name; });
+		auto itRes = std::find_if(storage.m_storage.begin(), storage.m_storage.end(), [&](const HRS_Resource& res) { return res.data->GetName() == name; });
 		if (itRes == storage.m_storage.end()) {
 			throw EngineException("[HighRenderBatcher] HighRenderStorage doesn't keep a resource with the tag - " + name);
 		}
 
-		auto itNode = std::find_if(m_nodes.begin(), m_nodes.end(), [&](const HRS_ResourceNode& node) { node.resource->name == name; });
+		auto itNode = std::find_if(m_nodes.begin(), m_nodes.end(), [&](const HRS_ResourceNode& node) { return node.resource->data->GetName() == name; });
 		if (itNode == m_nodes.end()) {
 			m_nodes.push_back({ &(*itRes), nullptr, nullptr, tags });
 			itNode = m_nodes.end() - 1;
 
-			auto itList = std::find_if(m_topNodes.begin(), m_topNodes.end(), [&](const HRS_ResourceNode*& node) { node->resource->data->Is(*(*itRes).data); });
+			auto itList = std::find_if(m_topNodes.begin(), m_topNodes.end(), [&](const HRS_ResourceNode* node) { return node->resource->data->Is(*(*itRes).data); });
 			if (itList == m_topNodes.end()) {
 				(*itNode).last = &(*itNode);
 				m_topNodes.push_back(&(*itNode));

@@ -5,7 +5,7 @@ namespace Engine {
 	GENERATE_INSTANTIATION(Shader)
 
 	Shader::Shader(const ObjectArgument& arguments) 
-		: Object(arguments), m_shader(nullptr), m_stage(), m_name() {
+		: Object(arguments), m_shader(nullptr), m_stage() {
 
 	}
 
@@ -22,7 +22,7 @@ namespace Engine {
 	}
 
 	Shader::Metadata::Metadata() 
-		: m_data(nullptr) {
+		: m_data(nullptr), m_name() {
 
 	}
 

@@ -231,14 +231,14 @@ public:
 		}
 
 		void operator+=(TCallable* callback) {
-			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { item->IsEqual(*callback); });
+			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { return item->IsEqual(*callback); });
 			if (it == m_callbackList.end()) {
 				m_callbackList.push_back(callback);
 			}
 		}
 
 		void operator-=(TCallable* callback) {
-			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { item->IsEqual(*callback); });
+			auto it = std::find_if(m_callbackList.begin(), m_callbackList.end(), [&](TCallable* item) { return item->IsEqual(*callback); });
 			if (it != m_callbackList.end()) {
 				TCallable::Free(*it);
 				m_callbackList.erase(it);

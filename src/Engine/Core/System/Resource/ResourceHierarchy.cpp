@@ -14,7 +14,7 @@ namespace Engine {
 	}
 
 	Object* ResourceNode::Get(const String& path) {
-		auto nameIterator = std::find_if(path.begin(), path.end(), [](const char& item) { item == '/' || item == '\\'; });
+		auto nameIterator = std::find_if(path.begin(), path.end(), [](const char& item) { return item == '/' || item == '\\'; });
 
 		if (nameIterator == path.end()) {
 			for (Int32 i = 0; i < static_cast<Int32>(m_relatedResources.size()); i++) {
@@ -34,7 +34,7 @@ namespace Engine {
 	}
 
 	void ResourceNode::Set(const String& path, Object* obj) {
-		auto nameIterator = std::find_if(path.begin(), path.end(), [](const char& item) { item == '/' || item == '\\'; });
+		auto nameIterator = std::find_if(path.begin(), path.end(), [](const char& item) { return item == '/' || item == '\\'; });
 
 		if (nameIterator == path.end()) {
 			m_relatedResources.push_back({ path, obj });

@@ -106,7 +106,7 @@ namespace Engine {
 		}
 
 		template<class ...TArgs>
-		void Start(EngineThreadSync& sync, Callable<TArgs...>* callback, TArgs... args) {
+		void Start(EngineThreadSync& sync, Callable<void(TArgs...)>* callback, TArgs... args) {
 			m_thread = std::thread([&]() {
 				bool isSyncExit = false;
 				Int32 syncId = sync.ReserveSyncSlot();

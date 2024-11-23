@@ -31,7 +31,7 @@
 #define RESOURCE_TAG_BAKING_IRR_CUBEMAP "Cubemap_Irradiance"
 
 #define RESOURCE_TAG_FRAME_HDR "FrameHDR"
-#define RESOURCE_TAG_FRAME "Frame"
+#define RESOURCE_TAG_FRAME "OutputTarget"
 #define RESOURCE_TAG_DEPTH "Depth"
 
 namespace Engine {

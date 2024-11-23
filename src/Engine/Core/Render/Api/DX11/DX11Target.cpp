@@ -14,7 +14,7 @@ namespace Engine {
     }
 
     DX11RenderTarget::DX11RenderTarget(const String& name, IContext* context, DX11Texture2D* texture, const Float* color)
-        : TargetResource(context), m_data(texture), m_viewId(0) {
+        : TargetResource(name, context), m_data(texture), m_viewId(0) {
         memcpy_s(m_clearColor, sizeof(m_clearColor), color, sizeof(m_clearColor));
 
         D3D11_RENDER_TARGET_VIEW_DESC  d3dRenderTargetViewDesc;
@@ -86,7 +86,7 @@ namespace Engine {
     }
 
     DX11DepthStencil::DX11DepthStencil(const String& name, IContext* context, DX11Texture2D* texture, Float depth, UInt32 stencil) 
-        : DepthStencilResource(context), m_data(texture), m_clearDepth(depth), m_clearStencil(stencil)
+        : DepthStencilResource(name, context), m_data(texture), m_clearDepth(depth), m_clearStencil(stencil)
         , m_clearFlags(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL), m_viewId(0) {
         D3D11_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
         ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
