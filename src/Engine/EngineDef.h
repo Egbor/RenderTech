@@ -85,7 +85,10 @@ namespace Engine {
             return reinterpret_cast<T*>(m_data);
         }
 
-        static const RawData nulldata;
+        static inline const RawData& Nulldata() {
+            static RawData nulldata = RawData();
+            return nulldata;
+        }
 
     private:
         constexpr RawData() noexcept
@@ -96,7 +99,7 @@ namespace Engine {
         Size m_size;
     };
 
-    const RawData RawData::nulldata = RawData();
+    // const RawData RawData::nulldata = RawData();
 
 #define DELETE_OBJECT(obj) if ((obj) != nullptr) { delete (obj); (obj) = nullptr; }
 #define DELETE_ARRAY_OF_OBJECTS(arr) for (auto obj : (arr)) { DELETE_OBJECT(obj); }

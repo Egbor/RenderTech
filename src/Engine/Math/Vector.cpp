@@ -7,10 +7,93 @@ namespace Engine {
 
     }
 
-    //constexpr Vector2::Vector2(float x, float y) noexcept 
-    //    : XMFLOAT2(x, y) {
+    Vector2::Vector2(float x, float y) noexcept 
+        : XMFLOAT2(x, y) {
 
-    //}
+    }
+
+    Vector2 Vector2::Normalize() {
+        XMVECTOR xmVector1 = XMLoadFloat2(this);
+        XMVECTOR xmNormalizedVector = XMVector3Normalize(xmVector1);
+
+        Vector2 result;
+        XMStoreFloat2(&result, xmNormalizedVector);
+
+        return result;
+    }
+
+    float Vector2::Dot(const Vector2& vector) {
+        XMVECTOR xmVector1 = XMLoadFloat2(this);
+        XMVECTOR xmVector2 = XMLoadFloat2(&vector);
+        XMVECTOR xmDotVector = XMVector2Dot(xmVector1, xmVector2);
+
+        Vector2 result;
+        XMStoreFloat2(&result, xmDotVector);
+
+        return result.x;
+    }
+
+    Vector2 Vector2::operator+(const Vector2& vector) {
+        XMVECTOR xmVector1 = XMLoadFloat2(this);
+        XMVECTOR xmVector2 = XMLoadFloat2(&vector);
+        XMVECTOR xmVector = xmVector1 + xmVector2;
+
+        Vector2 result;
+        XMStoreFloat2(&result, xmVector);
+
+        return result;
+    }
+
+    Vector2 Vector2::operator-(const Vector2& vector) {
+        XMVECTOR xmVector1 = XMLoadFloat2(this);
+        XMVECTOR xmVector2 = XMLoadFloat2(&vector);
+        XMVECTOR xmVector = xmVector1 - xmVector2;
+
+        Vector2 result;
+        XMStoreFloat2(&result, xmVector);
+
+        return result;
+    }
+
+    Vector2 Vector2::operator+(const float arg) {
+        return *this + Vector2(arg, arg);
+    }
+
+    Vector2 Vector2::operator-(const float arg) {
+        return *this - Vector2(arg, arg);
+    }
+
+    Vector2 Vector2::operator*(const float arg) {
+        XMVECTOR xmVector1 = XMLoadFloat2(this);
+        XMVECTOR xmVector = xmVector1 * arg;
+
+        Vector2 result;
+        XMStoreFloat2(&result, xmVector);
+
+        return result;
+    }
+
+    Vector2 Vector2::operator/(const float arg) {
+        XMVECTOR xmVector1 = XMLoadFloat2(this);
+        XMVECTOR xmVector = xmVector1 * arg;
+
+        Vector2 result;
+        XMStoreFloat2(&result, xmVector);
+
+        return result;
+    }
+
+    void Vector2::operator+=(const Vector2& vector) {
+        *this = *this + vector;
+    }
+
+    void Vector2::operator-=(const Vector2& vector) {
+        *this = *this - vector;
+    }
+
+    bool Vector2::operator==(const Vector2& vector) {
+        return (this->x == vector.x) && (this->y == vector.y);
+    }
 
     Vector3 Vector3::forword = Vector3(0.0f, 0.0f, 1.0f);
     Vector3 Vector3::right = Vector3(1.0f, 0.0f, 0.0f);
@@ -21,7 +104,12 @@ namespace Engine {
 
     }
 
-    constexpr Vector3::Vector3(float x, float y, float z) noexcept 
+    Vector3::Vector3(const Vector2& vec, float z) noexcept
+        : XMFLOAT3(vec.x, vec.y, z) {
+
+    }
+
+    Vector3::Vector3(float x, float y, float z) noexcept 
         : XMFLOAT3(x, y, z) {
 
     }
@@ -171,7 +259,17 @@ namespace Engine {
 
     }
 
-    constexpr Vector4::Vector4(float x, float y, float z, float w) noexcept
+    Vector4::Vector4(const Vector3& vec, float w) noexcept
+        : XMFLOAT4(vec.x, vec.y, vec.z, w) {
+
+    }
+
+    Vector4::Vector4(const Vector2& vec, float z, float w) noexcept
+        : XMFLOAT4(vec.x, vec.y, z, w) {
+
+    }
+
+    Vector4::Vector4(float x, float y, float z, float w) noexcept
         : XMFLOAT4(x, y, z, w) {
 
     }

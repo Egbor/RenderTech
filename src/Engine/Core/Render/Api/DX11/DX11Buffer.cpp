@@ -6,7 +6,7 @@ namespace Engine {
     DX11Buffer::DX11Buffer(const String& name, IContext* context, D3D11_USAGE usage, D3D11_BIND_FLAG bindFlags, 
         UINT cpuAccessFlags, UINT size, UINT strides, const void* data)
         : BufferResource(name, context), m_strides(strides), m_offset(0)
-        , m_data(RawData::nulldata), m_isMutable(usage == D3D11_USAGE_DYNAMIC) {
+        , m_data(RawData::Nulldata()), m_isMutable(usage == D3D11_USAGE_DYNAMIC) {
 
         D3D11_BUFFER_DESC d3dBufferDesc;
         ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));

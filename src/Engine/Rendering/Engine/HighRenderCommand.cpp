@@ -412,7 +412,7 @@ namespace Engine {
 	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeEnvironmentCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material) {
 		pipeline->SetViewportResolution(1080, 1080);
 		pipeline->BindResources(material->GetNativeShaderResources());
-		pipeline->BindResources(material->GetNativeTextureResources());
+		pipeline->BindResources(material->GetNativeTextureResources(), RenderStage::RS_PIXEL);
 		
 		for (m_faceId = 0; m_faceId < m_mat4x4ViewProjection.size(); m_faceId++) {
 			UpdateBuffers(m_batcher);

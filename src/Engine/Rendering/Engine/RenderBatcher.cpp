@@ -34,6 +34,10 @@ namespace Engine {
 		return resource;
 	}
 
+	bool HighRenderStorage::IsEmpty() const {
+		return m_storage.empty();
+	}
+
 	void HighRenderBatcher::LinkWithStorage(const HighRenderStorage& storage, const String& name, EnumFlags<HRS_Tag> tags) {
 		auto itRes = std::find_if(storage.m_storage.begin(), storage.m_storage.end(), [&](const HRS_Resource& res) { return res.data->GetName() == name; });
 		if (itRes == storage.m_storage.end()) {

@@ -49,6 +49,8 @@ namespace Engine {
 		TargetResource* InitResourceAsTarget(IRenderResourceFactory* factory, const String& name, TextureType type, TextureFormat format, Int32 width, Int32 height);
 		TargetResource* InitResourceAsTarget(TargetResource* resource, const String& name);
 
+		bool IsEmpty() const;
+
 	private:
 		Array<HRS_Resource> m_storage;
 	};

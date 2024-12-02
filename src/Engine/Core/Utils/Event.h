@@ -170,7 +170,7 @@ public:
 		return new Delegate<TOwner, TReturn(TArgs...)>(owner, method);
 	}
 
-	static void Free(Callable* callback) {
+	static void Free(TCallable* callback) {
 		DELETE_OBJECT(callback);
 	}
 };
@@ -220,7 +220,8 @@ public:
 
 		~Event() {
 			for (Size i = 0; i < m_callbackList.size(); i++) {
-				DELETE_OBJECT(m_callbackList[i]);
+				TCallable::Free(m_callbackList[i]);
+				// DELETE_OBJECT(m_callbackList[i]);
 			}
 		}
 

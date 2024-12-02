@@ -1,5 +1,6 @@
 #include "Engine/Core/System/Resource/ResourceLoader.h"
 #include "Engine/Core/System/Exception/EngineException.h"
+#include "Engine/Core/Utils/Algorithm.h"
 
 #include "Engine/Object/Class/Material.h"
 #include "Engine/Object/Class/Texture.h"
@@ -238,17 +239,15 @@ namespace Engine {
 #define RTASSET_ATTRIBUTE_TYPE "type"
 #define RTASSET_ATTRIBUTE_ID "id"
 
-    // TODO - https://stackoverflow.com/questions/76290329/boostto-lower-copy-too-expensive-as-it-extracts-a-facet-from-the-passed-loca
-
     void ParseMetadataSection(IResourceMetadata* metadata, rapidxml::xml_node<>* xmlRoot) {
         Map<String, String> attributes;
 
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
             for (rapidxml::xml_attribute<>* attr = node->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
-                attributes[boost::algorithm::to_lower_copy(attr->name())] = attr->value();
+                attributes[ToLowerCopy(attr->name())] = attr->value();
             }
 
-            auto function = rtAssetMetadataLoaders.at(boost::algorithm::to_lower_copy(node->name()));
+            auto function = rtAssetMetadataLoaders.at(ToLowerCopy(node->name()));
             function(metadata, attributes);
         }
     }
@@ -258,10 +257,10 @@ namespace Engine {
         String path = "";
 
         for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
-            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_ID) == 0) {
-                face = rtFaces.at(boost::algorithm::to_lower_copy(attr->value()));
+            if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_ID) {
+                face = rtFaces.at(ToLowerCopy(attr->value()));
             }
-            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+            if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_PATH) {
                 path = attr->value();
             }
         }
@@ -284,7 +283,7 @@ namespace Engine {
         String path = "";
 
         for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
-            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+            if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_PATH) {
                 path = attr->value();
             }
         }
@@ -311,7 +310,7 @@ namespace Engine {
         String path = "";
 
         for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
-            if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+            if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_PATH) {
                 path = attr->value();
             }
         }
@@ -365,7 +364,7 @@ namespace Engine {
 
     void LoadAssetMetadataType(IResourceMetadata* metadata, const Map<String, String>& attributes) {
         Shader::Metadata* shaderMetadata = dynamic_cast<Shader::Metadata*>(metadata);
-        RenderStage stage = rtShaderTypes.at(boost::algorithm::to_lower_copy(attributes.at(RTASSET_ATTRIBUTE_VALUE)));
+        RenderStage stage = rtShaderTypes.at(ToLowerCopy(attributes.at(RTASSET_ATTRIBUTE_VALUE)));
         shaderMetadata->SetType(stage);
     }
 
@@ -380,11 +379,11 @@ namespace Engine {
     Object* LoadAssetTexture2D(rapidxml::xml_node<>* xmlRoot) {
         Texture2D::Metadata metadata(TextureType::TT_DEFAULT);
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_METADATA) == 0) {
+            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_METADATA) {
                 ParseMetadataSection(&metadata, node);
             }
 
-            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_DATA) == 0) {
+            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_DATA) {
                 ParseTextureDataSection(&metadata, node);
             }
         }
@@ -394,28 +393,28 @@ namespace Engine {
     Object* LoadAssetMaterial(rapidxml::xml_node<>* xmlRoot) {
         Material::Metadata metadata;
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_METADATA) == 0) {
+            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_METADATA) {
                 ParseMetadataSection(&metadata, node);
             }
 
-            if (strcmp(boost::algorithm::to_lower_copy(xmlRoot->name()), RTASSET_TAG_DATA) == 0) {
+            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_DATA) {
                 for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
                     String type = "";
                     String path = "";
 
-                    if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_TYPE) == 0) {
-                        type = boost::algorithm::to_lower_copy(attr->value());
+                    if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_TYPE) {
+                        type = ToLowerCopy(attr->value());
                     }
 
-                    if (strcmp(boost::algorithm::to_lower_copy(attr->name()), RTASSET_ATTRIBUTE_PATH) == 0) {
+                    if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_PATH) {
                         path = attr->value();
                     }
 
                     assert(!(type.empty() || path.empty()));
 
-                    if (strcmp("texture", type.c_str()) == 0) {
+                    if (type == "texture") {
                         metadata.AddTexturePath(path);
-                    } else if (strcmp("shader", type.c_str()) == 0) {
+                    } else if (type == "shader") {
                         metadata.AddShaderPath(path);
                     }
                 }
@@ -427,13 +426,13 @@ namespace Engine {
     Object* LoadAssetCubemap( rapidxml::xml_node<>* xmlRoot) {
         Texture2D::Metadata metadata(TextureType::TT_CUBE);
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_METADATA) == 0) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_METADATA) {
                 ParseMetadataSection(&metadata, node);
             }
 
-            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_FACES) == 0) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_FACES) {
                 for (rapidxml::xml_node<>* dataNode = node->first_node(); dataNode != nullptr; dataNode = dataNode->next_sibling()) {
-                    if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_DATA) == 0) {
+                    if (ToLowerCopy(node->name()) == RTASSET_TAG_DATA) {
                         ParseTextureDataSection(&metadata, dataNode);
                     }
                 }
@@ -445,11 +444,11 @@ namespace Engine {
     Object* LoadAssetShader(rapidxml::xml_node<>* xmlRoot) {
         Shader::Metadata metadata;
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_METADATA) == 0) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_METADATA) {
                 ParseMetadataSection(&metadata, node);
             }
 
-            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_DATA) == 0) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_DATA) {
                 ParseShaderDataSection(&metadata, node);
             }
         }
@@ -459,11 +458,11 @@ namespace Engine {
     Object* LoadAssetStaticMesh(rapidxml::xml_node<>* xmlRoot) {
         StaticMesh::Metadata metadata;
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_METADATA) == 0) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_METADATA) {
                 ParseMetadataSection(&metadata, node);
             }
 
-            if (strcmp(boost::algorithm::to_lower_copy(node->name()), RTASSET_TAG_DATA) == 0) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_DATA) {
                 ParseShaderDataSection(&metadata, node);
             }
         }

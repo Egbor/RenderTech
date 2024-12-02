@@ -92,7 +92,6 @@ namespace Engine {
 
 	AbstractHighRenderContext::AbstractHighRenderContext(IContext* context)
 		: m_context(context) {
-		this->OnInitDraw(context);
 	}
 
 	AbstractHighRenderContext::~AbstractHighRenderContext() {
@@ -105,6 +104,10 @@ namespace Engine {
 
 	void AbstractHighRenderContext::DrawScene(Scene* scene) {
 		HighRenderPipelineAdapter adapter(m_context->QueryPipeline());
+
+		if (m_storage.IsEmpty()) {
+			this->OnInitDraw(m_context);
+		}
 
 		for (Int32 i = 0; i < m_commands.size(); i++) {
 			m_commands[i]->Execute(&adapter, scene);
@@ -175,7 +178,7 @@ namespace Engine {
 		: AbstractHighRenderContext(context), m_IBLCubeMapOutputWidth(outputWidth), m_IBLCubeMapOutputHeight(outputHeight) {
 		// m_texture2D = Core::Load<Texture2D>(filename);// Resource::Load<Texture2D*>(filename);
 
-		ExtendCommandList(new HighRenderCommandBakeHDRIToEnvironmentCubemap(GetStorage()));
+		// ExtendCommandList(new HighRenderCommandBakeHDRIToEnvironmentCubemap(GetStorage()));
 	}
 	
 	HRC_IBLBacker::~HRC_IBLBacker() {

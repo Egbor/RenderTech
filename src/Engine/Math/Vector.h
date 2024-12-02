@@ -4,11 +4,12 @@
 #include "Engine/Math/MathDef.h"
 
 namespace Engine {
+    STRUCTTYPE(Vector2)
     struct Vector2 : public DirectX::XMFLOAT2 {
         Vector2();
         Vector2(const Vector2&) = default;
 
-        constexpr Vector2(float x, float y) noexcept : XMFLOAT2(x, y) {}
+        Vector2(float x, float y) noexcept;
 
         Vector2 Normalize();
         float Dot(const Vector2& vector);
@@ -32,8 +33,8 @@ namespace Engine {
         Vector3();
         Vector3(const Vector3&) = default;
 
-        constexpr Vector3(const Vector2& vec, float z) noexcept;
-        constexpr Vector3(float x, float y, float z) noexcept;
+        Vector3(const Vector2& vec, float z) noexcept;
+        Vector3(float x, float y, float z) noexcept;
 
         Vector3 Normalize();
         Vector3 Cross(const Vector3& vector);
@@ -72,9 +73,9 @@ namespace Engine {
         Vector4();
         Vector4(const Vector4&) = default;
 
-        constexpr Vector4(const Vector3& vec, float w) noexcept;
-        constexpr Vector4(const Vector2& vec, float z, float w) noexcept;
-        constexpr Vector4(float x, float y, float z, float w) noexcept;
+        Vector4(const Vector3& vec, float w) noexcept;
+        Vector4(const Vector2& vec, float z, float w) noexcept;
+        Vector4(float x, float y, float z, float w) noexcept;
 
         Vector4 operator+(const Vector4& vector);
         Vector4 operator-(const Vector4& vector);

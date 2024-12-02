@@ -77,7 +77,7 @@ namespace Engine {
         Viewport(Viewport&&) = default;
         Viewport& operator=(Viewport&&) = default;
 
-        constexpr Viewport(Int32 width, Int32 height) noexcept 
+        Viewport(Int32 width, Int32 height) noexcept 
             : resolution(static_cast<Float>(width), static_cast<Float>(height)) {
 
         }
