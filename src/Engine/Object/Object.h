@@ -5,8 +5,6 @@
 #include "Engine/Object/BaseObject.h"
 #include "Engine/Object/ObjectArgument.h"
 
-#include "Engine/Core/System/Serialization/ISerializer.h"
-
 namespace Engine {
     CLASSTYPE(Object)
     class Object : public BaseObject {
