@@ -214,7 +214,7 @@ namespace Engine {
         case Engine::TextureFormat::TF_R32_FLOAT:
             return 4;
         case Engine::TextureFormat::TF_R32G32B32A32_FLOAT:
-            return 128;
+            return 16;
         default:
             break;
         }

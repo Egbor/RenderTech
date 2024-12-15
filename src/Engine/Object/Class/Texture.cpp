@@ -81,8 +81,8 @@ namespace Engine {
     }
 
     Texture2D::Metadata* Texture2D::Metadata::SetData(const Int8* bits, TextureFace face) {
-        Int32 faceIndex = static_cast<Int32>(face);
-        Int32 faceSize = m_height * m_width * GetBytesPrePixel(m_format);
+        UInt64 faceIndex = static_cast<UInt64>(face);
+        UInt64 faceSize = static_cast<UInt64>(m_height * m_width) * GetBytesPrePixel(m_format);
 
         assert(faceIndex < m_data.size());
 
