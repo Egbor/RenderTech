@@ -18,8 +18,7 @@ namespace Engine {
 		
 		std::unique_lock lock(m_mutex);
 		
-		m_syncs |= bitFlag;
-		if (m_syncs == ALL_SYNC) {
+		if (ALL_SYNC == (m_syncs.fetch_or(m_syncs | bitFlag) | bitFlag)) {
 			m_syncEvent();
 
 			m_syncs &= m_syncsMask;

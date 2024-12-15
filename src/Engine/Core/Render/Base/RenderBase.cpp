@@ -2,7 +2,7 @@
 
 namespace Engine {
 	RenderBase::RenderBase(const String& name, IContext* context, ResourceIdentifier identifier)
-		: m_identifier(identifier), m_context(context) {
+		: m_name(name), m_identifier(identifier), m_context(context) {
 
 	}
 

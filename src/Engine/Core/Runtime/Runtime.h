@@ -7,13 +7,13 @@ namespace Engine {
 	class Runtime {
 	public:
 		Runtime();
-		~Runtime();
+		virtual ~Runtime();
 
 		void DelegateProcess(Callable<void(Float)>* callback);
 
-		void Start();
-		void Pause();
-		void Terminate();
+		virtual void Start();
+		virtual void Pause();
+		virtual void Terminate();
 
 	private:
 		void Sync();

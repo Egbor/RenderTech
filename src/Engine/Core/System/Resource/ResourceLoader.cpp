@@ -379,11 +379,11 @@ namespace Engine {
     Object* LoadAssetTexture2D(rapidxml::xml_node<>* xmlRoot) {
         Texture2D::Metadata metadata(TextureType::TT_DEFAULT);
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_METADATA) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_METADATA) {
                 ParseMetadataSection(&metadata, node);
             }
 
-            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_DATA) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_DATA) {
                 ParseTextureDataSection(&metadata, node);
             }
         }
@@ -393,15 +393,15 @@ namespace Engine {
     Object* LoadAssetMaterial(rapidxml::xml_node<>* xmlRoot) {
         Material::Metadata metadata;
         for (rapidxml::xml_node<>* node = xmlRoot->first_node(); node != nullptr; node = node->next_sibling()) {
-            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_METADATA) {
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_METADATA) {
                 ParseMetadataSection(&metadata, node);
             }
 
-            if (ToLowerCopy(xmlRoot->name()) == RTASSET_TAG_DATA) {
-                for (rapidxml::xml_attribute<>* attr = xmlRoot->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
-                    String type = "";
-                    String path = "";
+            if (ToLowerCopy(node->name()) == RTASSET_TAG_DATA) {
+                String type = "";
+                String path = "";
 
+                for (rapidxml::xml_attribute<>* attr = node->first_attribute(); attr != nullptr; attr = attr->next_attribute()) {
                     if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_TYPE) {
                         type = ToLowerCopy(attr->value());
                     }
@@ -409,14 +409,14 @@ namespace Engine {
                     if (ToLowerCopy(attr->name()) == RTASSET_ATTRIBUTE_PATH) {
                         path = attr->value();
                     }
+                }
 
-                    assert(!(type.empty() || path.empty()));
+                assert(!(type.empty() || path.empty()));
 
-                    if (type == "texture") {
-                        metadata.AddTexturePath(path);
-                    } else if (type == "shader") {
-                        metadata.AddShaderPath(path);
-                    }
+                if (type == "texture") {
+                    metadata.AddTexturePath(path);
+                } else if (type == "shader") {
+                    metadata.AddShaderPath(path);
                 }
             }
         }
@@ -432,7 +432,7 @@ namespace Engine {
 
             if (ToLowerCopy(node->name()) == RTASSET_TAG_FACES) {
                 for (rapidxml::xml_node<>* dataNode = node->first_node(); dataNode != nullptr; dataNode = dataNode->next_sibling()) {
-                    if (ToLowerCopy(node->name()) == RTASSET_TAG_DATA) {
+                    if (ToLowerCopy(dataNode->name()) == RTASSET_TAG_DATA) {
                         ParseTextureDataSection(&metadata, dataNode);
                     }
                 }
@@ -463,7 +463,7 @@ namespace Engine {
             }
 
             if (ToLowerCopy(node->name()) == RTASSET_TAG_DATA) {
-                ParseShaderDataSection(&metadata, node);
+                ParseStaticMeshDataSection(&metadata, node);
             }
         }
         return metadata.Build();
@@ -514,7 +514,7 @@ namespace Engine {
 
         rapidxml::xml_node<>* xmlRoot = xmlDocument->first_node();
 
-        auto function = rtAssetLoaders.at(xmlRoot->name());  
+        auto function = rtAssetLoaders.at(ToLowerCopy(xmlRoot->name()));  
         Object* resource = function(xmlRoot);
 
         delete xmlDocument;

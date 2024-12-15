@@ -109,10 +109,10 @@ namespace Engine {
 
 	HighRenderCommandPrePass::HighRenderCommandPrePass(const HighRenderStorage& storage)
 		: AbstractHighRenderCommand(),  m_batcher() {
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_Object), TAG_VS_PLUS_PS);
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_ObjectHelper), TAG_VS_PLUS_PS);
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_Light), HRS_Tag::HRS_PS_STAGE);
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_Camera), HRS_Tag::HRS_VS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Object), TAG_VS_PLUS_PS);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_ObjectHelper), TAG_VS_PLUS_PS);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Light), HRS_Tag::HRS_PS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Camera), HRS_Tag::HRS_VS_STAGE);
 	}
 
 	void HighRenderCommandPrePass::Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) {
@@ -153,20 +153,20 @@ namespace Engine {
 	HighRenderCommandBasePass::HighRenderCommandBasePass(const HighRenderStorage& storage) 
 		: AbstractHighRenderCommand(), m_batcher() {
 		// Uniform buffers linking
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_Object), TAG_VS_PLUS_PS);
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_ObjectHelper), TAG_VS_PLUS_PS);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Object), TAG_VS_PLUS_PS);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_ObjectHelper), TAG_VS_PLUS_PS);
 
 		// GBuffer linking
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_ALBEDO, TAG_GBUFFER);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_NORMAL, TAG_GBUFFER);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_ORM, TAG_GBUFFER);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_DEPTH, TAG_GBUFFER);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_ALBEDO, TAG_GBUFFER);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_NORMAL, TAG_GBUFFER);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_ORM, TAG_GBUFFER);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_DEPTH, TAG_GBUFFER);
 
 		// States linking
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_SAMPLER_DEFAULT, TAG_SAMPLER);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_DEPTHSTENCIL_DEFAULT, TAG_STATE);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_DEFAULT, TAG_STATE);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_BLEND_DEFAULT, TAG_STATE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_SAMPLER_DEFAULT, TAG_SAMPLER);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_DEPTHSTENCIL_DEFAULT, TAG_STATE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_DEFAULT, TAG_STATE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_BLEND_DEFAULT, TAG_STATE);
 	}
 
 	void HighRenderCommandBasePass::Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) {
@@ -208,29 +208,29 @@ namespace Engine {
 
 	HighRenderCommandLightPass::HighRenderCommandLightPass(const HighRenderStorage& storage) {
 		// Uniform buffers linking
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_Object), TAG_VS_PLUS_PS);
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_ObjectHelper), TAG_VS_PLUS_PS);
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_Light), HRS_Tag::HRS_PS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Object), TAG_VS_PLUS_PS);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_ObjectHelper), TAG_VS_PLUS_PS);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Light), HRS_Tag::HRS_PS_STAGE);
 
 		// Targets linking
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_FRAME_HDR, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_1);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_DEPTH, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_2);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_FRAME_HDR, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_1);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_DEPTH, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_2);
 
 		// Targets linking to transform to shader resources
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_ALBEDO, HRS_Tag::HRS_PS_STAGE);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_NORMAL, HRS_Tag::HRS_PS_STAGE);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_ORM, HRS_Tag::HRS_PS_STAGE);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_GBUFFER_DEPTH, HRS_Tag::HRS_PS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_ALBEDO, HRS_Tag::HRS_PS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_NORMAL, HRS_Tag::HRS_PS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_ORM, HRS_Tag::HRS_PS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_GBUFFER_DEPTH, HRS_Tag::HRS_PS_STAGE);
 
 		// States linking for front calculation
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_BLEND_FRONT, TAG_STATE | HRS_Tag::HRS_ADDITION_1);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_FRONT, TAG_STATE | HRS_Tag::HRS_ADDITION_1);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_DEPTHSTENCIL_FRONT, TAG_STATE | HRS_Tag::HRS_ADDITION_1);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_BLEND_FRONT, TAG_STATE | HRS_Tag::HRS_ADDITION_1);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_FRONT, TAG_STATE | HRS_Tag::HRS_ADDITION_1);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_DEPTHSTENCIL_FRONT, TAG_STATE | HRS_Tag::HRS_ADDITION_1);
 
 		// States linking for back calculation
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_BLEND_BACK, TAG_STATE | HRS_Tag::HRS_ADDITION_2);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_BACK, TAG_STATE | HRS_Tag::HRS_ADDITION_2);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_DEPTHSTENCIL_BACK, TAG_STATE | HRS_Tag::HRS_ADDITION_2);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_BLEND_BACK, TAG_STATE | HRS_Tag::HRS_ADDITION_2);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_BACK, TAG_STATE | HRS_Tag::HRS_ADDITION_2);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_DEPTHSTENCIL_BACK, TAG_STATE | HRS_Tag::HRS_ADDITION_2);
 	}
 
 	void HighRenderCommandLightPass::Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) {
@@ -386,11 +386,11 @@ namespace Engine {
 		m_mat4x4ViewProjection[4] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, Vector3::forword, Vector3::up) * proj;
 		m_mat4x4ViewProjection[5] = Matrix4x4::CreateMatrixLookAt(Vector3::zero, -Vector3::forword, Vector3::up) * proj;
 
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_BAKING_ENV_CUBEMAP, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_1);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_BAKING_IRR_CUBEMAP, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_2);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_SAMPLER_DEFAULT, TAG_SAMPLER);
-		m_batcher.LinkWithStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_BACK, TAG_STATE);
-		m_batcher.LinkWithStorage(storage, AS_TEXT(UB_Object), HRS_Tag::HRS_VS_STAGE);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_BAKING_ENV_CUBEMAP, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_1);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_BAKING_IRR_CUBEMAP, HRS_Tag::HRS_TARGET | HRS_Tag::HRS_ADDITION_2);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_SAMPLER_DEFAULT, TAG_SAMPLER);
+		m_batcher.AddNewLinkToStorage(storage, RESOURCE_TAG_STATE_RESTERIZER_BACK, TAG_STATE);
+		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Object), HRS_Tag::HRS_VS_STAGE);
 	}
 
 	//HighRenderCommandBakeHDRIToEnvironmentCubemap::~HighRenderCommandBakeHDRIToEnvironmentCubemap() {

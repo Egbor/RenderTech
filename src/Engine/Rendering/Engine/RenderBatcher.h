@@ -5,6 +5,8 @@
 #include "Engine/Core/Utils/Enum.h"
 #include "Engine/Core/Utils/Event.h"
 
+#include <algorithm>
+
 namespace Engine {
 	enum class HRS_Tag {
 		HRS_NONE = 0x00000000,
@@ -24,10 +26,11 @@ namespace Engine {
 	constexpr EnumFlags<HRS_Tag> TAG_ANY = ~HRS_Tag::HRS_NONE;
 
 	struct HRS_Resource {
-		String name;
 		RenderBase* data;
-		Int8 _aligment[8];
 		bool isDeletable;
+
+		HRS_Resource(RenderBase* data, bool isDeletable) 
+			: data(data), isDeletable(isDeletable) {}
 	};
 
 	struct HRS_ResourceNode {
@@ -35,6 +38,9 @@ namespace Engine {
 		HRS_ResourceNode* next;
 		HRS_ResourceNode* last;
 		EnumFlags<HRS_Tag> tags;
+
+		HRS_ResourceNode(const HRS_Resource* resource, EnumFlags<HRS_Tag> tags)
+			: resource(resource), tags(tags), next(nullptr), last(nullptr) {}
 	};
 
 	class HighRenderStorage {
@@ -55,74 +61,114 @@ namespace Engine {
 		Array<HRS_Resource> m_storage;
 	};
 
-	template<class TResourceClass>
-	struct NamePlusResourceWrapper {
-		const String& name;
-		TResourceClass* resource;
-	};
-
 	class HighRenderBatcher {
 	public:
-		HighRenderBatcher() = default;
-		~HighRenderBatcher() = default;
+		HighRenderBatcher();
 
-		void LinkWithStorage(const HighRenderStorage& storage, const String& name, EnumFlags<HRS_Tag> tags);
+		void AddNewLinkToStorage(const HighRenderStorage& storage, const String& name, EnumFlags<HRS_Tag> tags);
 
 		template<class TResourceClass>
 		Array<TResourceClass*> QueryResources(EnumFlags<HRS_Tag> tags) const {
-			return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
-				if ((resourceTags & tags) == tags) {
-					return dynamic_cast<TResourceClass*>(resource->data);
+			ResourceIdentifier resourceId = TResourceClass::GetResourceIdentifier();
+			Array<RenderBase*> resources = SelectResources(resourceId, [&](HRS_ResourceNode* node) {
+				if (ResourceIdentifier::RI_TEXTURE == resourceId) {
+					return TextureSelector(node, tags);
 				}
+				return DefaultSelector(node, tags);
 			});
-		}
 
-		//template<class TResourceClass>
-		//Array<NamePlusResourceWrapper<TResourceClass>> QueryNamePlusResources() const {
-		//	return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
-		//		return { resource->data->GetName(), dynamic_cast<TResourceClass*>(resource->data)};
-		//	});
-		//}
+			Array<TResourceClass*> result(resources.size());
+			std::transform(resources.cbegin(), resources.cend(), result.begin(), [](RenderBase* item) { 
+				return dynamic_cast<TResourceClass*>(item);
+			});
+			return result;
+		}
 
 		template<class TResourceClass>
 		TResourceClass* QueryResourceByName(const String& name) const {
-			Array<TResourceClass*> resources = SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
-				if (resource->data->GetName() == name) {
-					return dynamic_cast<TResourceClass*>(resource->data);
+			ResourceIdentifier resourceId = TResourceClass::GetResourceIdentifier();
+			Array<RenderBase*> resources = SelectResources(resourceId, [&](HRS_ResourceNode* node) -> RenderBase* {
+				RenderBase* resource = node->resource->data;
+				if (resource->GetName() == name) {
+					return resource;
 				}
+				return nullptr;
 			});
-			return resources.size() > 0 ? resources[0] : nullptr;
-		}
-
-		template<>
-		Array<TextureResource*> QueryResources(EnumFlags<HRS_Tag> tags) const {
-			return SelectResources<TextureResource*>(ResourceIdentifier::RI_TARGET, [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
-				if ((resourceTags & tags) == tags) {
-					return dynamic_cast<TargetResource*>(resource->data)->GetTextureResource();
-				}
-			});
+			return resources.size() > 0 ? dynamic_cast<TResourceClass*>(resources[0]) : nullptr;
 		}
 
 	private:
-		template<class TCastomWrapper>
-		Array<TCastomWrapper> SelectResources(ResourceIdentifier id, std::function<TCastomWrapper(const HRS_Resource*, EnumFlags<HRS_Tag>)> selector) const {
-			auto it = std::find_if(m_topNodes.begin(), m_topNodes.end(), [&](const HRS_ResourceNode* node) {
-				return node->resource->data->Is(id);
-			});
+		Array<RenderBase*> SelectResources(ResourceIdentifier id, std::function<RenderBase* (HRS_ResourceNode*)> selector) const;
 
-			Array<TCastomWrapper> outcome;
+		static RenderBase* DefaultSelector(const HRS_ResourceNode* node, EnumFlags<HRS_Tag> tag);
+		static RenderBase* TextureSelector(const HRS_ResourceNode* node, EnumFlags<HRS_Tag> tag);
 
-			if (it != m_topNodes.end()) {
-				for (HRS_ResourceNode* node = *it; node->next != nullptr; node = node->next) {
-					outcome.push_back(selector(node->resource, node->tags));
-				}
-			}
-			return outcome;
-		}
-
-		Array<HRS_ResourceNode*> m_topNodes;
+		Array<HRS_ResourceNode*> m_tops;
 		Array<HRS_ResourceNode> m_nodes;
 	};
+
+	//class HighRenderBatcher {
+	//public:
+	//	HighRenderBatcher() = default;
+	//	~HighRenderBatcher() = default;
+
+	//	void LinkWithStorage(const HighRenderStorage& storage, const String& name, EnumFlags<HRS_Tag> tags);
+
+	//	template<class TResourceClass>
+	//	Array<TResourceClass*> QueryResources(EnumFlags<HRS_Tag> tags) const {
+	//		return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+	//			if ((resourceTags & tags) == tags) {
+	//				return dynamic_cast<TResourceClass*>(resource->data);
+	//			}
+	//		});
+	//	}
+
+	//	//template<class TResourceClass>
+	//	//Array<NamePlusResourceWrapper<TResourceClass>> QueryNamePlusResources() const {
+	//	//	return SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+	//	//		return { resource->data->GetName(), dynamic_cast<TResourceClass*>(resource->data)};
+	//	//	});
+	//	//}
+
+	//	template<class TResourceClass>
+	//	TResourceClass* QueryResourceByName(const String& name) const {
+	//		Array<TResourceClass*> resources = SelectResources<TResourceClass*>(TResourceClass::GetResourceIdentifier(), [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+	//			if (resource->data->GetName() == name) {
+	//				return dynamic_cast<TResourceClass*>(resource->data);
+	//			}
+	//		});
+	//		return resources.size() > 0 ? resources[0] : nullptr;
+	//	}
+
+	//	template<>
+	//	Array<TextureResource*> QueryResources(EnumFlags<HRS_Tag> tags) const {
+	//		return SelectResources<TextureResource*>(ResourceIdentifier::RI_TARGET, [&](const HRS_Resource* resource, EnumFlags<HRS_Tag> resourceTags) {
+	//			if ((resourceTags & tags) == tags) {
+	//				return dynamic_cast<TargetResource*>(resource->data)->GetTextureResource();
+	//			}
+	//		});
+	//	}
+
+	//private:
+	//	template<class TCastomWrapper>
+	//	Array<TCastomWrapper> SelectResources(ResourceIdentifier id, std::function<TCastomWrapper(const HRS_Resource*, EnumFlags<HRS_Tag>)> selector) const {
+	//		auto it = std::find_if(m_topNodes.begin(), m_topNodes.end(), [&](const HRS_ResourceNode* node) {
+	//			return node->resource->data->Is(id);
+	//		});
+
+	//		Array<TCastomWrapper> outcome;
+
+	//		if (it != m_topNodes.end()) {
+	//			for (HRS_ResourceNode* node = *it; node->next != nullptr; node = node->next) {
+	//				outcome.push_back(selector(node->resource, node->tags));
+	//			}
+	//		}
+	//		return outcome;
+	//	}
+
+	//	Array<HRS_ResourceNode*> m_topNodes;
+	//	Array<HRS_ResourceNode> m_nodes;
+	//};
 }
 
 #endif // !RENDER_BUFFER_H

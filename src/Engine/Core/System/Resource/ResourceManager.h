@@ -14,7 +14,7 @@ namespace Engine {
 		TObjectClass* Load(const String& path) const {
 			Object* resource = m_root->Get(path);
 			if (!resource) {
-				resource = ResourceLoader::Load(m_root->Name() + "/" + path);
+				resource = ResourceLoader::Load(m_root->Name() + "\\" + path);
 				m_root->Set(path, resource);
 			}
 			return resource->As<TObjectClass>();

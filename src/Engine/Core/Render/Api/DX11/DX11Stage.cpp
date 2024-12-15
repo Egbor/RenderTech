@@ -108,7 +108,8 @@ namespace Engine {
 	}
 
 	DX11StagePS::DX11StagePS(DX11Context* context)
-		: m_isEnable(true), m_countOfTakenTexturesSlots(0), m_lastBindedShader(nullptr) {
+		: m_dxContext(context), m_isEnable(true)
+		, m_countOfTakenTexturesSlots(0), m_lastBindedShader(nullptr) {
 
 	}
 

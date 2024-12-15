@@ -5,7 +5,11 @@ namespace Engine {
 
 	Core::Core() 
 		: m_window(nullptr), m_context(nullptr) {
+		m_resourceManager = new ResourceManager();
+	}
 
+	Core::~Core() {
+		DELETE_OBJECT(m_resourceManager);
 	}
 
 	IContext* Core::GetContext() const {

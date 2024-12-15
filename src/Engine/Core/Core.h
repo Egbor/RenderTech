@@ -12,7 +12,7 @@ namespace Engine {
 	class Core {
 	private:
 		Core();
-		virtual ~Core() = default;
+		virtual ~Core();
 
 	public:
 		IContext* GetContext() const;
