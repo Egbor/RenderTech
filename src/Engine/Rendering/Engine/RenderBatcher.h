@@ -69,39 +69,25 @@ namespace Engine {
 
 		template<class TResourceClass>
 		Array<TResourceClass*> QueryResources(EnumFlags<HRS_Tag> tags) const {
-			ResourceIdentifier resourceId = TResourceClass::GetResourceIdentifier();
-			Array<RenderBase*> resources = SelectResources(resourceId, [&](HRS_ResourceNode* node) {
-				if (ResourceIdentifier::RI_TEXTURE == resourceId) {
-					return TextureSelector(node, tags);
-				}
-				return DefaultSelector(node, tags);
-			});
-
+			Array<RenderBase*> resources = QueryResources(TResourceClass::GetResourceIdentifier(), [tags](const HRS_ResourceNode* node) { return (node->tags & tags) == tags; });
 			Array<TResourceClass*> result(resources.size());
-			std::transform(resources.cbegin(), resources.cend(), result.begin(), [](RenderBase* item) { 
-				return dynamic_cast<TResourceClass*>(item);
-			});
+
+			std::transform(resources.crbegin(), resources.crend(), result.begin(), [](RenderBase* item) { return dynamic_cast<TResourceClass*>(item); });
 			return result;
 		}
 
 		template<class TResourceClass>
 		TResourceClass* QueryResourceByName(const String& name) const {
-			ResourceIdentifier resourceId = TResourceClass::GetResourceIdentifier();
-			Array<RenderBase*> resources = SelectResources(resourceId, [&](HRS_ResourceNode* node) -> RenderBase* {
-				RenderBase* resource = node->resource->data;
-				if (resource->GetName() == name) {
-					return resource;
-				}
-				return nullptr;
-			});
-			return resources.size() > 0 ? dynamic_cast<TResourceClass*>(resources[0]) : nullptr;
+			Array<RenderBase*> resources = QueryResources(TResourceClass::GetResourceIdentifier(), [&name](const HRS_ResourceNode* node) { return node->resource->data->GetName() == name; });
+			return resources.size() > 0 ? dynamic_cast<TResourceClass*>(resources[resources.size() - 1]) : nullptr;
 		}
 
 	private:
 		Array<RenderBase*> SelectResources(ResourceIdentifier id, std::function<RenderBase* (HRS_ResourceNode*)> selector) const;
+		Array<RenderBase*> QueryResources(ResourceIdentifier id, std::function<bool(const HRS_ResourceNode*)> filter) const;
 
-		static RenderBase* DefaultSelector(const HRS_ResourceNode* node, EnumFlags<HRS_Tag> tag);
-		static RenderBase* TextureSelector(const HRS_ResourceNode* node, EnumFlags<HRS_Tag> tag);
+		static RenderBase* DefaultSelector(const HRS_ResourceNode* node, std::function<bool(const HRS_ResourceNode*)> filter);
+		static RenderBase* TextureSelector(const HRS_ResourceNode* node, std::function<bool(const HRS_ResourceNode*)> filter);
 
 		Array<HRS_ResourceNode*> m_tops;
 		Array<HRS_ResourceNode> m_nodes;

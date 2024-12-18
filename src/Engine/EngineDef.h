@@ -75,7 +75,7 @@ namespace Engine {
             
         }
 
-        ~RawData() noexcept {
+        ~RawData() {
             delete[] m_data;
         }
 

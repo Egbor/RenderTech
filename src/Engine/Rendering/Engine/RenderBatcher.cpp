@@ -64,8 +64,13 @@ namespace Engine {
 			(*itNode).last = &(*itNode);
 			m_tops.push_back(&(*itNode));
 		} else {
-			HRS_ResourceNode* lastNode = (*itList)->last;
-			lastNode->next = &(*itNode);
+			(*itNode).last = (*itList)->last;
+			(*itNode).next = *itList;
+
+			*itList = &(*itNode);
+
+			//HRS_ResourceNode* lastNode = (*itList)->last;
+			//lastNode->next = &(*itNode);
 		}
 	}
 
@@ -74,7 +79,7 @@ namespace Engine {
 
 		Array<RenderBase*> result;
 		if (it != m_tops.end()) {
-			for (HRS_ResourceNode* node = *it; node->next != nullptr; node = node->next) {
+			for (HRS_ResourceNode* node = *it; node != nullptr; node = node->next) {
 				RenderBase* resource = selector(node);
 				if (resource != nullptr) {
 					result.push_back(resource);
@@ -84,15 +89,27 @@ namespace Engine {
 		return result;
 	}
 
-	RenderBase* HighRenderBatcher::DefaultSelector(const HRS_ResourceNode* node, EnumFlags<HRS_Tag> tag) {
-		if ((node->tags & tag) == tag) {
+	Array<RenderBase*> HighRenderBatcher::QueryResources(ResourceIdentifier id, std::function<bool(const HRS_ResourceNode*)> filter) const {
+		std::function<RenderBase* (HRS_ResourceNode*)> selector = [&filter](HRS_ResourceNode* node) { 
+			return DefaultSelector(node, filter); 
+		};
+
+		if (ResourceIdentifier::RI_TEXTURE == id) {
+			id = ResourceIdentifier::RI_TARGET;
+			selector = [&filter](HRS_ResourceNode* node) { return TextureSelector(node, filter); };
+		}
+		return SelectResources(id, selector);
+	}
+
+	RenderBase* HighRenderBatcher::DefaultSelector(const HRS_ResourceNode* node, std::function<bool(const HRS_ResourceNode*)> filter) {
+		if (filter(node)) {
 			return node->resource->data;
 		}
 		return nullptr;
 	}
 
-	RenderBase* HighRenderBatcher::TextureSelector(const HRS_ResourceNode* node, EnumFlags<HRS_Tag> tag) {
-		if ((node->tags & tag) == tag) {
+	RenderBase* HighRenderBatcher::TextureSelector(const HRS_ResourceNode* node, std::function<bool(const HRS_ResourceNode*)> filter) {
+		if (filter(node)) {
 			return dynamic_cast<TargetResource*>(node->resource->data)->GetTextureResource();
 		}
 		return nullptr;

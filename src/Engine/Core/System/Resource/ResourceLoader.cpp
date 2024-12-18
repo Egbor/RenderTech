@@ -524,7 +524,7 @@ namespace Engine {
     }
 
     void ResourceLoader::Save(Object* object) {
-        auto function = rtAssetSavers.at(object->TypeIdClass());
+        auto function = rtAssetSavers.at(object->TypeIdInstance());
         function(object);
     }
 }
