@@ -15,6 +15,9 @@ namespace Engine {
 		virtual void Pause();
 		virtual void Terminate();
 
+	protected:
+		void ExitSafty();
+
 	private:
 		void Sync();
 

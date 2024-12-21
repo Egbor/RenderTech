@@ -64,6 +64,8 @@ namespace Engine {
 	}
 
 	EngineRuntime::~EngineRuntime() {
+		ExitSafty();
+
 		DELETE_OBJECT(m_context);
 	}
 
@@ -87,5 +89,9 @@ namespace Engine {
 
 	void EngineRuntime::RenderLoop(Float deltaTime) {
 		m_context->DrawScene(/*scene*/ nullptr);
+
+		std::stringstream ss;
+		ss << "RenderLoop: " << deltaTime << "(" << std::this_thread::get_id() << ")" << std::endl;
+		OutputDebugStringA(ss.str().c_str());
 	}
 }

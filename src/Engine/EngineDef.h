@@ -75,8 +75,47 @@ namespace Engine {
             
         }
 
-        ~RawData() {
+        RawData(const RawData& data) noexcept 
+            : RawData(data.m_size) {
+            memcpy_s(m_data, m_size, data.m_data, data.m_size);
+        }
+
+        RawData(RawData&& data) noexcept
+            : m_data(data.m_data), m_size(data.m_size) {
+            data.m_data = nullptr;
+            data.m_size = 0;
+        }
+
+        ~RawData() noexcept {
             delete[] m_data;
+        }
+
+        RawData& operator=(const RawData& data) {
+            if (this == &data) {
+                return *this;
+            }
+
+            delete[] m_data;
+            m_size = data.m_size;
+            m_data = new char[m_size];
+            memcpy_s(m_data, m_size, data.m_data, data.m_size);
+
+            return *this;
+        }
+
+        RawData& operator=(RawData&& data) {
+            if (this == &data) {
+                return *this;
+            }
+
+            delete[] m_data;
+            m_size = data.m_size;
+            m_data = data.m_data;
+
+            data.m_size = 0;
+            data.m_data = nullptr;
+
+            return *this;
         }
 
         template<typename T>

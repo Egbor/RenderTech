@@ -14,8 +14,6 @@ namespace Engine {
 	}
 
 	Runtime::~Runtime() {
-		DELETE_ARRAY_OF_OBJECTS(m_tasks);
-
 		DELETE_OBJECT(m_time);
 		DELETE_OBJECT(m_sync);
 	}
@@ -39,6 +37,10 @@ namespace Engine {
 	void Runtime::Terminate() {
 		m_time->Reset();
 		m_sync->Set(RuntimeState::RPS_TERMINATE);
+	}
+
+	void Runtime::ExitSafty() {
+		DELETE_ARRAY_OF_OBJECTS(m_tasks);
 	}
 
 	void Runtime::Sync() {

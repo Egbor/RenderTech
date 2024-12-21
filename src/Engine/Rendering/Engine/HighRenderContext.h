@@ -44,12 +44,6 @@ namespace Engine {
 		static constexpr Int32 irrWidth = 32;
 		static constexpr Int32 irrHeight = 32;
 
-		Int32 m_IBLCubeMapOutputWidth;
-		Int32 m_IBLCubeMapOutputHeight;
-
-		TargetResource* m_envOutput;
-		TargetResource* m_irrOutput;
-
 	public:
 		HRC_IBLBacker(IContext* context, const String& filename, Int32 outputWidth, Int32 outputHeight);
 		virtual ~HRC_IBLBacker();
@@ -57,6 +51,13 @@ namespace Engine {
 	private:
 		void OnInitDraw(IContext* context) override;
 		void OnPostDraw(IContext* context) override;
+
+	private:
+		Int32 m_IBLCubeMapOutputWidth;
+		Int32 m_IBLCubeMapOutputHeight;
+
+		TargetResource* m_envOutput;
+		TargetResource* m_irrOutput;
 	};
 }
 
