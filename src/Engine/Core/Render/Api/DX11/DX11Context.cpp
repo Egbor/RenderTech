@@ -149,8 +149,14 @@ namespace Engine {
     }
 
     void DX11Context::SetTargets(const Array<TargetResource*>& targets) {
+        if (targets.empty()) {
+            m_d3dContext->OMSetRenderTargets(0, nullptr, nullptr);
+        }
+
         Array<ID3D11RenderTargetView*> rendertargets;
         ID3D11DepthStencilView* depthstencil = nullptr;
+
+        rendertargets.reserve(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
 
         for (Size i = 0; i < targets.size(); i++) {
             if (targets[i]->IsDepth()) {
@@ -170,6 +176,10 @@ namespace Engine {
             StandaloneStateResource* state = dynamic_cast<StandaloneStateResource*>(states[i]);
             state->Bind();
         }
+    }
+
+    void DX11Context::WipeTargets() {
+        m_d3dContext->OMSetRenderTargets(0, nullptr, nullptr);
     }
 
     void DX11Context::GetViewport(Viewport& viewport) {

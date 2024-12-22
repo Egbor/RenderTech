@@ -15,6 +15,8 @@ namespace Engine {
 		virtual void SetTargets(const Array<TargetResource*>& targets) = 0;
 		virtual void SetStates(const Array<StateResource*>& states) = 0;
 
+		virtual void WipeTargets() = 0;
+
 		virtual void GetViewport(Viewport& viewport) = 0;
 		virtual IRenderStage* GetStage(RenderStage stage) = 0;
 	};

@@ -194,18 +194,13 @@ namespace Engine {
 	}
 
 	void HRC_IBLBacker::OnPostDraw(IContext* context) {
+		context->QuerySwapChain()->Swap();
+
 		Texture2D* envCubemap = Texture2D::Metadata(TextureType::TT_CUBE).SetData(m_envOutput->GetTextureResource())->SetName("AfternoonEnv")->Build()->As<Texture2D>();
 		Texture2D* irrCubemap = Texture2D::Metadata(TextureType::TT_CUBE).SetData(m_irrOutput->GetTextureResource())->SetName("AfternoonIrr")->Build()->As<Texture2D>();
 
 		ResourceLoader::Save(envCubemap);
 		ResourceLoader::Save(irrCubemap);
-
-		//if (Resource::Save<ITextureResourceData*>(GetResourceFromBatchByTag<ITextureResourceData>("EnvironmentCubemap"), "assets/textures/skybox/afternoon_env.exr") != ResourceStatus::RS_OK) {
-		//	OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for the evironment cubmap");
-		//}
-		//if (Resource::Save<ITextureResourceData*>(GetResourceFromBatchByTag<ITextureResourceData>("IrradianceCubemap"), "assets/textures/skybox/afternoon_irr.exr") != ResourceStatus::RS_OK) {
-		//	OutputDebugStringA("[HRC_IBLBacker] Resource::Save() failed for the irradiance cubmap");
-		//}
 
 		DELETE_OBJECT(envCubemap);
 		DELETE_OBJECT(irrCubemap);

@@ -69,7 +69,7 @@ namespace Engine {
 
 		template<class TResourceClass>
 		Array<TResourceClass*> QueryResources(EnumFlags<HRS_Tag> tags) const {
-			Array<RenderBase*> resources = QueryResources(TResourceClass::GetResourceIdentifier(), [tags](const HRS_ResourceNode* node) { return (node->tags & tags) == tags; });
+			Array<RenderBase*> resources = QueryResources(TResourceClass::GetResourceIdentifier(), [tags](const HRS_ResourceNode* node) { return !!(node->tags & tags); });
 			Array<TResourceClass*> result(resources.size());
 
 			std::transform(resources.crbegin(), resources.crend(), result.begin(), [](RenderBase* item) { return dynamic_cast<TResourceClass*>(item); });

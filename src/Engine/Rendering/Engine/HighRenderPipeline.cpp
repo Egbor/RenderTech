@@ -31,7 +31,7 @@ namespace Engine {
 	}
 
 	template<>
-	 void HighRenderPipelineAdapter::BindResources<ShaderResource>(const Array<ShaderResource*>& resources) {
+	void HighRenderPipelineAdapter::BindResources<ShaderResource>(const Array<ShaderResource*>& resources) {
 		for (Int32 i = 0; i < static_cast<Int32>(RenderStage::RS_NUM); i++) {
 			IRenderStage* _stage = m_pipeline->GetStage(static_cast<RenderStage>(i));
 			_stage->BindShader(resources[i]);
@@ -54,6 +54,10 @@ namespace Engine {
 	void HighRenderPipelineAdapter::BindResources<BufferResource>(const Array<BufferResource*>& resources, RenderStage stage) {
 		IRenderStage* _stage = m_pipeline->GetStage(stage);
 		_stage->BindBuffers(resources);
+	}
+
+	void HighRenderPipelineAdapter::UnbindAllTargets() {
+		BindResources(Array<TargetResource*>());
 	}
 
 	IRenderPipeline* HighRenderPipelineAdapter::GetDirectAccessToPipeline() const {

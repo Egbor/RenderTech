@@ -393,15 +393,10 @@ namespace Engine {
 		m_batcher.AddNewLinkToStorage(storage, AS_TEXT(UB_Object), HRS_Tag::HRS_VS_STAGE);
 	}
 
-	//HighRenderCommandBakeHDRIToEnvironmentCubemap::~HighRenderCommandBakeHDRIToEnvironmentCubemap() {
-	//	DELETE_OBJECT(m_vertexShader);
-	//	DELETE_OBJECT(m_pixelShaderEnvironment);
-	//	DELETE_OBJECT(m_pixelShaderIrradiance);
-	//}
-
 	void HighRenderCommandBakeHDRIToEnvironmentCubemap::Execute(HighRenderPipelineAdapter* pipeline, Scene* scene) {
 		StaticMesh* staticCubeMesh = Core::Load<StaticMesh>("models\\Cube.rtasset");
 
+		pipeline->BindResources(m_batcher.QueryResources<BufferResource>(HRS_Tag::HRS_VS_STAGE), RenderStage::RS_VERTEX);
 		pipeline->BindResources(m_batcher.QueryResources<StateResource>(HRS_Tag::HRS_PS_STAGE), RenderStage::RS_PIXEL);
 		pipeline->BindResources(m_batcher.QueryResources<StateResource>(HRS_Tag::HRS_STANDALONE));
 
@@ -423,6 +418,7 @@ namespace Engine {
 			pipeline->BindResources(targets);
 			pipeline->GetDirectAccessToPipeline()->Draw(mesh.vertexBuffer, mesh.indexBuffer);
 		}
+		pipeline->UnbindAllTargets();
 	}
 
 	void HighRenderCommandBakeHDRIToEnvironmentCubemap::BakeIrradianceCubemap(HighRenderPipelineAdapter* pipeline, const MeshUnit& mesh, const Material* material) {
@@ -439,6 +435,7 @@ namespace Engine {
 			pipeline->BindResources(targets);
 			pipeline->GetDirectAccessToPipeline()->Draw(mesh.vertexBuffer, mesh.indexBuffer);
 		}
+		pipeline->UnbindAllTargets();
 	}
 
 	void HighRenderCommandBakeHDRIToEnvironmentCubemap::UpdateUBObject(BufferResource* resource) {

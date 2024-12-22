@@ -41,6 +41,8 @@ namespace Engine {
         void SetTargets(const Array<TargetResource*>& targets) override;
         void SetStates(const Array<StateResource*>& states) override;
 
+        void WipeTargets() override;
+
         void GetViewport(Viewport& viewport) override;
         IRenderStage* GetStage(RenderStage stage) override;
 

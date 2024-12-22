@@ -23,5 +23,4 @@ float4 main(float4 localPosition : POSITION, float4 position : SV_POSITION) : SV
     }
 
     return float4((PI * sampledColour / index).rgb, 1.0f);
-
 }

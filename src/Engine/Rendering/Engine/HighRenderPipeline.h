@@ -9,7 +9,6 @@ namespace Engine {
 		HighRenderPipelineAdapter(IRenderPipeline* pipeline) noexcept;
 
 		void SetViewportResolution(Int32 width, Int32 height);
-
 		void DisableRenderStage(RenderStage stage);
 		void EnableRenderStage(RenderStage stage);
 
@@ -18,6 +17,8 @@ namespace Engine {
 		
 		template<class TResourceClass>
 		void BindResources(const Array<TResourceClass*>& resources, RenderStage stage);
+
+		void UnbindAllTargets();
 
 		IRenderPipeline* GetDirectAccessToPipeline() const;
 
