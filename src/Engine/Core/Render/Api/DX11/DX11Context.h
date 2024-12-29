@@ -21,6 +21,8 @@ namespace Engine {
         DX11Context(IWindow* window);
         virtual ~DX11Context();
 
+        void Init(const _Core* core) override;
+
         ComPtr<ID3D11Device> GetD3D11Device() const;
         ComPtr<ID3D11DeviceContext> GetD3D11Context() const;
 

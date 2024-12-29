@@ -6,12 +6,16 @@
 #include "Engine/Core/Render/Base/Interface/ISwapChain.h"
 
 namespace Engine {
+	class _Core;
+
 	class IContext {
 	public:
 		virtual ~IContext() = default;
 		virtual IRenderResourceFactory* QueryResourceFactory() = 0;
 		virtual IRenderPipeline* QueryPipeline() = 0;
 		virtual ISwapChain* QuerySwapChain() = 0;
+
+		virtual void Init(const _Core* core) = 0;
 	};
 }
 

@@ -8,20 +8,9 @@ namespace Engine {
     class EntityComponent : public Object {
         GENERATE_BODY(EntityComponent, Object)
 
-    private:
-        HandlerPtr m_register;
-        UInt64 m_behaviorID;
-
     public:
         EntityComponent(const ObjectArgument& argument);
         virtual ~EntityComponent() = default;
-
-        //HandlerPtr& GetHandler();
-
-        //virtual void CreateRenderState(AbstractRenderPass* pass);
-
-    //protected:
-    //    virtual UInt64 GetBehaviorID() const;
     };
 }
 

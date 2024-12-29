@@ -11,8 +11,10 @@ namespace Engine {
 		virtual Int32 GetHeight() const = 0;
 		virtual UInt64 WinId() const = 0;
 
-		virtual void Show() = 0;
+		virtual void Show() const = 0;
 		virtual bool HasQuit() const = 0;
+
+		virtual void InvokeErrorMessageBox(const String& message) = 0;
 	};
 }
 

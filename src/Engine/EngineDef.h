@@ -9,8 +9,7 @@
 #include <memory>
 #include <functional>
 
-#include <boost/uuid.hpp>
-#include <boost/algorithm/string.hpp>
+#include <assert.h>
 
 namespace Engine {
     template<typename TType>

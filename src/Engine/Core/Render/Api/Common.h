@@ -1,0 +1,7 @@
+#ifndef GFX_COMMON_H
+#define GFX_COMMON_H
+
+#define VENDOR_ID_NVIDIA 0x10DE
+#define VENDOR_ID_AMD 0x1002
+
+#endif // !GFX_COMMON_H

@@ -56,29 +56,32 @@ namespace Engine {
 	}
 
 	EngineRuntime::EngineRuntime(IWindow* window, IContext* context)
-		: Runtime(), m_context(nullptr) {
-		Core::GetInstance()->Initialize(window, context);
-
+		: Runtime(window, context) {
 		DelegateProcess(Delegate<EngineRuntime, void(Float)>::AllocateDelegate(this, &EngineRuntime::UpdateLoop));
 		DelegateProcess(Delegate<EngineRuntime, void(Float)>::AllocateDelegate(this, &EngineRuntime::RenderLoop));
 	}
 
 	EngineRuntime::~EngineRuntime() {
 		ExitSafty();
-
-		DELETE_OBJECT(m_context);
 	}
 
 	void EngineRuntime::Init() {
-		m_context = new HRC_IBLBacker(Core::GetInstance()->GetContext(), "", 1080, 1080);
+		//m_context = new HRC_IBLBacker(Core::GetInstance()->GetContext(), "", 1080, 1080);
 	}
 
 	void EngineRuntime::Start() {
 		Runtime::Start();
-		IWindow* window = Core::GetInstance()->GetWindow();
+
+		const IWindow* window = GetCore()->GetWindow();
 
 		window->Show();
-		while (!window->HasQuit()) {}
+		while (!window->HasQuit());
+
+		Terminate();
+	}
+
+	void EngineRuntime::Sync() {
+		Runtime::Sync();
 	}
 
 	void EngineRuntime::UpdateLoop(Float deltaTime) {
@@ -88,8 +91,6 @@ namespace Engine {
 	}
 
 	void EngineRuntime::RenderLoop(Float deltaTime) {
-		m_context->DrawScene(/*scene*/ nullptr);
-
 		std::stringstream ss;
 		ss << "RenderLoop: " << deltaTime << "(" << std::this_thread::get_id() << ")" << std::endl;
 		OutputDebugStringA(ss.str().c_str());

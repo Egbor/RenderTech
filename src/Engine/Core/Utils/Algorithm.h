@@ -3,8 +3,11 @@
 
 #include "Engine/EngineDef.h"
 
+#include <algorithm>
+#include <locale>
+
 namespace Engine {
-	String ToLowerCopy(const String& value, const std::locale& loc = std::locale()) {
+	inline String ToLowerCopy(const String& value, const std::locale& loc = std::locale()) {
 		auto const& facet = std::use_facet<std::ctype<char>>(loc);
 
 		String out;

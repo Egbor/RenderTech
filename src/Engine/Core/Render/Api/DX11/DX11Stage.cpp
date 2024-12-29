@@ -137,7 +137,7 @@ namespace Engine {
 	}
 
 	void DX11StagePS::BindShader(ShaderResource* resource) {
-		if (m_lastBindedShader != resource) {
+		if (m_isEnable && (m_lastBindedShader != resource)) {
 			ComPtr<ID3D11DeviceContext> d3dContext = m_dxContext->GetD3D11Context();
 
 			if (resource != nullptr) {

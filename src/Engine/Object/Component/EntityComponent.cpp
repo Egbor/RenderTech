@@ -4,18 +4,6 @@ namespace Engine {
     GENERATE_INSTANTIATION(EntityComponent)
 
     EntityComponent::EntityComponent(const ObjectArgument& argument)
-        : Super(argument), m_register(nullptr), m_behaviorID(0) {
+        : Super(argument) {
     }
-
-    //void EntityComponent::CreateRenderState(AbstractRenderPass* pass) {
-
-    //}
-
-    //HandlerPtr& EntityComponent::GetHandler() {
-    //    return m_register;
-    //}
-
-    //UInt64 EntityComponent::GetBehaviorID() const {
-    //    return EntityComponent::TypeIdClass();
-    //}
 }

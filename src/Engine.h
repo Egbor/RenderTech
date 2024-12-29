@@ -45,10 +45,10 @@ namespace Engine {
         void Start() override;
 
     private:
+        void Sync() override;
+
         void UpdateLoop(Float deltaTime);
         void RenderLoop(Float deltaTime);
-
-        AbstractHighRenderContext* m_context;
     };
 }
 

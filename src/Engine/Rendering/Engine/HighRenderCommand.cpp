@@ -2,75 +2,43 @@
 #include "Engine/Core/System/Exception/EngineException.h"
 
 namespace Engine {
-	//IShaderResourceData* LoadShader(IRenderResourceFactory* factory, const String& filename, ShaderType type) {
-	//	const Array<Int8> code = Resource::Load<const Array<Int8>>(filename);
-	//	return factory->CreateShader(type, code.size(), code.data());
+	//void UpdatePrePassUBCamera(RawData& data, CameraComponent* component, Float viewportWidth, Float viewportHeight) {
+	//	UB_Camera* buffer = data.As<UB_Camera>();
+	//	buffer->EyePosition = Vector4(component->GetWorldPosition().x, component->GetWorldPosition().y, component->GetWorldPosition().z, 1.0f);
+	//	buffer->Resolution = Vector2(viewportWidth, viewportHeight);
 	//}
 
-	//Mesh* LoadLightVolume(LightType type) {
-	//	switch (type) {
-	//	case LightType::LT_POINT:
-	//		static Mesh* pointLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
-	//		return pointLight;
-	//	case LightType::LT_SPOT:
-	//		static Mesh* spotLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
-	//		return spotLight;
-	//	case LightType::LT_DIRECTIONAL:
-	//		static Mesh* directionalLight = Resource::Load<Mesh*>("assets/models/Sphere.fbx");
-	//		return directionalLight;
-	//	default:
-	//		break;
+	//void UpdatePrePassUBObject(RawData& data, Matrix4x4 view, Matrix4x4 proj) {
+	//	UB_Object* buffer = data.As<UB_Object>();
+	//	buffer->ViewProjection = (view * proj).Transpose();
+	//}
+
+	//void UpdatePrePassUBOjectHelper(RawData& data, Matrix4x4 view, Matrix4x4 proj) {
+	//	UB_ObjectHelper* buffer = data.As<UB_ObjectHelper>();
+	//	buffer->invView = view.Inverse().Transpose();
+	//	buffer->invProjection = proj.Inverse().Transpose();
+	//}
+
+	//void UpdateBasePassUBObject(RawData& data, SceneComponent* component) {
+	//	UB_Object* buffer = data.As<UB_Object>();
+	//	buffer->World = Matrix4x4::CreateMatrixWorld(component->GetWorldPosition(), component->GetWorldRotation(), component->GetWorldScale()).Transpose();
+	//}
+
+	//void UpdateBasePassUBObjectHelper(RawData& data, SceneComponent* component) {
+	//	UB_ObjectHelper* buffer = data.As<UB_ObjectHelper>();
+	//	buffer->invWorld = Matrix4x4::CreateMatrixWorld(component->GetWorldPosition(), component->GetWorldRotation(), component->GetWorldScale()).Inverse().Transpose();
+	//}
+
+	//void UpdateLightPassUBLight(RawData& data, LightComponent* component, bool isDirectional) {
+	//	UB_Light* buffer = data.As<UB_Light>();
+	//	buffer->Brightness = component->GetBrightness();
+	//	buffer->Color = component->GetColor();
+	//	if (isDirectional) {
+	//		buffer->Value = Vector4(component->GetForward().x, component->GetForward().y, component->GetForward().z, 0.0f);
+	//	} else {
+	//		buffer->Value = Vector4(component->GetWorldPosition().x, component->GetWorldPosition().y, component->GetWorldPosition().y, 1.0f);
 	//	}
-	//	throw EngineException("[Global] LoadLightVolume() failed. The selected light is not supported");
 	//}
-
-	//Mesh* LoadCubeVolume() {
-	//	static Mesh* screen = Resource::Load<Mesh*>("assets/models/Cube.fbx");
-	//	return screen;
-	//}
-
-	//Mesh* LoadPlaneVolume() {
-	//	static Mesh* screen = Resource::Load<Mesh*>("assets/models/Plane.fbx");
-	//	return screen;
-	//}
-
-	void UpdatePrePassUBCamera(RawData& data, CameraComponent* component, Float viewportWidth, Float viewportHeight) {
-		UB_Camera* buffer = data.As<UB_Camera>();
-		buffer->EyePosition = Vector4(component->GetWorldPosition().x, component->GetWorldPosition().y, component->GetWorldPosition().z, 1.0f);
-		buffer->Resolution = Vector2(viewportWidth, viewportHeight);
-	}
-
-	void UpdatePrePassUBObject(RawData& data, Matrix4x4 view, Matrix4x4 proj) {
-		UB_Object* buffer = data.As<UB_Object>();
-		buffer->ViewProjection = (view * proj).Transpose();
-	}
-
-	void UpdatePrePassUBOjectHelper(RawData& data, Matrix4x4 view, Matrix4x4 proj) {
-		UB_ObjectHelper* buffer = data.As<UB_ObjectHelper>();
-		buffer->invView = view.Inverse().Transpose();
-		buffer->invProjection = proj.Inverse().Transpose();
-	}
-
-	void UpdateBasePassUBObject(RawData& data, SceneComponent* component) {
-		UB_Object* buffer = data.As<UB_Object>();
-		buffer->World = Matrix4x4::CreateMatrixWorld(component->GetWorldPosition(), component->GetWorldRotation(), component->GetWorldScale()).Transpose();
-	}
-
-	void UpdateBasePassUBObjectHelper(RawData& data, SceneComponent* component) {
-		UB_ObjectHelper* buffer = data.As<UB_ObjectHelper>();
-		buffer->invWorld = Matrix4x4::CreateMatrixWorld(component->GetWorldPosition(), component->GetWorldRotation(), component->GetWorldScale()).Inverse().Transpose();
-	}
-
-	void UpdateLightPassUBLight(RawData& data, LightComponent* component, bool isDirectional) {
-		UB_Light* buffer = data.As<UB_Light>();
-		buffer->Brightness = component->GetBrightness();
-		buffer->Color = component->GetColor();
-		if (isDirectional) {
-			buffer->Value = Vector4(component->GetForward().x, component->GetForward().y, component->GetForward().z, 0.0f);
-		} else {
-			buffer->Value = Vector4(component->GetWorldPosition().x, component->GetWorldPosition().y, component->GetWorldPosition().y, 1.0f);
-		}
-	}
 
 	AbstractHighRenderCommand::AbstractHighRenderCommand() {
 		m_updater[AS_TEXT(UB_Camera)] = new Delegate<AbstractHighRenderCommand, void(BufferResource*)>(this, &AbstractHighRenderCommand::UpdateUBCamera);
@@ -94,11 +62,7 @@ namespace Engine {
 
 	void AbstractHighRenderCommand::UpdateBuffers(const HighRenderBatcher& batcher) {
 		Array<BufferResource*> resources = batcher.QueryResources<BufferResource>(TAG_ANY);
-		// Array<NamePlusResourceWrapper<BufferResource>> resources = batcher.QueryNamePlusResources<BufferResource>();
-
 		for (Size i = 0; i < resources.size(); i++) {
-			//NamePlusResourceWrapper<BufferResource>& wrapper = resources[i];
-
 			auto it = m_updater.find(resources[i]->GetName());
 			if (it != m_updater.end()) {
 				it->second->Invoke(resources[i]);
@@ -180,7 +144,7 @@ namespace Engine {
 			m_component = component;
 
 			UpdateBuffers(m_batcher);
-			DrawSingleMesh(pipeline); 
+			DrawSingleMesh(pipeline);
 		});
 	}
 

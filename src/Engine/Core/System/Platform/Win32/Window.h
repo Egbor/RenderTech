@@ -17,8 +17,10 @@ namespace Engine {
 		Int32 GetHeight() const override;
 		UInt64 WinId() const override;
 
-		void Show() override;
+		void Show() const override;
 		bool HasQuit() const override;
+
+		void InvokeErrorMessageBox(const String& message) override;
 
 		Input* GetInput() const override;
 

@@ -104,11 +104,6 @@ namespace Engine {
 
 	void AbstractHighRenderContext::DrawScene(Scene* scene) {
 		HighRenderPipelineAdapter adapter(m_context->QueryPipeline());
-
-		if (m_storage.IsEmpty()) {
-			this->OnInitDraw(m_context);
-		}
-
 		for (Int32 i = 0; i < m_commands.size(); i++) {
 			m_commands[i]->Execute(&adapter, scene);
 		}
@@ -120,7 +115,7 @@ namespace Engine {
 	}
 
 	HRC_Base::HRC_Base(IContext* context) 
-		: AbstractHighRenderContext(context) {	
+		: AbstractHighRenderContext(context) {
 		ExtendCommandList(new HighRenderCommandPrePass(GetStorage()));
 		ExtendCommandList(new HighRenderCommandBasePass(GetStorage()));
 		ExtendCommandList(new HighRenderCommandLightPass(GetStorage()));

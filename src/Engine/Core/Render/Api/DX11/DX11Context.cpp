@@ -92,6 +92,10 @@ namespace Engine {
         return m_d3dContext;
     }
 
+    void DX11Context::Init(const _Core* core) {
+
+    }
+
     Int32 DX11Context::GetWidth() const {
         DXGI_SWAP_CHAIN_DESC desc;
         m_dxgiSwapChain->GetDesc(&desc);

@@ -64,7 +64,7 @@ namespace Engine {
 		return reinterpret_cast<UInt64>(m_winId);
 	}
 
-	void Win32Window::Show() {
+	void Win32Window::Show() const {
 		ShowWindow(m_winId, SW_SHOWDEFAULT);
 		UpdateWindow(m_winId);
 	}
@@ -80,6 +80,10 @@ namespace Engine {
 		}
 
 		return msg.message == WM_QUIT;
+	}
+
+	void Win32Window::InvokeErrorMessageBox(const String& message) {
+		MessageBoxA(m_winId, message.c_str(), "RenderTech", MB_ICONERROR | MB_OK);
 	}
 
 	Input* Win32Window::GetInput() const {

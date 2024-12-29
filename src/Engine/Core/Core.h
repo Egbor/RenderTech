@@ -8,7 +8,28 @@
 #include "Engine/Core/System/Platform/Interface/IInputable.h"
 #include "Engine/Core/System/Resource/ResourceManager.h"
 
+#include "Engine/Core/Utils/Event.h"
+
+#define ENGINE_DEBUG_MESSAGE(msg) __FUNCSIG__, msg
+
 namespace Engine {
+	class _Core {
+	public:
+		_Core(IWindow* window, IContext* context);
+		~_Core();
+
+		static void InitiateFatalError(const String& tag, const String& message);
+
+		const IContext* GetContext() const;
+		const IWindow* GetWindow() const;
+
+	private:
+		IContext* m_context;
+		IWindow* m_window;
+
+		static Callable<void(const String&)>* errorMessageBox;
+	};
+
 	class Core {
 	private:
 		Core();

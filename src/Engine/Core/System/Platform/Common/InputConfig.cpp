@@ -1,10 +1,11 @@
+#include "Engine/Core/Utils/Algorithm.h"
 #include "Engine/Core/System/Platform/Common/InputConfig.h"
 #include "Engine/Core/System/Exception/EngineException.h"
 
 #include "rapidxml-1.13/rapidxml.hpp"
 #include "rapidxml-1.13/rapidxml_utils.hpp"
 
-#include <boost/algorithm/string.hpp>
+// #include <boost/algorithm/string.hpp>
 
 namespace Engine {
 	InputKey ConvertStringToKey(const String& key) {
@@ -65,9 +66,9 @@ namespace Engine {
 			{ "gamepad y", InputKey::IK_GAMEPAD_Y },
 		};
 
-		String copyOfString = key;
-		boost::algorithm::to_lower(copyOfString);
-		return keytable.at(copyOfString);
+		//String copyOfString = key;
+		//boost::algorithm::to_lower(copyOfString);
+		return keytable.at(ToLowerCopy(key));
 	}
 
 	template<class TBindValue>
@@ -80,9 +81,9 @@ namespace Engine {
 			{ "pressed", InputEvent::IE_PRESSED },
 		};
 
-		String copyOfString = value;
-		boost::algorithm::to_lower(copyOfString);
-		return valuetable.at(copyOfString);
+		//String copyOfString = value;
+		//boost::algorithm::to_lower(copyOfString);
+		return valuetable.at(ToLowerCopy(value));
 	}
 
 	template<>

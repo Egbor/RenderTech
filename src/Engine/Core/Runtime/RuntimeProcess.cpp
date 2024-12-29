@@ -1,24 +1,24 @@
 #include "Engine/Core/Runtime/RuntimeProcess.h"
 
 namespace Engine {
-	RuntimeProcess::RuntimeProcess(Int32 id, RuntimeSync* sync, const Time* time, Callable<void(Float)>* callback)
+	RuntimeProcess::RuntimeProcess(Int32 id, RuntimeSync* sync, Callback* callback, const RuntimeProcessArgs& args)
 		: m_id(id) {
-		Launch(sync, time, callback);
+		Launch(sync, callback, args);
 	}
 
 	RuntimeProcess::~RuntimeProcess() {
 		m_thread.join();
 	}
 
-	void RuntimeProcess::Launch(RuntimeSync* sync, const Time* time, Callable<void(Float)>* callback) {
+	void RuntimeProcess::Launch(RuntimeSync* sync, Callback* callback, const RuntimeProcessArgs& args) {
 		sync->RegisterProcess(this);
-		m_thread = std::thread([&, sync, time, callback]() {
+		m_thread = std::thread([&, sync, callback, args]() {
 			for (RuntimeState state = RuntimeState::RPS_PAUSE; state != RuntimeState::RPS_TERMINATE; state = sync->SyncProcess(this)) {
 				if (state == RuntimeState::RPS_PROGRESS) {
-					callback->Invoke(time->DeltaTime());
+					callback->Invoke(args.time->DeltaTime());
 				}
 			}
-			Callable<void(Float)>::Free(callback);
+			Callback::Free(callback);
 		});
 	}
 

@@ -7,8 +7,9 @@
 namespace Engine {
 #define ALL_SYNC 0xFFFFFFFF
 
-	Runtime::Runtime() 
-		: m_sync(new RuntimeSync()), m_time(new Time()) {
+	Runtime::Runtime(IWindow* window, IContext* context)
+		: m_core(new _Core(window, context)), m_time(new Time())
+		, m_sync(new RuntimeSync()) {
 		m_tasks.reserve(RuntimeSync::MAX_PROCESSES_NUMBER);
 		m_sync->RegisterSyncCallback(Delegate<Runtime, void()>::AllocateDelegate(this, &Runtime::Sync));
 	}
@@ -16,11 +17,12 @@ namespace Engine {
 	Runtime::~Runtime() {
 		DELETE_OBJECT(m_time);
 		DELETE_OBJECT(m_sync);
+		DELETE_OBJECT(m_core);
 	}
 
-	void Runtime::DelegateProcess(Callable<void(Float)>* callback) {
+	void Runtime::DelegateProcess(RuntimeProcess::Callback* callback) {
 		if (RuntimeSync::MAX_PROCESSES_NUMBER != m_tasks.size()) {
-			m_tasks.push_back(new RuntimeProcess(static_cast<Int32>(m_tasks.size()), m_sync, m_time, callback));
+			m_tasks.push_back(new RuntimeProcess(static_cast<Int32>(m_tasks.size()), m_sync, callback, { m_time }));
 		}
 	}
 
@@ -49,5 +51,9 @@ namespace Engine {
 		std::stringstream ss;
 		ss << "---------Sync: " << m_time->DeltaTime() << "(" << std::this_thread::get_id() << ")" << "---------" << std::endl;
 		OutputDebugStringA(ss.str().c_str());
+	}
+
+	const _Core* Runtime::GetCore() const {
+		return m_core;
 	}
 }

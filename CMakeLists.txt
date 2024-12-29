@@ -34,12 +34,11 @@ target_link_directories(RenderTech PUBLIC
 target_include_directories(RenderTech PUBLIC
     ${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_SOURCE_DIRECTORY}
     ${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_INCLUDE_DIRECTORY}
-    ${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_3DPARTY_DIRECTORY}/boost
 )
 
 target_link_libraries(RenderTech PRIVATE
     ${PROJECT_LIBRARIES}
-    d3d11 dxgi dxguid DXGI D3DCompiler
+    d3d11 d3d12 dxgi dxguid DXGI D3DCompiler
     assimp-vc142-mt FreeImage Xinput ImGui
 )
 
