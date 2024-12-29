@@ -1,0 +1,3 @@
+[submodule "3dparty/DirectX12"]
+	path = 3dparty/DirectX12
+	url = https://github.com/microsoft/DirectX-Headers.git
