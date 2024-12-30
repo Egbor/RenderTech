@@ -5,9 +5,9 @@
 #include "Engine/Core/Render/Base/Interface/IRenderResourceFactory.h"
 
 namespace Engine {
-	class DX12Factory : public IRenderResourceFactory {
+	class DX12ResourceFactory : public IRenderResourceFactory {
 	public:
-		DX12Factory(ComPtr<ID3D12Device> d3dDevice);
+		DX12ResourceFactory(const DX12Context* dxContext);
 
 		StateResource* CreateState(StateType type, const String& name, StateData data) override;
 		ShaderResource* CreateShader(RenderStage stage, const String& name, Size codeLength, const void* code) override;
@@ -17,6 +17,8 @@ namespace Engine {
 
 	private:
 		ComPtr<ID3D12DescriptorHeap> m_d3dRTVDescriptionHeap;
+
+		const DX12Context* m_dxContext;
 	};
 }
 

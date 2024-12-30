@@ -34,6 +34,7 @@ target_link_directories(RenderTech PUBLIC
 target_include_directories(RenderTech PUBLIC
     ${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_SOURCE_DIRECTORY}
     ${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_INCLUDE_DIRECTORY}
+    ${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_3DPARTY_DIRECTORY}/DirectX12/include
 )
 
 target_link_libraries(RenderTech PRIVATE

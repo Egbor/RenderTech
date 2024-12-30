@@ -4,7 +4,8 @@
 
 namespace Engine {
 	DX12Context::DX12Context() 
-		: m_dxSwapChain(nullptr), m_dxFactory(nullptr) {
+		: m_dxResourceFactory(nullptr), m_dxPipelineFactory(nullptr)
+		, m_dxSwapChain(nullptr) {
 #if defined(DEBUG) || defined(_DEBUG)
 		ComPtr<ID3D12Debug> d3dDebug;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&d3dDebug)))) {
@@ -15,11 +16,16 @@ namespace Engine {
 
 	DX12Context::~DX12Context() {
 		DELETE_OBJECT(m_dxSwapChain);
-		DELETE_OBJECT(m_dxFactory);
+		DELETE_OBJECT(m_dxPipelineFactory);
+		DELETE_OBJECT(m_dxResourceFactory);
 	}
 
 	IRenderResourceFactory* DX12Context::QueryResourceFactory() {
-		return m_dxFactory;
+		return m_dxResourceFactory;
+	}
+
+	IRenderPipelineFactory* DX12Context::QueryPipelineFactory() {
+		return m_dxPipelineFactory;
 	}
 
 	IRenderPipeline* DX12Context::QueryPipeline() {
@@ -59,7 +65,20 @@ namespace Engine {
 			_Core::InitiateFatalError(ENGINE_DEBUG_MESSAGE("ID3D12Device::CreateCommandQueue() failed"));
 		}
 
-		m_dxFactory = new DX12Factory(m_d3dDevice);
+		if (FAILED(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_d3dAllocator)))) {
+			_Core::InitiateFatalError(ENGINE_DEBUG_MESSAGE("ID3D12Device::CreateCommandAllocator() failed"));
+		}
+
+		m_dxResourceFactory = new DX12ResourceFactory(this);
+		m_dxPipelineFactory = new DX12PipelineFactory(this);
 		m_dxSwapChain = new DXCSwapChain(core, dxgiFactory, m_d3dQueue);
+	}
+
+	ComPtr<ID3D12Device> DX12Context::GetD3D12Device() const {
+		return m_d3dDevice;
+	}
+
+	ComPtr<ID3D12CommandAllocator> DX12Context::GetD3D12CommandAllocator() const {
+		return m_d3dAllocator;
 	}
 }

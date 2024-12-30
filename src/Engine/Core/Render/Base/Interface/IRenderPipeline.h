@@ -20,6 +20,16 @@ namespace Engine {
 		virtual void GetViewport(Viewport& viewport) = 0;
 		virtual IRenderStage* GetStage(RenderStage stage) = 0;
 	};
+
+	class IRenderPipelineFactory {
+	public:
+		virtual ~IRenderPipelineFactory() = default;
+
+		virtual IRenderPipelineFactory* SetVSShader(const ShaderResource* shader) = 0;
+		virtual IRenderPipelineFactory* SetPSShader(const ShaderResource* shader) = 0;
+
+		virtual IRenderPipeline* Build() const = 0;
+	};
 }
 
 #endif // !IRENDER_PIPELINE_H
